@@ -184,7 +184,8 @@ export const buildGroupInviteUrl = (inviteCode) => {
 // Quita emojis y símbolos pictográficos; el chat no los admite ni siquiera dentro del nombre de una rutina.
 export const stripEmojis = (text) =>
   String(text ?? '')
-    .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\u200D\uFE0F\u20E3]/gu, '')
+    // Alternancia (no clase de caracteres): \u20E3 es un carácter combinable y dentro de [] ESLint lo marca (no-misleading-character-class).
+    .replace(/\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Regional_Indicator}|\u200D|\uFE0F|\u20E3/gu, '')
     .replace(/\s+/g, ' ')
     .trim();
 

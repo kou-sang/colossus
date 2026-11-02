@@ -186,7 +186,9 @@ const AUTOSAVE_DELAY_MS = 1200;
 const useColorAutosave = () => {
   const { user } = useAppData();
   const { customColors, recentColors } = useTheme();
-  const [status, setStatus] = useState('saved'); // 'saved' | 'pending' | 'error'
+  // Clave local cuyo último guardado falló (null = sin error). El estado visible se DERIVA en el render:
+  // así ningún efecto llama setState de forma síncrona (regla react-hooks/set-state-in-effect).
+  const [failedKey, setFailedKey] = useState(null);
   const pendingSaveRef = useRef(null);
 
   const localKey = JSON.stringify({ colors: colorsKey(customColors), recent: sanitizeRecentColors(recentColors) });
@@ -201,7 +203,6 @@ const useColorAutosave = () => {
   useEffect(() => {
     if (isSynced) {
       pendingSaveRef.current = null;
-      setStatus('saved');
       return undefined;
     }
     const save = async () => {
@@ -210,23 +211,22 @@ const useColorAutosave = () => {
       try {
         markLocalColorsWrite(colors);
         await savePreferences(userRef.current.id, { ...userRef.current.preferences, colors: JSON.parse(colors), recentColors: recent });
-        setStatus('saved');
+        setFailedKey(null);
       } catch (saveError) {
         logError('profile:colors-autosave', saveError);
-        setStatus('error');
+        setFailedKey(localKey);
       }
     };
     pendingSaveRef.current = save;
-    setStatus('pending');
     const timer = setTimeout(save, AUTOSAVE_DELAY_MS);
     return () => clearTimeout(timer);
   }, [localKey, isSynced]);
 
   // Al salir de Perfil: guarda lo pendiente en vez de perderlo (se lee el ref al desmontar a propósito).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => pendingSaveRef.current?.(), []);
 
-  return status;
+  if (isSynced) return 'saved';
+  return failedKey === localKey ? 'error' : 'pending';
 };
 
 const AutosaveStatus = ({ status }) => {

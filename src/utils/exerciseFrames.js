@@ -24,8 +24,7 @@ const resolveFrame = (frame, gear, pattern) => {
     .map((prop) => {
       if (prop.type !== 'gear') return prop;
       if (!base) return null;
-      const { type: _placeholder, ...options } = prop;
-      return { ...base, ...options, type: base.type };
+      return { ...base, ...prop, type: base.type }; // `type: 'gear'` se pisa con el implemento real
     })
     .filter(Boolean);
   return { ...frame, props };

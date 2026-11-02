@@ -29,7 +29,8 @@ export const useFriendSync = (user, groups, groupsLoading) => {
       try {
         if (toRemove.length) await setFriendList(user.id, [...current].filter((id) => groupOf.has(id)));
         for (const friendId of toAdd) {
-          await addFriend(user.id, friendId, groupOf.get(friendId)); // eslint-disable-line no-await-in-loop -- las reglas exigen una alta por escritura
+          // En serie a propósito: las reglas exigen una sola alta por escritura.
+          await addFriend(user.id, friendId, groupOf.get(friendId));
         }
       } catch (syncError) {
         logError('friends:sync', syncError);

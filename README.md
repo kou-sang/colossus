@@ -16,3 +16,7 @@ Este proyecto inició como una idea para compartir con los amigos. Ahora es un s
 ## Reglas de Firestore
 
 Las reglas (`firestore.rules`) limitan la lectura de perfiles, récords y registros a ti y a quienes comparten un grupo contigo (`users/{uid}.friendIds`, que mantiene la app). Desplegar con `firebase deploy --only firestore:rules` **después** de publicar la versión de la app que sincroniza `friendIds` (4.4.0 o posterior).
+
+## Integración continua
+
+Cada PR y cada push a `main` corre `npm ci`, `npm run lint`, `npm test` y `npm run build` en GitHub Actions (`.github/workflows/ci.yml`). El PR muestra ✅ o ❌ en la pestaña **Checks**; si hay ❌, el detalle del paso que falló está en **Details**.
