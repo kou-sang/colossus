@@ -1,4 +1,4 @@
-import { CalendarDays, Check, CloudOff, Flame, Plus, Timer, Trophy, Undo2 } from 'lucide-react';
+import { CalendarDays, Check, CloudOff, Flame, Plus, Timer, TrendingUp, Trophy, Undo2 } from 'lucide-react';
 import { Suspense, useMemo, useState } from 'react';
 import { EmptyState, IconButton, SectionCard, Spinner, StatTile } from '../../components/ui';
 import { QUERY_LIMITS } from '../../constants/collections';
@@ -12,6 +12,7 @@ import { parseTargetReps } from '../../services/validation';
 import { playClick } from '../../utils/audio';
 import { addDays, formatLongDate, formatShortDate, getDayKey, parseDateKey, startOfWeek, toDateKey } from '../../utils/dates';
 import { logError, toUserMessage } from '../../utils/errors';
+import { formatSetDetails, hasSetDetails, suggestNextLoad } from '../../utils/sets';
 import { computeWeekStreak, countPlannedDays, countTrainingDays } from '../../utils/metrics';
 import { LogEntryForm } from './LogEntryForm';
 import { lazyWithPrefetch } from '../../utils/lazyWithPrefetch';
@@ -47,12 +48,28 @@ const buildConfirmDefaults = (item, latestLog) => {
     sets: latestLog?.sets ?? routine.sets,
     reps: latestLog?.reps ?? routine.reps,
     weight: latestLog ? latestLog.weight ?? '' : routine.weight,
+    // Series detalladas de la última vez (sin el RIR: el esfuerzo es de cada sesión y no se arrastra).
+    setDetails: latestLog?.setDetails?.map(({ reps, weight }) => ({ reps, weight })) ?? null,
     fallbackSets: item.sets || 3,
   };
 };
 
+// Tope del rango de repeticiones de la rutina ("8-12" → 12, "10" → 10): guía la sugerencia de carga.
+const topRepsOf = (repsText) => {
+  const numbers = String(repsText ?? '').match(/\d+/g)?.map(Number) ?? [];
+  return numbers.length ? Math.max(...numbers) : 12;
+};
+
+// Línea completa de un registro: "4 × 60 kg × 8 · RIR 2" o, con detalle, "60×10 · 62,5×8 @1".
+const formatLogLine = (log) => {
+  if (hasSetDetails(log)) return formatSetDetails(log.setDetails);
+  const rir = Number.isInteger(log.rir) ? ` · RIR ${log.rir >= 4 ? '4+' : log.rir}` : '';
+  return `${log.sets} × ${formatSetSummary(log)}${rir}`;
+};
+
 const formatSetSummary = (log) => {
   if (!log) return null;
+  if (hasSetDetails(log)) return formatSetDetails(log.setDetails);
   const weight = log.weight !== null ? `${log.weight} kg` : 'sin peso';
   return log.reps ? `${weight} × ${log.reps}` : weight;
 };
@@ -64,6 +81,7 @@ const formatSetSummary = (log) => {
  */
 const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpenConfirm, onOpenTimer, onSubmit, onCancel }) => {
   const routineValues = buildRoutineValues(item);
+  const suggestion = isDone ? null : suggestNextLoad(previousLog, { topReps: topRepsOf(item.reps) });
   const isConfirming = panel?.key === item.id;
   return (
     <li className={`py-3 first:pt-0 last:pb-0 ${isDone && !isConfirming ? 'opacity-60' : ''}`}>
@@ -74,9 +92,14 @@ const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen
             {item.sets} series{item.reps && ` × ${item.reps} reps`}
             {hasValue(item.weight) && ` · ${item.weight} kg`}
           </p>
+          {suggestion && (
+            <p className="mt-0.5 flex items-start gap-1 text-xs font-semibold text-[var(--good)]">
+              <TrendingUp size={13} className="mt-px shrink-0" aria-hidden /> {suggestion.text}
+            </p>
+          )}
           {(previousLog || best) && (
             <p className="mt-0.5 text-xs text-muted">
-              {previousLog && <>Última ({formatShortDate(previousLog.performedAt)}): {previousLog.sets} × {formatSetSummary(previousLog)}</>}
+              {previousLog && <>Última ({formatShortDate(previousLog.performedAt)}): {formatLogLine(previousLog)}</>}
               {previousLog && best?.e1rm && ' · '}
               {best?.e1rm && <>Mejor 1RM est.: {best.e1rm} kg</>}
             </p>
@@ -316,7 +339,7 @@ export const TodayTab = ({ onCelebrate }) => {
                     {log.exercise} {log.isPr && <span className="badge badge-accent ml-1"><Trophy size={12} aria-hidden /> PR</span>}
                   </p>
                   <p className="text-xs text-secondary">
-                    {log.sets} × {formatSetSummary(log)}
+                    {formatLogLine(log)}
                     {log.isPending && <span className="ml-2 inline-flex items-center gap-1 text-muted"><CloudOff size={12} aria-hidden /> pendiente de sincronizar</span>}
                   </p>
                 </div>

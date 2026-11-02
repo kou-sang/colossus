@@ -125,12 +125,13 @@ export const CHART_INFO = Object.freeze({
       'Ese aporte se disipa con el tiempo: la mitad cada ~30 h en músculos grandes (cuádriceps, glúteos, dorsales, pecho), ~24 h en medianos y ~18 h en chicos (antebrazos, gemelos).',
       '100% equivale a una sesión exigente completa para ese músculo: ≈4 series efectivas en músculos grandes (cada cabeza del cuádriceps, pectoral, dorsal), 3,5 en medianos y 3 en chicos.',
       'El tiempo de recuperación es lo que falta para bajar del 25% con el mismo ritmo de disipación.',
+      'Si registras el esfuerzo (RIR), cada serie pesa distinto: al fallo ×1,15, 1 en reserva ×1,05, 2 ×1, 3 ×0,85 y 4 o más ×0,7.',
     ],
     read: [
       'Verde: músculo fresco, listo para una sesión fuerte.',
       'Amarillo/naranja: todavía se está recuperando; sirve para trabajo liviano o técnico.',
       'Rojo: fatiga alta; entrenarlo hoy rinde menos y aumenta el riesgo de sobrecarga.',
-      'Es un modelo orientativo: no sabe cuán cerca del fallo llegaste, ni cómo dormiste o comiste.',
+      'Es un modelo orientativo: sin RIR no sabe cuán cerca del fallo llegaste, y nunca sabe cómo dormiste o comiste.',
     ],
     tip: 'Organiza la semana para que cada músculo vuelva a verde antes de su próxima sesión intensa (en general 48–72 h).',
   },
@@ -158,6 +159,7 @@ export const CHART_INFO = Object.freeze({
     ],
     read: [
       'Para los ejercicios estancados se aplica la doble progresión: primero sumar repeticiones hasta ~12 y recién entonces subir 2,5–5% el peso.',
+      'Con RIR registrado: si las series quedaron lejos del fallo (3 o más en reserva) la recomendación es acercarse más antes de subir el peso; un promedio muy cerca del fallo sugiere dejar alguna repetición en reserva.',
       'Un retroceso del 1RM estimado de más del 5% suele indicar fatiga acumulada, no pérdida real de fuerza.',
     ],
     tip: 'Elige 2 o 3 recomendaciones por mes, no todas a la vez: los cambios chicos y sostenidos son los que se notan.',

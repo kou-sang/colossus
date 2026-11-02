@@ -137,8 +137,10 @@ export const buildMonthlyReport = (logs, userId, now = new Date()) => {
 
   // ── Progresión de cargas (doble progresión) ──
   trends.filter((trend) => trend.status === 'plateau').slice(0, 3).forEach((trend) => {
-    const { reps, weight } = trend.last;
-    if (reps >= HIGH_REPS) {
+    const { reps, weight, rir } = trend.last;
+    if (Number.isInteger(rir) && rir >= 3) {
+      add('intensity', `Acercarte más al fallo en ${trend.exercise}`, `Tus últimas series quedaron con ${rir >= 4 ? '4 o más' : rir} repeticiones en reserva: el estímulo es bajo. Termina las series a 1–2 RIR antes de cambiar el peso.`, 1);
+    } else if (reps >= HIGH_REPS) {
       add('weight', `Subir kg y bajar repeticiones en ${trend.exercise}`, `Vienes haciendo ${reps} repeticiones con ${weight} kg: sube a ~${round1(weight * 1.1)} kg y trabaja en 8–12 repeticiones.`, 1);
     } else if (reps >= TOP_REP_RANGE) {
       add('weight', `Aumentar kilogramos en ${trend.exercise}`, `Llegaste a ${reps} repeticiones con ${weight} kg en varias sesiones: sube 2,5–5% (≈ ${round1(weight * 1.025)}–${round1(weight * 1.05)} kg) y vuelve a construir repeticiones.`, 1);
@@ -149,6 +151,17 @@ export const buildMonthlyReport = (logs, userId, now = new Date()) => {
   trends.filter((trend) => trend.status === 'regress').slice(0, 2).forEach((trend) => {
     add('deload', `Revisar fatiga en ${trend.exercise}`, `El 1RM estimado bajó ${Math.abs(trend.change)}% este mes. Puede ser cansancio acumulado: haz una semana más liviana (−40% de series) o revisa sueño y alimentación.`, 1);
   });
+
+  // ── Esfuerzo (RIR) ──
+  const rirValues = currentLogs.map((log) => log.rir).filter((value) => Number.isInteger(value));
+  if (rirValues.length >= 6) {
+    const averageRir = rirValues.reduce((sum, value) => sum + value, 0) / rirValues.length;
+    if (averageRir >= 3.5) {
+      add('intensity', 'Entrenar más cerca del fallo', `Tu RIR promedio fue ${round1(averageRir)}: la mayoría de las series de hipertrofia deberían terminar a 0–3 repeticiones del fallo.`, 1);
+    } else if (averageRir <= 0.7) {
+      add('recovery', 'Dejar alguna repetición en reserva', `Tu RIR promedio fue ${round1(averageRir)} (casi todo al fallo). Alterna con series a 1–2 RIR: progresas igual y te recuperas mejor.`, 2);
+    }
+  }
 
   // ── Cardio ──
   const cardioPerWeek = Math.round(current.cardioMinutes / WEEKS);

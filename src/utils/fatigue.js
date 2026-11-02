@@ -1,5 +1,6 @@
 import { resolveMuscleDistribution } from '../constants/exercises';
 import { MUSCLE_IDS } from '../constants/muscles';
+import { hasSetDetails, rirFatigueFactor } from './sets';
 
 /*
  * Fatiga muscular estimada (función pura). Modelo simple y explicable:
@@ -9,7 +10,8 @@ import { MUSCLE_IDS } from '../constants/muscles';
  *    Referencias: la síntesis proteica y el rendimiento suelen normalizarse en 48–72 h tras una sesión dura
  *    (MacDougall 1995; Schoenfeld 2016), antes en músculos pequeños.
  *  - 100% = una sesión exigente completa para ese músculo (capacidad en series efectivas).
- * Es una estimación orientativa: no mide dolor, sueño ni intensidad real (RIR).
+ *  - Si registraste el RIR, cada serie pesa según su esfuerzo (al fallo ×1,15 … 4+ en reserva ×0,7).
+ * Es una estimación orientativa: no mide dolor ni sueño.
  */
 
 const SIZE_PARAMS = Object.freeze({
@@ -60,7 +62,10 @@ export const buildMuscleFatigue = (logs, { userIds, now = new Date() }) => {
     if (!userSet.has(log.userId)) return;
     const ageHours = (nowMs - log.performedAt.getTime()) / HOUR_MS;
     if (ageHours < 0 || ageHours > FATIGUE_WINDOW_HOURS) return;
-    const sets = Number.isFinite(log.sets) ? log.sets : 0;
+    // Series ponderadas por esfuerzo: con RIR por serie se pondera cada una; si no, el RIR del registro (o 1).
+    const sets = hasSetDetails(log)
+      ? log.setDetails.reduce((sum, set) => sum + rirFatigueFactor(Number.isInteger(set.rir) ? set.rir : log.rir), 0)
+      : (Number.isFinite(log.sets) ? log.sets : 0) * rirFatigueFactor(log.rir);
     Object.entries(resolveMuscleDistribution(log)).forEach(([muscleId, share]) => {
       const { halfLifeHours, capacity } = paramsOf(muscleId);
       const remaining = (sets * share * 0.5 ** (ageHours / halfLifeHours)) / capacity;

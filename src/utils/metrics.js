@@ -1,4 +1,5 @@
 import { getExerciseCategory, resolveMuscleDistribution } from '../constants/exercises';
+import { hasSetDetails, setDetailsTonnage } from './sets';
 import { addDays, diffInCalendarDays, startOfWeek, toDateKey, toWeekKey } from './dates';
 
 // Funciones puras: sin React ni Firestore → testeables de forma aislada.
@@ -16,8 +17,11 @@ export const estimateOneRepMax = (weight, reps) => {
   return round1(weight * (1 + cappedReps / 30));
 };
 
-// Tonelaje = series × reps × peso. Null si falta algún dato (no se inventan valores).
-export const computeTonnage = ({ sets, reps, weight }) => {
+// Tonelaje = series × reps × peso. Con series detalladas se suma cada una (Σ reps × kg): la "mejor serie"
+// repetida N veces sobreestimaba el volumen real. Null si falta algún dato (no se inventan valores).
+export const computeTonnage = (log) => {
+  if (hasSetDetails(log)) return setDetailsTonnage(log.setDetails);
+  const { sets, reps, weight } = log;
   if (![sets, reps, weight].every((value) => Number.isFinite(value) && value > 0)) return null;
   return sets * reps * weight;
 };

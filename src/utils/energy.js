@@ -1,5 +1,6 @@
 import { getExerciseCategory } from '../constants/exercises';
 import { toDateKey } from './dates';
+import { hasSetDetails } from './sets';
 
 /*
  * Gasto calórico y recomendaciones de alimentación (funciones puras).
@@ -32,6 +33,8 @@ export const estimateMinutes = (log) => {
   const category = getExerciseCategory(log);
   const sets = Number.isFinite(log.sets) && log.sets > 0 ? log.sets : 1;
   if (TIMED_CATEGORIES.has(category)) {
+    // Series detalladas de cardio/deportes: cada fila trae sus minutos en "reps".
+    if (hasSetDetails(log)) return log.setDetails.reduce((sum, set) => sum + (Number.isFinite(set.reps) ? set.reps : 0), 0) || DEFAULT_TIMED_MINUTES;
     return Number.isFinite(log.reps) && log.reps > 0 ? log.reps * sets : DEFAULT_TIMED_MINUTES * (sets > 1 ? 0.5 : 1) * sets;
   }
   return sets * (category === 'FUNCIONAL' || category === 'CROSSFIT' ? 2 : MINUTES_PER_STRENGTH_SET);

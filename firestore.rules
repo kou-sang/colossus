@@ -69,6 +69,9 @@ service cloud.firestore {
         && d.sets is int && d.sets >= 1 && d.sets <= 30
         && (d.reps == null || (d.reps is int && d.reps >= 1 && d.reps <= 100))
         && (d.weight == null || (d.weight is number && d.weight >= 0 && d.weight <= 1000))
+        // Opcionales desde 4.3.1: esfuerzo percibido (RIR) y series una por una (máx. 30).
+        && (!('rir' in d) || d.rir == null || (d.rir is int && d.rir >= 0 && d.rir <= 10))
+        && (!('setDetails' in d) || (d.setDetails is list && d.setDetails.size() <= 30))
         && d.performedAt is timestamp
         && d.performedAt < request.time + duration.value(10, 'm'); // Sin fechas futuras
     }

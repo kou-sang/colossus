@@ -2,6 +2,7 @@ import { GENDERS } from '../constants/collections';
 import { canonicalExerciseName } from '../constants/exercises';
 import { LEGACY_MUSCLE_DISTRIBUTION, MUSCLE_IDS } from '../constants/muscles';
 import { ValidationError } from '../utils/errors';
+import { hardestRir, parseSetDetails, pickBestSet, RIR_MAX } from '../utils/sets';
 
 // Unicode: el regex original /^[a-zA-Z]+$/ rechazaba "Ñandú", "José" o "Ana María".
 const USERNAME_PATTERN = /^[\p{L}\p{N}_ ]{2,24}$/u;
@@ -39,9 +40,28 @@ const sanitizeMuscleId = (muscle) =>
   typeof muscle === 'string' && (MUSCLE_IDS.includes(muscle) || LEGACY_MUSCLE_DISTRIBUTION[muscle]) ? muscle : null;
 
 // Los alias se guardan con el nombre canónico → historial y ranking no se fragmentan.
-export const sanitizeLogEntry = ({ exercise, muscle, sets, reps, weight }) => {
+// `setDetails` (opcional): series una por una; si viene, sets/reps/weight se derivan de ellas (mejor serie).
+// `rir` (opcional): repeticiones en reserva del ejercicio (0–10); con series detalladas, el de la más exigente.
+export const sanitizeLogEntry = ({ exercise, muscle, sets, reps, weight, rir, setDetails }) => {
   const name = canonicalExerciseName(exercise);
   if (!name || name.length > 60) throw new ValidationError('Nombre de ejercicio inválido.');
+
+  const detail = parseSetDetails(setDetails);
+  if (detail.error) throw new ValidationError(detail.error);
+  if (detail.sets.length > 0) {
+    const best = pickBestSet(detail.sets);
+    const anyRir = detail.sets.some((set) => Number.isInteger(set.rir));
+    const fallbackRir = parseOptionalNumber(rir);
+    return {
+      exercise: name,
+      muscle: sanitizeMuscleId(muscle),
+      sets: detail.sets.length,
+      reps: best.reps,
+      weight: best.weight,
+      rir: anyRir ? hardestRir(detail.sets) : sanitizeRir(fallbackRir),
+      setDetails: detail.sets,
+    };
+  }
 
   const parsedSets = parseOptionalNumber(sets) ?? 1;
   if (!Number.isInteger(parsedSets) || parsedSets < 1 || parsedSets > 30) {
@@ -64,7 +84,14 @@ export const sanitizeLogEntry = ({ exercise, muscle, sets, reps, weight }) => {
     sets: parsedSets,
     reps: parsedReps,
     weight: parsedWeight === null ? null : Math.round(parsedWeight * 100) / 100,
+    rir: sanitizeRir(parseOptionalNumber(rir)),
   };
+};
+
+const sanitizeRir = (value) => {
+  if (value === null) return null;
+  if (!Number.isInteger(value) || value < 0 || value > RIR_MAX) throw new ValidationError(`El RIR debe ser un entero entre 0 y ${RIR_MAX}.`);
+  return value;
 };
 
 export const ROUTINE_DEFAULTS = Object.freeze({ sets: 3, reps: '10' });

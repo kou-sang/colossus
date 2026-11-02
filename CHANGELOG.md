@@ -17,6 +17,19 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.3.1] - 2026-11-02
+
+### Added
+- **Serie por serie:** al registrar o confirmar un ejercicio se puede cargar cada serie con sus repeticiones, kg y RIR (por ejemplo 60×10, 62,5×8, 65×6). La preferencia se recuerda y la próxima vez se prellena con las series de la última sesión. El modo resumen (series × reps × kg) sigue disponible.
+- **Esfuerzo percibido (RIR) opcional** en "Hecho": repeticiones que quedaban antes del fallo (0, 1, 2, 3, 4+).
+- Hoy: **sugerencia de carga** para cada ejercicio según la última sesión (doble progresión guiada por RIR: subir kg, sumar una repetición o repetir).
+
+### Changed
+- Con series detalladas, el registro guarda como resumen la mejor serie (mayor 1RM estimado): récords, ranking y gráficos siguen funcionando igual; el **tonelaje** suma cada serie real.
+- El **mapa de fatiga** pondera cada serie por su RIR (al fallo cansa más que con 4 repeticiones en reserva).
+- El **resumen mensual** recomienda acercarse al fallo o dejar repeticiones en reserva según el RIR registrado.
+- Reglas de Firestore: validan `rir` (0–10) y `setDetails` (máx. 30 series). Los registros anteriores no cambian.
+
 ## [4.3.0] - 2026-11-02
 
 ### Added
