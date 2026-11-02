@@ -1,6 +1,5 @@
-import { AlertTriangle, CheckCircle2, KeyRound, Mail, Moon, Palette, RotateCcw, Sun, UserRound } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, KeyRound, Mail, Moon, Palette, RotateCcw, Scale, Sun, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { version as APP_VERSION } from '../../../package.json';
 import { ColorPicker } from '../../components/ColorPicker';
 import { FieldLabel, InlineSpinner, SectionCard, SegmentedControl } from '../../components/ui';
 import { useAppData } from '../../context/AppDataContext';
@@ -10,6 +9,7 @@ import { changeEmail, changePassword, hasPasswordProvider, updateDisplayName } f
 import { savePreferences, updateProfileData } from '../../services/userService';
 import { playClick } from '../../utils/audio';
 import { logError, toUserMessage, ValidationError } from '../../utils/errors';
+import { BodyStatsForm } from './BodyStatsForm';
 
 const MIN_TEXT_CONTRAST = 4.5; // WCAG AA para texto normal
 
@@ -306,12 +306,17 @@ const AppearanceSection = () => {
   );
 };
 
-// Versión vigente (fuente única: package.json, ver CHANGELOG.md).
-const AppVersion = () => (
-  <p className="text-center text-xs font-semibold text-muted lg:col-span-2" data-testid="app-version">
-    Colossus v{APP_VERSION}
-  </p>
-);
+// Datos corporales privados (calorías y alimentación en Analíticas).
+const BodyStatsSection = () => {
+  const { user } = useAppData();
+  return (
+    <SectionCard title={<span className="flex items-center gap-2"><Scale size={18} aria-hidden /> Datos corporales</span>}
+      subtitle="Se usan para estimar calorías quemadas y la alimentación recomendada en Analíticas.">
+      {/* key: si los datos cambian desde Analíticas u otro dispositivo, el formulario se reinicia con los nuevos. */}
+      <BodyStatsForm key={JSON.stringify(user.bodyStats ?? null)} uid={user.id} stats={user.bodyStats} />
+    </SectionCard>
+  );
+};
 
 /*
  * Columnas con minmax(0, 1fr) y min-w-0: una columna `auto` crece hasta el min-content de sus hijos
@@ -323,10 +328,10 @@ export const ProfileTab = () => (
       <ProfileDataSection />
       <EmailSection />
       <PasswordSection />
+      <BodyStatsSection />
     </div>
     <div className="min-w-0">
       <AppearanceSection />
     </div>
-    <AppVersion />
   </div>
 );

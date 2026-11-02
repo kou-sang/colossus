@@ -1,7 +1,7 @@
 import { collection, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { COLLECTIONS } from '../constants/collections';
-import { sanitizeGender, sanitizeUsername } from './validation';
+import { sanitizeBodyStats, sanitizeGender, sanitizeUsername } from './validation';
 
 // Separación público/privado: el código original escuchaba TODA la colección 'users',
 // que incluía emails → cualquier usuario podía ver el correo de todos.
@@ -74,4 +74,11 @@ export const savePreferences = async (uid, preferences) => {
 
 export const setActiveRoutine = async (uid, routineId) => {
   await setDoc(doc(db, COLLECTIONS.USERS, uid), { activeRoutineId: routineId ?? null }, { merge: true });
+};
+
+// Datos corporales (privados): viven en users/{uid}, que solo puede leer y escribir su dueño.
+export const saveBodyStats = async (uid, stats) => {
+  const clean = sanitizeBodyStats(stats);
+  await setDoc(doc(db, COLLECTIONS.USERS, uid), { bodyStats: { ...clean, updatedAt: serverTimestamp() } }, { merge: true });
+  return clean;
 };

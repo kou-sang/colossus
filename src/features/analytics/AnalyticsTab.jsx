@@ -26,6 +26,9 @@ import { AnalyticsFilters } from './AnalyticsFilters';
 import { CRITICAL_RECENCY_DAYS, DATE_PRESETS, MAP_MODES } from './analyticsConstants';
 import { CHART_INFO } from './chartInfo';
 import { ConsistencyChart } from './ConsistencyChart';
+import { EnergyCard } from './EnergyCard';
+import { FatigueMapCard } from './FatigueMapCard';
+import { MonthlySummaryCard } from './MonthlySummaryCard';
 import { MuscleMap } from './MuscleMap';
 import { MuscleDetailPanel } from './MuscleDetailPanel';
 import { MuscleSetsChart } from './MuscleSetsChart';
@@ -136,8 +139,8 @@ export const AnalyticsTab = () => {
   const focusName = focusId === AGGREGATE_FOCUS ? 'Promedio de la selección' : profilesById[focusId]?.username ?? '—';
   const mapGender = mapGenderChoice ?? (focusId === AGGREGATE_FOCUS ? user.gender : profilesById[focusId]?.gender ?? user.gender);
 
+  const focusLogs = useMemo(() => filteredLogs.filter((log) => focusIds.includes(log.userId)), [filteredLogs, focusIds]);
   const focusMetrics = useMemo(() => {
-    const focusLogs = filteredLogs.filter((log) => focusIds.includes(log.userId));
     const divisor = focusIds.length;
     const totals = buildEffectiveSetsByMuscle(focusLogs, { muscles });
     const weeklySetsByMuscle = Object.fromEntries(Object.entries(totals).map(([id, value]) => [id, value / weeksInRange / divisor]));
@@ -150,13 +153,22 @@ export const AnalyticsTab = () => {
       records: focusLogs.filter((log) => log.isPr).length,
       streak: divisor === 1 ? computeWeekStreak(logsState.data, focusIds[0]) : null,
     };
-  }, [filteredLogs, focusIds, muscles, weeksInRange, range.since, logsState.data]);
+  }, [focusLogs, focusIds, muscles, weeksInRange, range.since, logsState.data]);
 
   // Recuperación: mismos filtros salvo la fecha de inicio (usa toda la historia descargada, ≥ 30 días).
   const lastTrainedByMuscle = useMemo(
     () => buildMuscleLastTrained(filterLogs(logsState.data, { userIds: focusIds, categories, muscles }), null),
     [logsState.data, focusIds, categories, muscles],
   );
+
+  // Fatiga "de hoy": mismos filtros de categoría/músculo, sin la fecha de inicio (usa los últimos 7 días descargados).
+  const fatigueLogs = useMemo(
+    () => filterLogs(logsState.data, { userIds: focusIds, categories, muscles }),
+    [logsState.data, focusIds, categories, muscles],
+  );
+  // Resumen mensual y plan de alimentación son individuales: con "Promedio de la selección" se muestran los tuyos.
+  const personalId = focusId === AGGREGATE_FOCUS ? user.id : focusId;
+  const personalName = profilesById[personalId]?.username ?? user.username;
 
   // ───────── Gráficos comparativos (máx. 8 perfiles con color propio) ─────────
   const chartUsers = useMemo(
@@ -332,6 +344,8 @@ export const AnalyticsTab = () => {
             </div>
           </SectionCard>
 
+          <FatigueMapCard logs={fatigueLogs} userIds={focusIds} gender={mapGender} focusName={focusName} enabledMuscles={enabledMuscles} />
+
           <SectionCard title="Series efectivas por músculo" subtitle={`Promedio semanal de ${focusName}`} actions={<ChartInfo info={CHART_INFO.muscleSets} />}>
             <MuscleSetsChart weeklySetsByMuscle={focusMetrics.weeklySetsByMuscle} highlightMuscle={selectedMuscle} enabledMuscles={enabledMuscles} onSelect={setSelectedMuscle} />
           </SectionCard>
@@ -362,6 +376,18 @@ export const AnalyticsTab = () => {
           <SectionCard title="Tonelaje semanal" subtitle="Series × reps × kg por semana (ejercicios que pasan los filtros)" actions={<ChartInfo info={CHART_INFO.weeklyVolume} />}>
             <WeeklyVolumeChart rows={weeklyRows} users={chartUsers} rangeStart={range.since} rangeEnd={rangeEnd} />
           </SectionCard>
+
+          <EnergyCard
+            logs={focusId === AGGREGATE_FOCUS ? focusLogs.filter((log) => log.userId === user.id) : focusLogs}
+            rangeStart={range.since}
+            rangeEnd={rangeEnd}
+            rangeDays={rangeDays}
+            user={user}
+            isSelf={personalId === user.id}
+            focusName={personalName}
+          />
+
+          <MonthlySummaryCard userId={personalId} focusName={personalName} todayKey={todayKey} />
         </>
       )}
     </div>

@@ -103,3 +103,26 @@ export const parseTargetReps = (reps) => {
   const match = String(reps ?? '').match(/\d+/);
   return match ? Number(match[0]) : null;
 };
+
+// Datos corporales opcionales (privados, users/{uid}.bodyStats): solo para estimar calorías y alimentación.
+const BODY_LIMITS = Object.freeze({ weightKg: [30, 300], heightCm: [120, 230], age: [13, 100] });
+export const BODY_ACTIVITY_VALUES = Object.freeze(['sedentary', 'light', 'moderate', 'active']);
+export const BODY_GOAL_VALUES = Object.freeze(['lose', 'maintain', 'muscle']);
+
+export const sanitizeBodyStats = ({ weightKg, heightCm, age, activity, goal }) => {
+  const parsed = { weightKg: parseOptionalNumber(weightKg), heightCm: parseOptionalNumber(heightCm), age: parseOptionalNumber(age) };
+  Object.entries(BODY_LIMITS).forEach(([key, [min, max]]) => {
+    const value = parsed[key];
+    if (value === null || Number.isNaN(value) || value < min || value > max) {
+      const labels = { weightKg: 'El peso', heightCm: 'La altura', age: 'La edad' };
+      throw new ValidationError(`${labels[key]} debe estar entre ${min} y ${max}.`);
+    }
+  });
+  return {
+    weightKg: Math.round(parsed.weightKg * 10) / 10,
+    heightCm: Math.round(parsed.heightCm),
+    age: Math.round(parsed.age),
+    activity: BODY_ACTIVITY_VALUES.includes(activity) ? activity : 'light',
+    goal: BODY_GOAL_VALUES.includes(goal) ? goal : 'maintain',
+  };
+};
