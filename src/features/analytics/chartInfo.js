@@ -123,7 +123,7 @@ export const CHART_INFO = Object.freeze({
     how: [
       'Cada registro de los últimos 7 días aporta "series efectivas" a cada músculo (series × porcentaje de participación del ejercicio).',
       'Ese aporte se disipa con el tiempo: la mitad cada ~30 h en músculos grandes (cuádriceps, glúteos, dorsales, pecho), ~24 h en medianos y ~18 h en chicos (antebrazos, gemelos).',
-      '100% equivale a una sesión exigente completa para ese músculo (≈10 series efectivas en músculos grandes, 8 en medianos y 6 en chicos).',
+      '100% equivale a una sesión exigente completa para ese músculo: ≈4 series efectivas en músculos grandes (cada cabeza del cuádriceps, pectoral, dorsal), 3,5 en medianos y 3 en chicos.',
       'El tiempo de recuperación es lo que falta para bajar del 25% con el mismo ritmo de disipación.',
     ],
     read: [

@@ -1,5 +1,6 @@
 import { Info, Lightbulb, X } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
+import { Modal } from './Modal';
 import { IconButton } from './ui';
 import { playClick } from '../utils/audio';
 
@@ -25,8 +26,8 @@ export const ChartInfo = ({ info }) => {
     <>
       <IconButton label={`Cómo leer: ${info.title}`} icon={Info} onClick={() => { playClick(); setIsOpen(true); }} />
       {isOpen && (
-        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={() => setIsOpen(false)}>
-          <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="dialog-panel card w-full max-w-lg p-5 text-left" onClick={(event) => event.stopPropagation()}>
+        <Modal onBackdropClick={() => setIsOpen(false)}>
+          <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="dialog-panel card w-full min-w-0 max-w-lg p-5 text-left font-normal normal-case tracking-normal" onClick={(event) => event.stopPropagation()}>
             <div className="mb-3 flex items-start justify-between gap-2">
               <h2 id={titleId} className="text-lg font-bold">{info.title}</h2>
               <IconButton label="Cerrar" icon={X} onClick={() => setIsOpen(false)} />
@@ -44,7 +45,7 @@ export const ChartInfo = ({ info }) => {
               <span><strong>Consejo:</strong> {info.tip}</span>
             </p>
           </div>
-        </div>
+        </Modal>
       )}
     </>
   );

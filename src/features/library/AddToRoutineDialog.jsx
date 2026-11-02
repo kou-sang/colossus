@@ -1,5 +1,6 @@
 import { Plus, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Modal } from '../../components/Modal';
 import { RepsInput } from '../../components/RepsInput';
 import { FieldLabel, IconButton, InlineSpinner } from '../../components/ui';
 import { useAppData } from '../../context/AppDataContext';
@@ -54,7 +55,7 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={onClose}>
+    <Modal onBackdropClick={onClose}>
       <div role="dialog" aria-modal="true" aria-labelledby="add-to-routine-title" className="dialog-panel card w-full max-w-sm p-5" onClick={(event) => event.stopPropagation()}>
         <div className="mb-3 flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -100,6 +101,6 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
           </form>
         )}
       </div>
-    </div>
+    </Modal>
   );
 };

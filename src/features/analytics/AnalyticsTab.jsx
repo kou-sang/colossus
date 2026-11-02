@@ -74,7 +74,6 @@ export const AnalyticsTab = () => {
   const [customRange, setCustomRange] = useState(() => ({ from: toDateKey(addDays(new Date(), -29)), to: toDateKey() }));
   const [focusChoice, setFocusChoice] = useState(null);
   const [mapMode, setMapMode] = useState('recency');
-  const [mapGenderChoice, setMapGenderChoice] = useState(null);
   const [selectedMuscle, setSelectedMuscle] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(true); // Siempre visibles al entrar; se pueden ocultar con la flecha
@@ -137,7 +136,8 @@ export const AnalyticsTab = () => {
     : effectiveUserIds.includes(focusChoice) ? focusChoice : effectiveUserIds.includes(user.id) ? user.id : effectiveUserIds[0];
   const focusIds = useMemo(() => (focusId === AGGREGATE_FOCUS ? effectiveUserIds : [focusId]), [focusId, effectiveUserIds]);
   const focusName = focusId === AGGREGATE_FOCUS ? 'Promedio de la selección' : profilesById[focusId]?.username ?? '—';
-  const mapGender = mapGenderChoice ?? (focusId === AGGREGATE_FOCUS ? user.gender : profilesById[focusId]?.gender ?? user.gender);
+  // El mapa usa el sexo del perfil foco (el selector manual se quitó en 4.2.0).
+  const mapGender = focusId === AGGREGATE_FOCUS ? user.gender : profilesById[focusId]?.gender ?? user.gender;
 
   const focusLogs = useMemo(() => filteredLogs.filter((log) => focusIds.includes(log.userId)), [filteredLogs, focusIds]);
   const focusMetrics = useMemo(() => {

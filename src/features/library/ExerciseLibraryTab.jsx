@@ -84,6 +84,10 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
   const guide = getExerciseGuide(exercise.name);
   const muscles = Object.entries(exercise.distribution).sort((a, b) => b[1] - a[1]);
   const alternatives = findAlternatives(exercise);
+  // Los alias sin Ñ (compatibilidad con historial viejo) no se muestran si ya aparece la versión con Ñ.
+  const withN = (label) => label.replace(/Ñ/g, 'N');
+  const enyeLabels = [exercise.name, ...exercise.aliases].filter((label) => label.includes('Ñ')).map(withN);
+  const visibleAliases = exercise.aliases.filter((alias) => !enyeLabels.includes(alias));
 
   return (
     <div className="min-w-0 space-y-4">
@@ -93,8 +97,8 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
       <header>
         <p className="text-xs font-bold text-muted">{CATEGORY_LABELS[exercise.category]}</p>
         <h2 className="text-xl font-black md:text-2xl">{exercise.name}</h2>
-        {exercise.aliases.length > 0 && (
-          <p className="mt-1 text-sm text-secondary">También conocido como: {exercise.aliases.slice(0, 4).join(', ')}</p>
+        {visibleAliases.length > 0 && (
+          <p className="mt-1 text-sm text-secondary">También conocido como: {visibleAliases.slice(0, 4).join(', ')}</p>
         )}
         <button type="button" className="btn btn-primary mt-3" onClick={() => { playClick(); setIsAdding(true); }}>
           <Plus size={16} aria-hidden /> Añadir a rutina

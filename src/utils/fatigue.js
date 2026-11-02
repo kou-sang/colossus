@@ -13,9 +13,11 @@ import { MUSCLE_IDS } from '../constants/muscles';
  */
 
 const SIZE_PARAMS = Object.freeze({
-  large: { halfLifeHours: 30, capacity: 10 },
-  medium: { halfLifeHours: 24, capacity: 8 },
-  small: { halfLifeHours: 18, capacity: 6 },
+  // Capacidad en series efectivas POR MÚSCULO individual (un cuádriceps se reparte en 3 cabezas: una sesión
+  // de piernas exigente deja ~3–4 series efectivas en cada una).
+  large: { halfLifeHours: 30, capacity: 4 },
+  medium: { halfLifeHours: 24, capacity: 3.5 },
+  small: { halfLifeHours: 18, capacity: 3 },
 });
 
 const MUSCLE_SIZE = Object.freeze({

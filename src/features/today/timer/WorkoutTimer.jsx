@@ -1,5 +1,6 @@
 import { Check, ChevronsRight, ClipboardCheck, Minus, Pause, Play, Plus, RotateCcw, Square, Timer, X } from 'lucide-react';
 import { useEffect, useId, useMemo, useState } from 'react';
+import { Modal } from '../../../components/Modal';
 import { IconButton } from '../../../components/ui';
 import { playClick } from '../../../utils/audio';
 import { logError } from '../../../utils/errors';
@@ -176,7 +177,7 @@ export const WorkoutTimer = ({ exercise = null, initialValues = null, routineVal
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 sm:items-center sm:p-4">
+    <Modal padded={false}>
       <div role="dialog" aria-modal="true" aria-labelledby={titleId}
         className="dialog-panel card w-full max-w-lg rounded-b-none p-4 sm:rounded-2xl md:p-5">
         <div className="mb-3 flex items-start justify-between gap-2">
@@ -291,6 +292,6 @@ export const WorkoutTimer = ({ exercise = null, initialValues = null, routineVal
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
