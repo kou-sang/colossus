@@ -121,8 +121,9 @@ export const StatTile = ({ label, value, hint, icon: Icon }) => (
 export const SectionCard = ({ title, subtitle, actions, children, className = '' }) => (
   <section className={`card p-4 md:p-5 ${className}`}>
     {(title || actions) && (
+      {/* Título con base mínima de 10rem: un botón (i) chico queda a la derecha; acciones anchas (selectores) bajan de línea. */}
       <header className="mb-4 flex flex-wrap items-start justify-between gap-2">
-        <div>
+        <div className="min-w-0 flex-1 basis-40">
           {title && <h3 className="text-base font-bold md:text-lg">{title}</h3>}
           {subtitle && <p className="mt-0.5 text-xs text-secondary md:text-sm">{subtitle}</p>}
         </div>

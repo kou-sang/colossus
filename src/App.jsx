@@ -1,6 +1,7 @@
 import { AnimatePresence, domAnimation, LazyMotion, m } from 'framer-motion';
 import { Activity, BookOpen, CalendarDays, Home, LogOut, Moon, Sun, UserRound, Users, Volume2, VolumeX } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useState } from 'react';
+import { version as APP_VERSION } from '../package.json';
 import { CelebrationLayer } from './components/CelebrationLayer';
 import { useCelebration } from './components/useCelebration';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -184,6 +185,8 @@ const AuthenticatedApp = ({ user }) => {
               </ErrorBoundary>
             </m.div>
           </AnimatePresence>
+          {/* Versión vigente al pie de TODAS las pestañas (fuente única: package.json, ver CHANGELOG.md). */}
+          <p className="mt-8 text-center text-xs font-semibold text-muted" data-testid="app-version">Colossus v{APP_VERSION}</p>
         </main>
 
         {/* Navegación inferior móvil con safe-area de iOS. */}
