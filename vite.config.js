@@ -14,6 +14,11 @@ const vendor = (packages) => new RegExp(`[\\\\/]node_modules[\\\\/](${packages})
  */
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Pruebas unitarias (Vitest) de la lógica pura: reloj, análisis, fatiga, energía, informe mensual, catálogo.
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.js'],
+  },
   build: {
     rolldownOptions: {
       output: {

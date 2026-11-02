@@ -17,6 +17,21 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.4.0] - 2026-11-02
+
+### Added
+- **Copiar y pegar días de rutina:** cada día tiene botones copiar/pegar en el editor (celular y escritorio), y en la tarjeta de cada rutina se puede tocar un día para copiarlo sin abrir el editor. Al pegar sobre un día con ejercicios se elige **agregar al final** o **reemplazar**. El portapapeles se recuerda en el dispositivo (sirve entre rutinas y después de recargar).
+- **Grupos plegables:** cada grupo muestra nombre, rol y miembros; al tocarlo se despliega con la misma información de antes.
+- **Chat del grupo en su propia ventana** (accesible con teclado y lector de pantalla).
+- **Pruebas automáticas (Vitest):** 26 pruebas de la lógica pura (reloj, análisis de rutinas, fatiga, calorías, resumen mensual, series/RIR y catálogo de ejercicios, incluidas las ilustraciones en las 3 vistas). Comandos `npm test` y `npm run test:watch`.
+
+### Changed
+- **Un solo componente de ventana** (`Dialog`) para todas las ventanas emergentes (información de gráficos, reloj, añadir a rutina, confirmaciones, chat y pegar día): Escape cierra, el foco queda dentro de la ventana y vuelve al botón que la abrió, el **botón atrás del celular** cierra la ventana en lugar de salir de la app, y se bloquea el scroll de fondo. El reloj no se puede cerrar por accidente mientras corre.
+- **Seguridad: cada persona solo puede leer perfiles, récords y registros propios o de quienes comparten un grupo.** La app mantiene `users/{uid}.friendIds` sincronizado con los integrantes de tus grupos y las nuevas reglas de Firestore lo verifican (las altas se validan contra el grupo). Las consultas por grupo solo incluyen amigos ya confirmados.
+
+### Removed
+- `src/components/Modal.jsx` (reemplazado por `Dialog`).
+
 ## [4.3.1] - 2026-11-02
 
 ### Added

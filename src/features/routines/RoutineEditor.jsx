@@ -1,5 +1,6 @@
-import { ArrowLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, ChevronUp, History, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, ChevronUp, ClipboardPaste, Copy, History, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Dialog } from '../../components/Dialog';
 import { ExercisePicker } from '../../components/ExercisePicker';
 import { RepsInput } from '../../components/RepsInput';
 import { IconButton, InlineSpinner } from '../../components/ui';
@@ -12,7 +13,10 @@ import { ROUTINE_DEFAULTS } from '../../services/validation';
 import { playClick } from '../../utils/audio';
 import { WEEK_DAYS } from '../../utils/dates';
 import { logError, toUserMessage } from '../../utils/errors';
+import { readDayClipboard, writeDayClipboard } from './dayClipboard';
 import { routineSignature } from './routineDraftStorage';
+
+const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 const DRAFT_SAVE_DELAY_MS = 300;
 
@@ -61,11 +65,19 @@ const RoutineItemFields = ({ item, extraNames, layout, onChange, onRemove }) => 
   );
 };
 
+// Copiar / pegar un día completo (portapapeles propio, ver dayClipboard.js).
+const DayClipboardButtons = ({ day, hasItems, clipboard, onCopy, onPaste, size = 18 }) => (
+  <>
+    {hasItems && <IconButton label={`Copiar ${day}`} icon={Copy} size={size} onClick={() => onCopy(day)} />}
+    {clipboard && <IconButton label={`Pegar en ${day} (${clipboard.day} de ${clipboard.routineName})`} icon={ClipboardPaste} size={size} onClick={() => onPaste(day)} />}
+  </>
+);
+
 /*
  * Móvil: un bloque por día. Los días con ejercicios se pueden plegar (en el celular ocupaban varias pantallas):
  * plegado muestra solo la lista de nombres; desplegado, los campos para editar.
  */
-const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem, expandedDays, onToggleDay, onToggleAll }) => {
+const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem, expandedDays, onToggleDay, onToggleAll, clipboard, onCopyDay, onPasteDay }) => {
   const daysWithWork = WEEK_DAYS.filter((day) => draft.days[day].length > 0);
   const allExpanded = daysWithWork.every((day) => expandedDays.has(day));
   return (
@@ -85,7 +97,8 @@ const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem, exp
           <fieldset key={day} className="min-w-0 rounded-xl border divider surface-2 p-3 md:p-4">
             <legend className="sr-only">{day}</legend>
             {items.length > 0 ? (
-              <button type="button" className="flex w-full min-w-0 items-center justify-between gap-2 text-left" aria-expanded={isExpanded} aria-controls={panelId}
+              <div className="flex min-w-0 items-center gap-1">
+              <button type="button" className="flex min-w-0 flex-1 items-center justify-between gap-2 text-left" aria-expanded={isExpanded} aria-controls={panelId}
                 onClick={() => onToggleDay(day)}>
                 <span className="min-w-0">
                   <span className="block font-bold capitalize">{day}</span>
@@ -97,6 +110,8 @@ const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem, exp
                   {items.length} ejercicio(s) {isExpanded ? <ChevronUp size={16} aria-hidden /> : <ChevronDown size={16} aria-hidden />}
                 </span>
               </button>
+              <DayClipboardButtons day={day} hasItems clipboard={clipboard} onCopy={onCopyDay} onPaste={onPasteDay} />
+              </div>
             ) : (
               // Día de descanso: una sola fila con el botón para agregar (antes ocupaba un bloque entero).
               <div className="flex items-center justify-between gap-2">
@@ -104,9 +119,12 @@ const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem, exp
                   <span className="block font-bold capitalize">{day}</span>
                   <span className="block text-xs text-muted">Descanso</span>
                 </span>
-                <button type="button" className="btn btn-outline min-h-[38px] shrink-0 px-3 text-sm" onClick={() => addItem(day)}>
-                  <Plus size={16} aria-hidden /> Ejercicio
-                </button>
+                <span className="flex shrink-0 items-center gap-1">
+                  <DayClipboardButtons day={day} hasItems={false} clipboard={clipboard} onCopy={onCopyDay} onPaste={onPasteDay} />
+                  <button type="button" className="btn btn-outline min-h-[38px] px-3 text-sm" onClick={() => addItem(day)}>
+                    <Plus size={16} aria-hidden /> Ejercicio
+                  </button>
+                </span>
               </div>
             )}
             {items.length > 0 && isExpanded && (
@@ -131,7 +149,7 @@ const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem, exp
  * Escritorio: matriz días (columnas) × ejercicios (filas). Fila N = N-ésimo ejercicio de cada día,
  * así se compara la semana de un vistazo. Scroll horizontal si la ventana es angosta.
  */
-const WeekGridLayout = ({ draft, extraNames, updateItem, addItem, removeItem }) => {
+const WeekGridLayout = ({ draft, extraNames, updateItem, addItem, removeItem, clipboard, onCopyDay, onPasteDay }) => {
   const rowCount = Math.max(1, ...WEEK_DAYS.map((day) => draft.days[day].length));
   return (
     <div className="overflow-x-auto rounded-xl border divider">
@@ -149,6 +167,9 @@ const WeekGridLayout = ({ draft, extraNames, updateItem, addItem, removeItem }) 
                 <span className="block font-bold capitalize">{day}</span>
                 <span className="text-xs font-semibold text-muted">
                   {draft.days[day].length ? `${draft.days[day].length} ejercicio(s)` : 'Descanso'}
+                </span>
+                <span className="-mb-2 -ml-2 mt-0.5 flex">
+                  <DayClipboardButtons day={day} hasItems={draft.days[day].length > 0} clipboard={clipboard} onCopy={onCopyDay} onPaste={onPasteDay} size={16} />
                 </span>
               </th>
             ))}
@@ -278,7 +299,40 @@ export const RoutineEditor = ({ original, initialDraft, wasRestored, exerciseOpt
     }
   };
 
-  const layoutProps = { draft, extraNames: exerciseOptions, updateItem, addItem, removeItem };
+  // ───────── Copiar / pegar días ─────────
+  const [clipboard, setClipboard] = useState(readDayClipboard);
+  const [pasteTarget, setPasteTarget] = useState(null);
+
+  const copyDay = (day) => {
+    playClick();
+    const saved = writeDayClipboard({ routineName: draft.name, day, items: draft.days[day] });
+    if (!saved) {
+      notify('Ese día no tiene ejercicios con nombre para copiar.', 'info');
+      return;
+    }
+    setClipboard(saved);
+    notify(`${capitalize(day)} copiado (${saved.items.length} ejercicio(s)). Toca "Pegar" en cualquier día de esta u otra rutina.`, 'success');
+  };
+
+  const openPaste = (day) => {
+    playClick();
+    const current = readDayClipboard() ?? clipboard; // Puede haberse copiado en otra pestaña del navegador
+    if (!current) return;
+    setClipboard(current);
+    // Día vacío: se pega directo. Con ejercicios: se pregunta si agregar o reemplazar.
+    if (draft.days[day].length === 0) pasteInto(day, 'append', current);
+    else setPasteTarget(day);
+  };
+
+  const pasteInto = (day, mode, source = clipboard) => {
+    const pasted = source.items.map((item) => ({ ...createEmptyRoutineItem(), ...item }));
+    updateDay(day, (items) => (mode === 'replace' ? pasted : [...items, ...pasted]));
+    setExpandedDays((previous) => new Set(previous).add(day));
+    setPasteTarget(null);
+    notify(`${pasted.length} ejercicio(s) pegados en ${day}. Recuerda guardar la rutina.`, 'success');
+  };
+
+  const layoutProps = { draft, extraNames: exerciseOptions, updateItem, addItem, removeItem, clipboard, onCopyDay: copyDay, onPasteDay: openPaste };
   const mobileProps = { ...layoutProps, expandedDays, onToggleDay: toggleDay, onToggleAll: toggleAllDays };
 
   return (
@@ -309,7 +363,31 @@ export const RoutineEditor = ({ original, initialDraft, wasRestored, exerciseOpt
         Series y repeticiones son opcionales (por defecto {ROUTINE_DEFAULTS.sets} × {ROUTINE_DEFAULTS.reps}). Los músculos se asignan solos.
       </p>
 
+      {clipboard && (
+        <p className="mb-3 flex items-center gap-2 rounded-xl surface-2 p-2.5 text-xs text-secondary">
+          <ClipboardPaste size={14} className="shrink-0" aria-hidden />
+          <span className="min-w-0">Copiado: <strong className="capitalize">{clipboard.day}</strong> de <strong>{clipboard.routineName}</strong> ({clipboard.items.length} ejercicio(s)). Usa el botón pegar de un día.</span>
+        </p>
+      )}
+
       {isDesktop ? <WeekGridLayout {...layoutProps} /> : <DayListLayout {...mobileProps} />}
+
+      {pasteTarget && clipboard && (
+        <Dialog title={`Pegar en ${pasteTarget}`} icon={ClipboardPaste} size="sm" onClose={() => setPasteTarget(null)} bodyClassName="px-5 pb-5 pt-2">
+          <p className="text-sm text-secondary">
+            Vas a pegar <strong className="capitalize">{clipboard.day}</strong> de <strong>{clipboard.routineName}</strong>:
+          </p>
+          <ul className="my-3 max-h-40 list-disc space-y-0.5 overflow-y-auto pl-5 text-sm">
+            {clipboard.items.map((item, index) => <li key={`${item.exercise}-${index}`}>{item.exercise}</li>)}
+          </ul>
+          <p className="mb-4 text-sm text-secondary"><span className="capitalize">{pasteTarget}</span> ya tiene {draft.days[pasteTarget].length} ejercicio(s).</p>
+          <div className="flex flex-col gap-2">
+            <button type="button" className="btn btn-primary" onClick={() => pasteInto(pasteTarget, 'append')}>Agregar al final</button>
+            <button type="button" className="btn btn-danger" onClick={() => pasteInto(pasteTarget, 'replace')}>Reemplazar el día</button>
+            <button type="button" className="btn btn-ghost" onClick={() => setPasteTarget(null)}>Cancelar</button>
+          </div>
+        </Dialog>
+      )}
 
       <div className="sticky bottom-20 mt-5 lg:bottom-4 lg:flex lg:justify-end">
         <button type="button" className="btn btn-primary w-full shadow-lg lg:w-auto lg:min-w-64" disabled={isSaving} onClick={handleSave}>

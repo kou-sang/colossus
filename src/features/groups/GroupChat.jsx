@@ -33,7 +33,7 @@ const MessageBubble = ({ message, isMine, canDelete, busyKey, onImport, onDelete
       <span className="text-[11px] font-semibold text-muted">
         {isMine ? 'Tú' : message.authorName}, {sentToday ? formatTime(message.createdAt) : formatDayTime(message.createdAt)}
       </span>
-      <div className={`w-full max-w-[22rem] rounded-2xl border divider p-3 ${isMine ? 'bg-[var(--accent-soft)]' : 'surface-2'}`}>
+      <div className={`w-full max-w-[min(22rem,100%)] rounded-2xl border divider p-3 ${isMine ? 'bg-[var(--accent-soft)]' : 'surface-2'}`}>
         <p className="break-words text-sm font-bold">{message.routineName}</p>
         <p className="text-xs text-secondary">
           {message.exerciseCount} ejercicios, {message.activeDays} {message.activeDays === 1 ? 'día' : 'días'} por semana
@@ -118,12 +118,12 @@ export const GroupChat = ({ group, isAdmin }) => {
   };
 
   return (
-    <section className="mt-3 rounded-xl border divider p-3" aria-label={`Chat de ${group.name}`}>
+    <section aria-label={`Chat de ${group.name}`}>
       <p className="mb-2 text-xs text-muted">
         Aquí solo se comparten rutinas (sin texto ni emojis), una por minuto. Los mensajes más viejos se descartan.
       </p>
 
-      <ul ref={listRef} className="flex max-h-72 min-h-[96px] flex-col gap-3 overflow-y-auto overscroll-contain pr-1" aria-live="polite">
+      <ul ref={listRef} className="flex max-h-[min(55dvh,28rem)] min-h-[96px] flex-col gap-3 overflow-y-auto overscroll-contain pr-1" aria-live="polite">
         {loading && <li className="py-6 text-center text-sm text-muted">Cargando mensajes…</li>}
         {!loading && error && <li role="alert" className="py-6 text-center text-sm font-semibold text-accent">{toUserMessage(error)}</li>}
         {!loading && !error && messages.length === 0 && (

@@ -1,8 +1,8 @@
-import { Plus, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Modal } from '../../components/Modal';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Dialog } from '../../components/Dialog';
 import { RepsInput } from '../../components/RepsInput';
-import { FieldLabel, IconButton, InlineSpinner } from '../../components/ui';
+import { FieldLabel, InlineSpinner } from '../../components/ui';
 import { useAppData } from '../../context/AppDataContext';
 import { useFeedback } from '../../context/FeedbackContext';
 import { addExerciseToRoutine } from '../../services/routineService';
@@ -27,12 +27,6 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
   }));
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (event) => event.key === 'Escape' && onClose();
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     const routine = routines.find((item) => item.id === form.routineId);
@@ -55,15 +49,7 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
   };
 
   return (
-    <Modal onBackdropClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-labelledby="add-to-routine-title" className="dialog-panel card w-full max-w-sm p-5" onClick={(event) => event.stopPropagation()}>
-        <div className="mb-3 flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h2 id="add-to-routine-title" className="text-lg font-bold">Añadir a rutina</h2>
-            <p className="truncate text-sm text-secondary">{exerciseName}</p>
-          </div>
-          <IconButton label="Cerrar" icon={X} onClick={onClose} />
-        </div>
+    <Dialog title="Añadir a rutina" subtitle={exerciseName} size="sm" onClose={onClose} bodyClassName="px-5 pb-5 pt-3">
 
         {routines.length === 0 ? (
           <p className="rounded-xl surface-2 p-3 text-sm text-secondary">Todavía no tienes rutinas. Crea una en la pestaña Rutinas y vuelve aquí.</p>
@@ -100,7 +86,6 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
             </div>
           </form>
         )}
-      </div>
-    </Modal>
+    </Dialog>
   );
 };

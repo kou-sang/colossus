@@ -1,5 +1,6 @@
-import { Copy, Crown, LogIn, LogOut, MessageSquare, Pencil, Plus, RefreshCw, Settings, Share2, Trash2, Trophy, UserMinus, Users, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, Crown, LogIn, LogOut, MessageSquare, Pencil, Plus, RefreshCw, Settings, Share2, Trash2, Trophy, UserMinus, Users, X } from 'lucide-react';
 import { useState } from 'react';
+import { Dialog } from '../../components/Dialog';
 import { EmptyState, FieldLabel, IconButton, InlineSpinner, LoadingState, SectionCard } from '../../components/ui';
 import { GROUP_LIMITS } from '../../constants/collections';
 import { useAppData } from '../../context/AppDataContext';
@@ -155,6 +156,9 @@ const GroupCard = ({ group }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isRankingOpen, setIsRankingOpen] = useState(false);
+  // Plegado por defecto: con varios grupos la pestaña era una pared de tarjetas. Al desplegar se ve todo como antes.
+  const [isExpanded, setIsExpanded] = useState(false);
+  const panelId = `group-panel-${group.id}`;
   const isOwner = group.ownerId === user.id;
   const isBusy = Boolean(busyKey);
 
@@ -212,19 +216,24 @@ const GroupCard = ({ group }) => {
   };
 
   return (
-    <li className={`card p-4 md:p-5 ${isChatOpen || isRankingOpen ? 'md:col-span-2' : ''}`} aria-busy={isBusy}>
+    <li className={`card min-w-0 p-4 md:p-5 ${isExpanded && isRankingOpen ? 'md:col-span-2' : ''}`} aria-busy={isBusy}>
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h3 className="flex items-center gap-2 text-base font-bold md:text-lg">
-            <span className="truncate">{group.name}</span>
-            {isOwner && <span className="badge badge-accent shrink-0"><Crown size={12} aria-hidden /> Admin</span>}
-          </h3>
-          {group.description && <p className="text-sm text-secondary">{group.description}</p>}
-          <p className="text-xs text-muted">{members.length}/{GROUP_LIMITS.MAX_MEMBERS} miembros</p>
-        </div>
-        {isOwner && !isEditing && <IconButton label="Editar configuración" icon={Settings} disabled={isBusy} onClick={() => { playClick(); setIsEditing(true); }} />}
+        <button type="button" className="flex min-w-0 flex-1 items-start justify-between gap-2 text-left" aria-expanded={isExpanded} aria-controls={panelId}
+          onClick={() => { playClick(); setIsExpanded((open) => !open); }}>
+          <span className="min-w-0">
+            <span className="flex items-center gap-2 text-base font-bold md:text-lg">
+              <span className="truncate">{group.name}</span>
+              {isOwner && <span className="badge badge-accent shrink-0"><Crown size={12} aria-hidden /> Admin</span>}
+            </span>
+            {group.description && <span className="block text-sm text-secondary">{group.description}</span>}
+            <span className="block text-xs text-muted">{members.length}/{GROUP_LIMITS.MAX_MEMBERS} miembros</span>
+          </span>
+          <span className="mt-1 shrink-0 text-muted">{isExpanded ? <ChevronUp size={20} aria-hidden /> : <ChevronDown size={20} aria-hidden />}</span>
+        </button>
+        {isExpanded && isOwner && !isEditing && <IconButton label="Editar configuración" icon={Settings} disabled={isBusy} onClick={() => { playClick(); setIsEditing(true); }} />}
       </div>
 
+      <div id={panelId} hidden={!isExpanded}>
       {isEditing && <GroupSettingsForm group={group} onDone={() => setIsEditing(false)} />}
 
       {/* Código visible para todos los miembros: cualquiera puede invitar. Solo el admin lo regenera. */}
@@ -242,12 +251,17 @@ const GroupCard = ({ group }) => {
         <button type="button" className="btn btn-ghost" aria-expanded={isRankingOpen} onClick={() => { playClick(); setIsRankingOpen((open) => !open); }}>
           <Trophy size={16} aria-hidden /> {isRankingOpen ? 'Ocultar ranking' : 'Ranking'}
         </button>
-        <button type="button" className="btn btn-ghost" aria-expanded={isChatOpen} onClick={() => { playClick(); setIsChatOpen((open) => !open); }}>
-          <MessageSquare size={16} aria-hidden /> {isChatOpen ? 'Ocultar chat' : 'Chat de rutinas'}
+        <button type="button" className="btn btn-ghost" aria-haspopup="dialog" onClick={() => { playClick(); setIsChatOpen(true); }}>
+          <MessageSquare size={16} aria-hidden /> Chat de rutinas
         </button>
       </div>
       {isRankingOpen && <GroupRanking group={group} />}
-      {isChatOpen && <GroupChat group={group} isAdmin={isOwner} />}
+      {/* Chat en su propia ventana: foco atrapado, Escape y botón atrás la cierran (accesible con teclado y lector). */}
+      {isChatOpen && (
+        <Dialog title={`Chat · ${group.name}`} icon={MessageSquare} size="lg" onClose={() => setIsChatOpen(false)} bodyClassName="px-4 pb-4 pt-2 md:px-5 md:pb-5">
+          <GroupChat group={group} isAdmin={isOwner} />
+        </Dialog>
+      )}
 
       <ul className="mt-3 divide-y divide-[var(--border)]">
         {members.map((member) => (
@@ -284,6 +298,7 @@ const GroupCard = ({ group }) => {
           </button>
         )}
       </div>
+      </div>
     </li>
   );
 };
@@ -307,7 +322,7 @@ export const GroupsTab = () => {
       ) : groups.length === 0 ? (
         <EmptyState icon={Users} title="Todavía no estás en ningún grupo" description="Crea uno y comparte el código, o únete con el código que te pasó un amigo." />
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 md:gap-4">
+        <ul className="grid grid-cols-[minmax(0,1fr)] items-start gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))] md:gap-4">
           {groups.map((group) => <GroupCard key={group.id} group={group} />)}
         </ul>
       )}

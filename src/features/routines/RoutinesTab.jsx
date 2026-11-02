@@ -11,6 +11,7 @@ import { WEEK_DAYS } from '../../utils/dates';
 import { logError, toUserMessage } from '../../utils/errors';
 import { RoutineAnalysis } from './RoutineAnalysis';
 import { RoutineEditor } from './RoutineEditor';
+import { writeDayClipboard } from './dayClipboard';
 import { clearRoutineDraft, readRoutineDraft, writeRoutineDraft } from './routineDraftStorage';
 
 const DAY_INITIALS = { lunes: 'L', martes: 'M', 'miércoles': 'X', jueves: 'J', viernes: 'V', 'sábado': 'S', domingo: 'D' };
@@ -66,6 +67,13 @@ export const RoutinesTab = () => {
     } finally {
       setBusyId(null);
     }
+  };
+
+  // Copia un día desde la tarjeta (sin abrir el editor): útil para armar una rutina a partir de una importada.
+  const handleCopyDay = (routine, day) => {
+    playClick();
+    const saved = writeDayClipboard({ routineName: routine.name, day, items: routine.days[day] });
+    if (saved) notify(`${day.charAt(0).toUpperCase() + day.slice(1)} de "${routine.name}" copiado. Abre una rutina y toca "Pegar" en un día.`, 'success');
   };
 
   const handleDelete = async (routine) => {
@@ -133,15 +141,18 @@ export const RoutinesTab = () => {
                   {routine.copyCount === 0 ? 'Todavía nadie la copió' : `Copiada por ${routine.copyCount} ${routine.copyCount === 1 ? 'persona' : 'personas'}`}
                 </p>
 
-                {/* Vista de la semana: qué días tienen entrenamiento, de un vistazo. */}
-                <div className="mt-3 flex gap-1" aria-label="Días con entrenamiento">
+                {/* Vista de la semana. Los días con ejercicios se pueden tocar para COPIARLOS y pegarlos en otra rutina. */}
+                <div className="mt-3 flex flex-wrap gap-1" aria-label="Días con entrenamiento (toca uno para copiarlo)">
                   {WEEK_DAYS.map((day) => {
-                    const hasWork = routine.days[day].length > 0;
-                    return (
-                      <span key={day} title={`${day}: ${routine.days[day].length} ejercicio(s)`}
-                        className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold ${hasWork ? 'bg-[var(--accent-soft)] text-accent' : 'surface-2 text-muted'}`}>
+                    const count = routine.days[day].length;
+                    const chipClass = 'flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold';
+                    return count > 0 ? (
+                      <button key={day} type="button" title={`Copiar ${day} (${count} ejercicio(s))`} aria-label={`Copiar ${day} de ${routine.name}`}
+                        className={`${chipClass} bg-[var(--accent-soft)] text-accent hover:ring-2 hover:ring-[var(--accent)]`} onClick={() => handleCopyDay(routine, day)}>
                         {DAY_INITIALS[day]}
-                      </span>
+                      </button>
+                    ) : (
+                      <span key={day} title={`${day}: descanso`} className={`${chipClass} surface-2 text-muted`}>{DAY_INITIALS[day]}</span>
                     );
                   })}
                 </div>

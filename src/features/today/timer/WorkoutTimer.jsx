@@ -1,6 +1,6 @@
-import { Check, ChevronsRight, ClipboardCheck, Minus, Pause, Play, Plus, RotateCcw, Square, Timer, X } from 'lucide-react';
+import { Check, ChevronsRight, ClipboardCheck, Minus, Pause, Play, Plus, RotateCcw, Square, Timer } from 'lucide-react';
 import { useEffect, useId, useMemo, useState } from 'react';
-import { Modal } from '../../../components/Modal';
+import { Dialog } from '../../../components/Dialog';
 import { IconButton } from '../../../components/ui';
 import { playClick } from '../../../utils/audio';
 import { logError } from '../../../utils/errors';
@@ -105,7 +105,6 @@ const PlannedValues = ({ id, values, onChange, routineValues, disabled }) => (
  */
 export const WorkoutTimer = ({ exercise = null, initialValues = null, routineValues = null, onFinish, onClose }) => {
   const id = useId();
-  const titleId = `${id}-title`;
   const stored = useMemo(readStoredTimer, []);
   const [modeId, setModeId] = useState(() => (TIMER_MODE_BY_ID[stored?.mode] ? stored.mode : 'classic'));
   const [rawConfigs, setRawConfigs] = useState(() => {
@@ -128,15 +127,6 @@ export const WorkoutTimer = ({ exercise = null, initialValues = null, routineVal
   useEffect(() => {
     writeStoredTimer({ mode: modeId, configs: rawConfigs });
   }, [modeId, rawConfigs]);
-
-  // Escape cierra la ventana solo si el reloj no está corriendo (evita perder una serie por accidente).
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape' && (isIdle || isDone)) onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isIdle, isDone, onClose]);
 
   const changeMode = (nextMode) => {
     playClick();
@@ -177,121 +167,114 @@ export const WorkoutTimer = ({ exercise = null, initialValues = null, routineVal
   };
 
   return (
-    <Modal padded={false}>
-      <div role="dialog" aria-modal="true" aria-labelledby={titleId}
-        className="dialog-panel card w-full max-w-lg rounded-b-none p-4 sm:rounded-2xl md:p-5">
-        <div className="mb-3 flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h2 id={titleId} className="flex items-center gap-2 text-lg font-bold"><Timer size={20} aria-hidden /> Reloj</h2>
-            {exercise && <p className="truncate text-sm font-semibold text-secondary">{exercise}</p>}
-          </div>
-          <IconButton label={isIdle || isDone ? 'Cerrar' : 'Cerrar (detiene el reloj)'} icon={X} onClick={onClose} />
+    // Con el reloj corriendo, Escape / atrás / tocar afuera no cierran (evita perder una serie por accidente):
+    // primero hay que pausar o terminar.
+    <Dialog title="Reloj" icon={Timer} subtitle={exercise ?? undefined} onClose={onClose} dismissible={isIdle || isDone || status === TIMER_STATUS.PAUSED}
+      closeLabel="Cerrar reloj" bodyClassName="px-4 pb-4 pt-3 md:px-5 md:pb-5">
+
+      {exercise && (
+        <div className="mb-3">
+          <PlannedValues id={id} values={values} onChange={changeValues} routineValues={routineValues} disabled={!isIdle && !isDone} />
         </div>
+      )}
 
-        {exercise && (
-          <div className="mb-3">
-            <PlannedValues id={id} values={values} onChange={changeValues} routineValues={routineValues} disabled={!isIdle && !isDone} />
-          </div>
-        )}
+      <div className="mb-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Tipo de reloj">
+        {TIMER_MODES.map((option) => (
+          <button key={option.id} type="button" role="radio" aria-checked={option.id === modeId} aria-pressed={option.id === modeId}
+            className="chip" disabled={!isIdle && !isDone} onClick={() => changeMode(option.id)}>
+            {option.short}
+          </button>
+        ))}
+      </div>
+      <p className="mb-3 text-xs text-muted">{mode.help}</p>
 
-        <div className="mb-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Tipo de reloj">
-          {TIMER_MODES.map((option) => (
-            <button key={option.id} type="button" role="radio" aria-checked={option.id === modeId} aria-pressed={option.id === modeId}
-              className="chip" disabled={!isIdle && !isDone} onClick={() => changeMode(option.id)}>
-              {option.short}
-            </button>
+      {(isIdle || isDone) && (
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {mode.fields.map((field) => (
+            <ConfigField key={field} id={id} field={field} value={rawConfigs[modeId][field]} onChange={changeField} />
           ))}
         </div>
-        <p className="mb-3 text-xs text-muted">{mode.help}</p>
+      )}
 
-        {(isIdle || isDone) && (
-          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {mode.fields.map((field) => (
-              <ConfigField key={field} id={id} field={field} value={rawConfigs[modeId][field]} onChange={changeField} />
-            ))}
+      <ClockRing progress={isDone ? 0 : progress} color={phaseStyle.color}>
+        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: isDone ? 'var(--good)' : phaseStyle.color }}>
+          {isDone ? 'Terminado' : isIdle ? 'Listo' : phaseLabel(phase, modeId)}
+        </span>
+        <span className="text-5xl font-black leading-tight tabular-nums" aria-live="off">
+          {formatClock(displayMs, { ceil: !isDone && !(phase?.countUp || phase?.duration === null) })}
+        </span>
+        {!isIdle && (
+          <span className="text-xs font-semibold text-secondary">
+            {countsManually ? `${completed} ronda(s)` : `${completed}/${phase?.totalRounds ?? 0} ${modeId === 'classic' ? 'series' : 'rondas'}`}
+          </span>
+        )}
+      </ClockRing>
+
+      <p className="mt-2 min-h-[1.25rem] text-center text-xs text-muted" aria-live="polite">
+        {isDone
+          ? `Tiempo total: ${formatClock(totalElapsedMs)}`
+          : status === TIMER_STATUS.PAUSED ? 'En pausa'
+            : nextPhase && !isIdle ? `Después: ${phaseLabel(nextPhase, modeId)}${nextPhase.duration ? ` (${formatClock(nextPhase.duration)})` : ''}` : ''}
+      </p>
+
+      <div className="mt-3 flex flex-col gap-2">
+        {isIdle && (
+          <button type="button" className="btn btn-primary w-full py-3 text-base" onClick={() => { playClick(); timer.start(); }}>
+            <Play size={18} aria-hidden /> Empezar
+          </button>
+        )}
+
+        {status === TIMER_STATUS.RUNNING && (
+          <>
+            {isOpenPhase && (
+              <button type="button" className="btn btn-primary w-full py-3 text-base" onClick={() => { playClick(); timer.next(); }}>
+                <Check size={18} aria-hidden /> {modeId === 'classic' ? 'Serie hecha' : 'Terminé'}
+              </button>
+            )}
+            {countsManually && (
+              <div className="flex gap-2">
+                <button type="button" className="btn btn-primary flex-1 py-3 text-base" onClick={() => { playClick(); timer.addRound(1); }}>
+                  <Plus size={18} aria-hidden /> 1 ronda
+                </button>
+                <IconButton label="Restar una ronda" icon={Minus} onClick={() => timer.addRound(-1)} />
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-2">
+              <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.pause(); }}><Pause size={16} aria-hidden /> Pausa</button>
+              <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.next(); }}><ChevronsRight size={16} aria-hidden /> Saltar</button>
+              <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.finish(); }}><Square size={14} aria-hidden /> Fin</button>
+            </div>
+          </>
+        )}
+
+        {status === TIMER_STATUS.PAUSED && (
+          <div className="grid grid-cols-3 gap-2">
+            <button type="button" className="btn btn-primary" onClick={() => { playClick(); timer.resume(); }}><Play size={16} aria-hidden /> Seguir</button>
+            <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.reset(); }}><RotateCcw size={16} aria-hidden /> Reiniciar</button>
+            <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.finish(); }}><Square size={14} aria-hidden /> Fin</button>
           </div>
         )}
 
-        <ClockRing progress={isDone ? 0 : progress} color={phaseStyle.color}>
-          <span className="text-xs font-bold uppercase tracking-wide" style={{ color: isDone ? 'var(--good)' : phaseStyle.color }}>
-            {isDone ? 'Terminado' : isIdle ? 'Listo' : phaseLabel(phase, modeId)}
-          </span>
-          <span className="text-5xl font-black leading-tight tabular-nums" aria-live="off">
-            {formatClock(displayMs, { ceil: !isDone && !(phase?.countUp || phase?.duration === null) })}
-          </span>
-          {!isIdle && (
-            <span className="text-xs font-semibold text-secondary">
-              {countsManually ? `${completed} ronda(s)` : `${completed}/${phase?.totalRounds ?? 0} ${modeId === 'classic' ? 'series' : 'rondas'}`}
-            </span>
-          )}
-        </ClockRing>
-
-        <p className="mt-2 min-h-[1.25rem] text-center text-xs text-muted" aria-live="polite">
-          {isDone
-            ? `Tiempo total: ${formatClock(totalElapsedMs)}`
-            : status === TIMER_STATUS.PAUSED ? 'En pausa'
-              : nextPhase && !isIdle ? `Después: ${phaseLabel(nextPhase, modeId)}${nextPhase.duration ? ` (${formatClock(nextPhase.duration)})` : ''}` : ''}
-        </p>
-
-        <div className="mt-3 flex flex-col gap-2">
-          {isIdle && (
-            <button type="button" className="btn btn-primary w-full py-3 text-base" onClick={() => { playClick(); timer.start(); }}>
-              <Play size={18} aria-hidden /> Empezar
-            </button>
-          )}
-
-          {status === TIMER_STATUS.RUNNING && (
-            <>
-              {isOpenPhase && (
-                <button type="button" className="btn btn-primary w-full py-3 text-base" onClick={() => { playClick(); timer.next(); }}>
-                  <Check size={18} aria-hidden /> {modeId === 'classic' ? 'Serie hecha' : 'Terminé'}
+        {isDone && (
+          <>
+            <p className="rounded-xl bg-[var(--accent-soft)] p-3 text-center text-sm font-semibold">
+              {completed > 0
+                ? `¡Bien! ${completed} ${countsManually || modeId !== 'classic' ? 'ronda(s)' : 'serie(s)'} en ${formatClock(totalElapsedMs)}.`
+                : `Tiempo: ${formatClock(totalElapsedMs)}.`}
+            </p>
+            <div className="flex gap-2">
+              {exercise && onFinish && (
+                <button type="button" className="btn btn-primary flex-1" onClick={handleRegister}>
+                  <Check size={16} aria-hidden /> Registrar
                 </button>
               )}
-              {countsManually && (
-                <div className="flex gap-2">
-                  <button type="button" className="btn btn-primary flex-1 py-3 text-base" onClick={() => { playClick(); timer.addRound(1); }}>
-                    <Plus size={18} aria-hidden /> 1 ronda
-                  </button>
-                  <IconButton label="Restar una ronda" icon={Minus} onClick={() => timer.addRound(-1)} />
-                </div>
-              )}
-              <div className="grid grid-cols-3 gap-2">
-                <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.pause(); }}><Pause size={16} aria-hidden /> Pausa</button>
-                <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.next(); }}><ChevronsRight size={16} aria-hidden /> Saltar</button>
-                <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.finish(); }}><Square size={14} aria-hidden /> Fin</button>
-              </div>
-            </>
-          )}
-
-          {status === TIMER_STATUS.PAUSED && (
-            <div className="grid grid-cols-3 gap-2">
-              <button type="button" className="btn btn-primary" onClick={() => { playClick(); timer.resume(); }}><Play size={16} aria-hidden /> Seguir</button>
-              <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.reset(); }}><RotateCcw size={16} aria-hidden /> Reiniciar</button>
-              <button type="button" className="btn btn-ghost" onClick={() => { playClick(); timer.finish(); }}><Square size={14} aria-hidden /> Fin</button>
+              <button type="button" className="btn btn-ghost flex-1" onClick={() => { playClick(); timer.reset(); }}>
+                <RotateCcw size={16} aria-hidden /> Otra vez
+              </button>
             </div>
-          )}
-
-          {isDone && (
-            <>
-              <p className="rounded-xl bg-[var(--accent-soft)] p-3 text-center text-sm font-semibold">
-                {completed > 0
-                  ? `¡Bien! ${completed} ${countsManually || modeId !== 'classic' ? 'ronda(s)' : 'serie(s)'} en ${formatClock(totalElapsedMs)}.`
-                  : `Tiempo: ${formatClock(totalElapsedMs)}.`}
-              </p>
-              <div className="flex gap-2">
-                {exercise && onFinish && (
-                  <button type="button" className="btn btn-primary flex-1" onClick={handleRegister}>
-                    <Check size={16} aria-hidden /> Registrar
-                  </button>
-                )}
-                <button type="button" className="btn btn-ghost flex-1" onClick={() => { playClick(); timer.reset(); }}>
-                  <RotateCcw size={16} aria-hidden /> Otra vez
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+          </>
+        )}
       </div>
-    </Modal>
+    </Dialog>
   );
 };

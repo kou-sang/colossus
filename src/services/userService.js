@@ -1,4 +1,4 @@
-import { doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { COLLECTIONS } from '../constants/collections';
 import { subscribeToDocsByIds } from './firestoreQueries';
@@ -82,4 +82,19 @@ export const saveBodyStats = async (uid, stats) => {
   const clean = sanitizeBodyStats(stats);
   await setDoc(doc(db, COLLECTIONS.USERS, uid), { bodyStats: { ...clean, updatedAt: serverTimestamp() } }, { merge: true });
   return clean;
+};
+
+/*
+ * Lista de amigos (users/{uid}.friendIds): personas con las que compartes al menos un grupo.
+ * Las reglas de Firestore la usan para decidir qué perfiles, récords y registros puedes leer.
+ *  - Quitar ids: siempre permitido (una sola escritura).
+ *  - Agregar: de a UNO por escritura e indicando el grupo que lo justifica (`viaGroup`); las reglas verifican que
+ *    ambos estén en ese grupo. Así nadie puede agregarse a cualquier persona.
+ */
+export const setFriendList = async (uid, friendIds) => {
+  await setDoc(doc(db, COLLECTIONS.USERS, uid), { friendIds }, { merge: true });
+};
+
+export const addFriend = async (uid, friendId, groupId) => {
+  await setDoc(doc(db, COLLECTIONS.USERS, uid), { friendIds: arrayUnion(friendId), viaGroup: groupId }, { merge: true });
 };

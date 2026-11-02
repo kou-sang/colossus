@@ -17,14 +17,45 @@ service cloud.firestore {
       return name is string && name.size() >= 2 && name.size() <= 24;
     }
 
-    // Privado: email y rutina activa.
-    match /users/{uid} {
-      allow read, write: if isOwner(uid);
+    // ───────── Visibilidad entre personas (desde 4.4.0) ─────────
+    // users/{uid}.friendIds = personas con las que compartes un grupo. La mantiene la app (useFriendSync).
+    // Cuesta 1 lectura extra por CONSULTA (no por documento) y Firestore la reutiliza dentro de la misma evaluación.
+    function myFriendIds() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('friendIds', []);
     }
 
-    // Público dentro de la app: nombre visible y sexo (mapa corporal).
+    function canSee(ownerId) {
+      return signedIn() && (ownerId == request.auth.uid || ownerId in myFriendIds());
+    }
+
+    function groupMembers(groupId) {
+      return get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+    }
+
+    // Altas en friendIds: de a UNA por escritura y justificada por un grupo donde están ambos.
+    // Quitar ids o tocar otros campos (preferencias, datos corporales, rutina activa) siempre está permitido.
+    function validFriendsChange(uid) {
+      let before = resource == null ? [] : resource.data.get('friendIds', []);
+      let after = request.resource.data.get('friendIds', []);
+      let added = after.toSet().difference(before.toSet());
+      return after is list && after.size() <= 300 && !(uid in after)
+        && (added.size() == 0
+          || (added.size() == 1
+            && request.resource.data.viaGroup is string
+            && uid in groupMembers(request.resource.data.viaGroup)
+            && groupMembers(request.resource.data.viaGroup).toSet().hasAll(added)));
+    }
+
+    // Privado: email, rutina activa, preferencias, datos corporales y friendIds.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validFriendsChange(uid);
+      allow delete: if isOwner(uid);
+    }
+
+    // Visible para ti y tus amigos: nombre y sexo (mapa corporal).
     match /profiles/{uid} {
-      allow read: if signedIn();
+      allow read: if canSee(uid);
       allow create, update: if isOwner(uid)
         && validUsername(request.resource.data.username)
         && request.resource.data.gender in ['masculino', 'femenino'];
@@ -78,14 +109,14 @@ service cloud.firestore {
 
     // Inmutables: corregir = borrar y volver a registrar (historial auditable para el ranking).
     match /workoutLogs/{logId} {
-      allow read: if signedIn();
+      allow read: if canSee(resource.data.userId);
       allow create: if signedIn() && validLog(request.resource.data);
       allow update: if false;
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
 
     match /personalBests/{uid} {
-      allow read: if signedIn();
+      allow read: if canSee(uid);
       allow write: if isOwner(uid);
     }
 

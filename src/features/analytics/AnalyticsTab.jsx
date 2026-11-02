@@ -61,7 +61,7 @@ const resolveDateRange = (preset, customRange, todayKey) => {
 };
 
 export const AnalyticsTab = () => {
-  const { user, groups, profilesById } = useAppData();
+  const { user, groups, profilesById, visibleIds } = useAppData();
   const { chart } = useTheme();
   const todayKey = useToday();
 
@@ -82,11 +82,12 @@ export const AnalyticsTab = () => {
   const activeGroup = scopeChoice === 'self' ? null : groups.find((group) => group.id === scopeChoice) ?? (scopeChoice ? null : groups[0] ?? null);
   const scopeId = activeGroup?.id ?? 'self';
 
-  // Solo miembros del grupo elegido: perfiles fuera de tus grupos nunca aparecen en Analíticas.
+  // Solo miembros del grupo elegido y ya confirmados como amigos (las reglas rechazan la consulta entera si
+  // incluye a alguien no permitido; un recién llegado aparece apenas se sincroniza su alta).
   const memberIds = useMemo(() => {
-    const ids = activeGroup ? activeGroup.memberIds : [user.id];
+    const ids = activeGroup ? activeGroup.memberIds.filter((id) => visibleIds.has(id)) : [user.id];
     return [...ids].sort((a, b) => (a === user.id ? -1 : b === user.id ? 1 : (profilesById[a]?.username ?? '').localeCompare(profilesById[b]?.username ?? '', 'es')));
-  }, [activeGroup, user.id, profilesById]);
+  }, [activeGroup, user.id, profilesById, visibleIds]);
 
   // El color sigue a la persona (posición estable en el grupo), no a la selección: filtrar no repinta.
   const colorByUser = useMemo(

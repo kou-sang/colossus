@@ -1,8 +1,8 @@
 import { AnimatePresence, m } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Dialog } from '../components/Dialog';
 import { FeedbackContext } from './FeedbackContext';
-
 
 const TOAST_DURATION_MS = 3500;
 const TOAST_ICONS = { success: CheckCircle2, error: AlertTriangle, info: Info };
@@ -74,42 +74,23 @@ export const FeedbackProvider = ({ children }) => {
         </AnimatePresence>
       </div>
 
-      <AnimatePresence>
-        {dialog && (
-          <m.div
-            className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 p-4 sm:items-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => closeDialog(false)}
-          >
-            <m.div
-              role="alertdialog"
-              aria-modal="true"
-              aria-labelledby="confirm-title"
-              className="dialog-panel card w-full max-w-sm p-5"
-              initial={{ y: 24 }}
-              animate={{ y: 0 }}
-              exit={{ y: 24 }}
-              onClick={(event) => event.stopPropagation()}
+      {dialog && (
+        <Dialog title={dialog.title} role="alertdialog" size="sm" onClose={() => closeDialog(false)} hideHeader bodyClassName="p-5">
+          <p className="text-lg font-bold" aria-hidden>{dialog.title}</p>
+          {dialog.message && <p className="mt-2 text-sm text-secondary">{dialog.message}</p>}
+          <div className="mt-5 flex gap-2">
+            <button type="button" className="btn btn-ghost flex-1" onClick={() => closeDialog(false)}>Cancelar</button>
+            <button
+              type="button"
+              autoFocus
+              className={`btn flex-1 ${dialog.tone === 'danger' ? 'btn-danger' : 'btn-primary'}`}
+              onClick={() => closeDialog(true)}
             >
-              <h2 id="confirm-title" className="text-lg font-bold">{dialog.title}</h2>
-              {dialog.message && <p className="mt-2 text-sm text-secondary">{dialog.message}</p>}
-              <div className="mt-5 flex gap-2">
-                <button type="button" className="btn btn-ghost flex-1" onClick={() => closeDialog(false)}>Cancelar</button>
-                <button
-                  type="button"
-                  autoFocus
-                  className={`btn flex-1 ${dialog.tone === 'danger' ? 'btn-danger' : 'btn-primary'}`}
-                  onClick={() => closeDialog(true)}
-                >
-                  {dialog.confirmLabel}
-                </button>
-              </div>
-            </m.div>
-          </m.div>
-        )}
-      </AnimatePresence>
+              {dialog.confirmLabel}
+            </button>
+          </div>
+        </Dialog>
+      )}
     </FeedbackContext.Provider>
   );
 };

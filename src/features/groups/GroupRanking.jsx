@@ -160,7 +160,9 @@ const RecentRecords = ({ logs }) => {
 export const GroupRanking = ({ group }) => {
   const [view, setView] = useState('strength');
   const todayKey = useToday();
-  const memberIds = group.memberIds;
+  const { visibleIds } = useAppData();
+  // Integrantes ya confirmados como amigos (ver reglas): evita que un recién llegado haga fallar la consulta.
+  const memberIds = useMemo(() => group.memberIds.filter((id) => visibleIds.has(id)), [group.memberIds, visibleIds]);
   const memberKey = memberIds.join('|');
 
   // Suscripción perezosa: solo se leen logs cuando la vista los necesita.
