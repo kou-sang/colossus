@@ -17,6 +17,15 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.4.1] - 2026-11-02
+
+### Fixed
+- `npm run lint` vuelve a pasar sin errores:
+  - Perfil (autoguardado de colores): el estado "Guardando / Guardado / Error" se deriva en el render en lugar de fijarse con `setState` dentro de un efecto (`react-hooks/set-state-in-effect`).
+  - Reloj: la configuración guardada se lee con un inicializador de `useState` (`react-hooks/use-memo`).
+  - Chat: la expresión que quita emojis usa alternancia en vez de una clase de caracteres con un carácter combinable (`no-misleading-character-class`).
+  - Ilustraciones: se quitó una variable sin uso (`no-unused-vars`) y dos comentarios `eslint-disable` innecesarios.
+
 ## [4.4.0] - 2026-11-02
 
 ### Added

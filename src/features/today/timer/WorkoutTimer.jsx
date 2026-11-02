@@ -105,7 +105,8 @@ const PlannedValues = ({ id, values, onChange, routineValues, disabled }) => (
  */
 export const WorkoutTimer = ({ exercise = null, initialValues = null, routineValues = null, onFinish, onClose }) => {
   const id = useId();
-  const stored = useMemo(readStoredTimer, []);
+  // Se lee una sola vez al abrir el reloj (inicializador perezoso de useState).
+  const [stored] = useState(readStoredTimer);
   const [modeId, setModeId] = useState(() => (TIMER_MODE_BY_ID[stored?.mode] ? stored.mode : 'classic'));
   const [rawConfigs, setRawConfigs] = useState(() => {
     const base = Object.fromEntries(TIMER_MODES.map((mode) => [mode.id, { ...mode.defaults, ...(stored?.configs?.[mode.id] ?? {}) }]));
