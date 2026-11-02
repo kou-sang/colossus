@@ -1,4 +1,4 @@
-import { ArrowLeft, History, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, ChevronUp, History, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExercisePicker } from '../../components/ExercisePicker';
 import { RepsInput } from '../../components/RepsInput';
@@ -61,27 +61,71 @@ const RoutineItemFields = ({ item, extraNames, layout, onChange, onRemove }) => 
   );
 };
 
-// Móvil (sin cambios de estructura): un bloque por día, ejercicios apilados.
-const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem }) => (
-  <div className="space-y-3">
-    {WEEK_DAYS.map((day) => (
-      <fieldset key={day} className="rounded-xl border divider surface-2 p-3 md:p-4">
-        <legend className="sr-only">{day}</legend>
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="font-bold capitalize">{day}</h3>
-          <span className="text-xs text-muted">{draft.days[day].length || 'Descanso'}{draft.days[day].length ? ' ejercicio(s)' : ''}</span>
+/*
+ * Móvil: un bloque por día. Los días con ejercicios se pueden plegar (en el celular ocupaban varias pantallas):
+ * plegado muestra solo la lista de nombres; desplegado, los campos para editar.
+ */
+const DayListLayout = ({ draft, extraNames, updateItem, addItem, removeItem, expandedDays, onToggleDay, onToggleAll }) => {
+  const daysWithWork = WEEK_DAYS.filter((day) => draft.days[day].length > 0);
+  const allExpanded = daysWithWork.every((day) => expandedDays.has(day));
+  return (
+    <div className="space-y-3">
+      {daysWithWork.length > 1 && (
+        <div className="flex justify-end">
+          <button type="button" className="btn btn-ghost min-h-[36px] px-3 text-xs" onClick={() => onToggleAll(!allExpanded)}>
+            {allExpanded ? <><ChevronsDownUp size={14} aria-hidden /> Plegar todos</> : <><ChevronsUpDown size={14} aria-hidden /> Desplegar todos</>}
+          </button>
         </div>
-        {draft.days[day].map((item) => (
-          <RoutineItemFields key={item.id} item={item} extraNames={extraNames} layout="mobile"
-            onChange={(patch) => updateItem(day, item.id, patch)} onRemove={() => removeItem(day, item.id)} />
-        ))}
-        <button type="button" className="btn btn-outline text-sm" onClick={() => addItem(day)}>
-          <Plus size={16} aria-hidden /> Ejercicio
-        </button>
-      </fieldset>
-    ))}
-  </div>
-);
+      )}
+      {WEEK_DAYS.map((day) => {
+        const items = draft.days[day];
+        const isExpanded = items.length === 0 || expandedDays.has(day);
+        const panelId = `routine-day-${day}`;
+        return (
+          <fieldset key={day} className="min-w-0 rounded-xl border divider surface-2 p-3 md:p-4">
+            <legend className="sr-only">{day}</legend>
+            {items.length > 0 ? (
+              <button type="button" className="flex w-full min-w-0 items-center justify-between gap-2 text-left" aria-expanded={isExpanded} aria-controls={panelId}
+                onClick={() => onToggleDay(day)}>
+                <span className="min-w-0">
+                  <span className="block font-bold capitalize">{day}</span>
+                  {!isExpanded && (
+                    <span className="block truncate text-xs text-muted">{items.map((item) => item.exercise || 'Sin nombre').join(' · ')}</span>
+                  )}
+                </span>
+                <span className="flex shrink-0 items-center gap-1 text-xs text-muted">
+                  {items.length} ejercicio(s) {isExpanded ? <ChevronUp size={16} aria-hidden /> : <ChevronDown size={16} aria-hidden />}
+                </span>
+              </button>
+            ) : (
+              // Día de descanso: una sola fila con el botón para agregar (antes ocupaba un bloque entero).
+              <div className="flex items-center justify-between gap-2">
+                <span className="min-w-0">
+                  <span className="block font-bold capitalize">{day}</span>
+                  <span className="block text-xs text-muted">Descanso</span>
+                </span>
+                <button type="button" className="btn btn-outline min-h-[38px] shrink-0 px-3 text-sm" onClick={() => addItem(day)}>
+                  <Plus size={16} aria-hidden /> Ejercicio
+                </button>
+              </div>
+            )}
+            {items.length > 0 && isExpanded && (
+              <div id={panelId} className="mt-2">
+                {items.map((item) => (
+                  <RoutineItemFields key={item.id} item={item} extraNames={extraNames} layout="mobile"
+                    onChange={(patch) => updateItem(day, item.id, patch)} onRemove={() => removeItem(day, item.id)} />
+                ))}
+                <button type="button" className="btn btn-outline text-sm" onClick={() => addItem(day)}>
+                  <Plus size={16} aria-hidden /> Ejercicio
+                </button>
+              </div>
+            )}
+          </fieldset>
+        );
+      })}
+    </div>
+  );
+};
 
 /*
  * Escritorio: matriz días (columnas) × ejercicios (filas). Fila N = N-ésimo ejercicio de cada día,
@@ -175,9 +219,30 @@ export const RoutineEditor = ({ original, initialDraft, wasRestored, exerciseOpt
   const updateItem = (day, itemId, patch) =>
     updateDay(day, (items) => items.map((item) => (item.id === itemId ? { ...item, ...patch } : item)));
 
+  // Días desplegados en móvil. Rutina nueva o vacía: todo abierto; rutina existente: todo plegado (se ve la semana entera).
+  const [expandedDays, setExpandedDays] = useState(() => {
+    const start = initialDraft ?? original;
+    const hasWork = WEEK_DAYS.some((day) => (start.days[day] ?? []).length > 0);
+    return new Set(hasWork ? [] : WEEK_DAYS);
+  });
+  const toggleDay = (day) => {
+    playClick();
+    setExpandedDays((previous) => {
+      const next = new Set(previous);
+      if (next.has(day)) next.delete(day);
+      else next.add(day);
+      return next;
+    });
+  };
+  const toggleAllDays = (expand) => {
+    playClick();
+    setExpandedDays(new Set(expand ? WEEK_DAYS : []));
+  };
+
   const addItem = (day) => {
     playClick();
     updateDay(day, (items) => [...items, createEmptyRoutineItem()]);
+    setExpandedDays((previous) => new Set(previous).add(day)); // El ejercicio nuevo siempre queda a la vista
   };
 
   const removeItem = (day, itemId) => {
@@ -214,6 +279,7 @@ export const RoutineEditor = ({ original, initialDraft, wasRestored, exerciseOpt
   };
 
   const layoutProps = { draft, extraNames: exerciseOptions, updateItem, addItem, removeItem };
+  const mobileProps = { ...layoutProps, expandedDays, onToggleDay: toggleDay, onToggleAll: toggleAllDays };
 
   return (
     // En escritorio el editor "rompe" el ancho máximo del layout para que entren 7 columnas cómodas.
@@ -243,7 +309,7 @@ export const RoutineEditor = ({ original, initialDraft, wasRestored, exerciseOpt
         Series y repeticiones son opcionales (por defecto {ROUTINE_DEFAULTS.sets} × {ROUTINE_DEFAULTS.reps}). Los músculos se asignan solos.
       </p>
 
-      {isDesktop ? <WeekGridLayout {...layoutProps} /> : <DayListLayout {...layoutProps} />}
+      {isDesktop ? <WeekGridLayout {...layoutProps} /> : <DayListLayout {...mobileProps} />}
 
       <div className="sticky bottom-20 mt-5 lg:bottom-4 lg:flex lg:justify-end">
         <button type="button" className="btn btn-primary w-full shadow-lg lg:w-auto lg:min-w-64" disabled={isSaving} onClick={handleSave}>

@@ -1,4 +1,4 @@
-import { CalendarDays, Copy, Pencil, Plus, Share2, Trash2, Users } from 'lucide-react';
+import { CalendarDays, Copy, Pencil, Plus, PowerOff, Share2, Trash2, Users } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { EmptyState, IconButton, LoadingState } from '../../components/ui';
 import { CATALOG_EXERCISE_NAMES, canonicalExerciseName } from '../../constants/exercises';
@@ -9,6 +9,7 @@ import { setActiveRoutine } from '../../services/userService';
 import { playClick } from '../../utils/audio';
 import { WEEK_DAYS } from '../../utils/dates';
 import { logError, toUserMessage } from '../../utils/errors';
+import { RoutineAnalysis } from './RoutineAnalysis';
 import { RoutineEditor } from './RoutineEditor';
 import { clearRoutineDraft, readRoutineDraft, writeRoutineDraft } from './routineDraftStorage';
 
@@ -117,15 +118,15 @@ export const RoutinesTab = () => {
       ) : routines.length === 0 ? (
         <EmptyState icon={CalendarDays} title="No tienes rutinas" description="Crea una o importa la de un amigo con su enlace." />
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 md:gap-4">
+        <ul className="grid grid-cols-[minmax(0,1fr)] items-start gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))] md:gap-4">
           {routines.map((routine) => {
             const isActive = user.activeRoutineId === routine.id;
             const isBusy = busyId === routine.id;
             const totalExercises = WEEK_DAYS.reduce((sum, day) => sum + routine.days[day].length, 0);
             return (
-              <li key={routine.id} className={`card relative p-4 md:p-5 ${isActive ? 'ring-2 ring-[var(--accent)]' : ''}`} aria-busy={isBusy}>
+              <li key={routine.id} className={`card relative min-w-0 p-4 md:p-5 ${isActive ? 'ring-2 ring-[var(--accent)]' : ''}`} aria-busy={isBusy}>
                 {isActive && <span className="badge badge-accent absolute right-3 top-3">Activa</span>}
-                <h3 className="pr-16 text-base font-bold md:text-lg">{routine.name}</h3>
+                <h3 className="break-words pr-16 text-base font-bold md:text-lg">{routine.name}</h3>
                 <p className="text-sm text-secondary">{totalExercises} ejercicios por semana</p>
                 <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-muted" title="Personas distintas que importaron esta rutina">
                   <Users size={13} aria-hidden />
@@ -145,12 +146,20 @@ export const RoutinesTab = () => {
                   })}
                 </div>
 
+                <RoutineAnalysis routine={routine} />
+
                 <div className="mt-3 flex flex-wrap items-center gap-1">
                   <IconButton label="Editar" icon={Pencil} disabled={isBusy} onClick={() => openEditor(routine)} />
                   <IconButton label="Duplicar" icon={Copy} disabled={isBusy} onClick={() => runAction(routine.id, 'routine:duplicate', () => duplicateRoutine(routine, user), 'Rutina duplicada')} />
                   <IconButton label="Compartir" icon={Share2} disabled={isBusy} onClick={() => handleShare(routine)} />
                   <IconButton label="Eliminar" icon={Trash2} tone="danger" disabled={isBusy} onClick={() => handleDelete(routine)} />
-                  {!isActive && (
+                  {isActive ? (
+                    // Desactivar: la pestaña Hoy queda sin plan (útil en vacaciones, lesión o entre programas).
+                    <button type="button" className="btn btn-ghost ml-auto" disabled={isBusy}
+                      onClick={() => runAction(routine.id, 'routine:deactivate', () => setActiveRoutine(user.id, null), 'Rutina desactivada')}>
+                      <PowerOff size={16} aria-hidden /> Desactivar
+                    </button>
+                  ) : (
                     <button type="button" className="btn btn-outline ml-auto" disabled={isBusy}
                       onClick={() => runAction(routine.id, 'routine:activate', () => setActiveRoutine(user.id, routine.id), 'Rutina activada')}>
                       Activar
