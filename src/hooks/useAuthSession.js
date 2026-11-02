@@ -104,6 +104,8 @@ export const useAuthSession = () => {
         gender: profile.gender,
         activeRoutineId: account?.activeRoutineId ?? null,
         preferences: account?.preferences ?? {},
+        friendIds: Array.isArray(account?.friendIds) ? account.friendIds : [], // Personas visibles (ver reglas de Firestore)
+        bodyStats: account?.bodyStats ?? null, // Privado: peso, altura, edad y objetivo (calorías y alimentación)
         // Proveedores vinculados: define si cambiar contraseña/correo pide la contraseña actual o Google.
         providerIds: authUser.providerData.map((provider) => provider.providerId),
       },

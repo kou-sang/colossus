@@ -17,6 +17,64 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.4.0] - 2026-11-02
+
+### Added
+- **Copiar y pegar días de rutina:** cada día tiene botones copiar/pegar en el editor (celular y escritorio), y en la tarjeta de cada rutina se puede tocar un día para copiarlo sin abrir el editor. Al pegar sobre un día con ejercicios se elige **agregar al final** o **reemplazar**. El portapapeles se recuerda en el dispositivo (sirve entre rutinas y después de recargar).
+- **Grupos plegables:** cada grupo muestra nombre, rol y miembros; al tocarlo se despliega con la misma información de antes.
+- **Chat del grupo en su propia ventana** (accesible con teclado y lector de pantalla).
+- **Pruebas automáticas (Vitest):** 26 pruebas de la lógica pura (reloj, análisis de rutinas, fatiga, calorías, resumen mensual, series/RIR y catálogo de ejercicios, incluidas las ilustraciones en las 3 vistas). Comandos `npm test` y `npm run test:watch`.
+
+### Changed
+- **Un solo componente de ventana** (`Dialog`) para todas las ventanas emergentes (información de gráficos, reloj, añadir a rutina, confirmaciones, chat y pegar día): Escape cierra, el foco queda dentro de la ventana y vuelve al botón que la abrió, el **botón atrás del celular** cierra la ventana en lugar de salir de la app, y se bloquea el scroll de fondo. El reloj no se puede cerrar por accidente mientras corre.
+- **Seguridad: cada persona solo puede leer perfiles, récords y registros propios o de quienes comparten un grupo.** La app mantiene `users/{uid}.friendIds` sincronizado con los integrantes de tus grupos y las nuevas reglas de Firestore lo verifican (las altas se validan contra el grupo). Las consultas por grupo solo incluyen amigos ya confirmados.
+
+### Removed
+- `src/components/Modal.jsx` (reemplazado por `Dialog`).
+
+## [4.3.1] - 2026-11-02
+
+### Added
+- **Serie por serie:** al registrar o confirmar un ejercicio se puede cargar cada serie con sus repeticiones, kg y RIR (por ejemplo 60×10, 62,5×8, 65×6). La preferencia se recuerda y la próxima vez se prellena con las series de la última sesión. El modo resumen (series × reps × kg) sigue disponible.
+- **Esfuerzo percibido (RIR) opcional** en "Hecho": repeticiones que quedaban antes del fallo (0, 1, 2, 3, 4+).
+- Hoy: **sugerencia de carga** para cada ejercicio según la última sesión (doble progresión guiada por RIR: subir kg, sumar una repetición o repetir).
+
+### Changed
+- Con series detalladas, el registro guarda como resumen la mejor serie (mayor 1RM estimado): récords, ranking y gráficos siguen funcionando igual; el **tonelaje** suma cada serie real.
+- El **mapa de fatiga** pondera cada serie por su RIR (al fallo cansa más que con 4 repeticiones en reserva).
+- El **resumen mensual** recomienda acercarse al fallo o dejar repeticiones en reserva según el RIR registrado.
+- Reglas de Firestore: validan `rir` (0–10) y `setDetails` (máx. 30 series). Los registros anteriores no cambian.
+
+## [4.3.0] - 2026-11-02
+
+### Added
+- **Reloj de entrenamiento** en Hoy, con modos Series + descanso, Tabata, EMOM, AMRAP, For Time e Intervalos y tiempos personalizables (se recuerdan por dispositivo). Pitidos en los últimos 3 segundos, vibración en los cambios de fase y pantalla siempre encendida mientras corre. También hay un reloj libre (botón "Reloj").
+- Hoy: cada ejercicio del plan tiene **Hacer ahora** (abre el reloj con series, reps y kg de la serie actual) y **Hecho** (pide confirmar series, reps y kg).
+- Hoy: el registro se prellena con los **valores que completaste la última vez**; el botón **Completar con valores de rutina** vuelve al plan.
+- Rutinas: **análisis muscular** de cada rutina (porcentaje por categoría y por músculo, series efectivas semanales, músculos sin trabajar y desequilibrios empuje/tirón y cuádriceps/isquiotibiales).
+- Rutinas: botón **Desactivar** para la rutina activa.
+- Analíticas: **mapa de fatiga muscular** (estimación para hoy según los últimos 7 días, con tiempo de recuperación por músculo).
+- Analíticas: **calorías y alimentación** (gasto estimado por MET, metabolismo basal Mifflin-St Jeor, objetivo diario, macronutrientes, agua y fibra). Los datos corporales se cargan en Perfil o en la misma tarjeta y son privados.
+- Analíticas: **resumen del mes** (últimos 30 días contra los 30 anteriores, progresión de cargas) con **recomendaciones**: aumentar series, kg, días o repeticiones, reducir volumen, hacer abdomen, sumar cardio, equilibrar empuje/tirón.
+- Ejercicios: **52 ejercicios nuevos** (8 de antebrazo y agarre, 8 de pecho, 7 de espalda, 4 de hombros, 4 de bíceps, 3 de tríceps, 6 de core, 7 de piernas, 2 de glúteos, 2 de pantorrillas y 1 funcional). Total: 261.
+- Ejercicios: **ilustraciones con volumen y tres vistas** (lateral, frontal y superior) generadas desde un esqueleto 3D, con encuadre automático.
+- Ejercicios: sección **Claves de entrenadores e investigación** con indicaciones atribuidas a su fuente (Rippetoe, McGill, Contreras, Nippard, Cressey, Israetel, estudios de Maeo, Schoenfeld, Kubo, etc.).
+
+### Changed
+- El antebrazo se divide en **braquiorradial, flexores y extensores**: el curl de muñeca (flexores) y el curl de muñeca invertido (extensores) ya no suman al mismo músculo. El id viejo `antebrazos` se reparte automáticamente (historial intacto).
+- Distribución muscular revisada en curls (supino, martillo, invertido, Scott, inclinado…) y en ejercicios que tenían porcentajes idénticos a otro distinto.
+- Consejos menos genéricos en varias familias de ejercicios (press, pullover, remo, press militar, abdominales, cardio).
+- Rutinas (celular): los días con ejercicios se **pliegan** (muestran solo los nombres) y los días de descanso ocupan una sola fila.
+- La **versión** se muestra al pie de todas las pestañas (antes solo en Perfil).
+- Las tarjetas mantienen el botón (i) en la misma línea del título.
+- **Perfiles y récords solo de tus grupos:** antes la app descargaba las colecciones completas `profiles` y `personalBests` (1 lectura por cada usuario registrado en cada apertura). Ahora pide únicamente los documentos tuyos y de quienes comparten un grupo contigo (consultas por id en bloques de 30).
+- Velocidad: el reloj y las pantallas de inicio de sesión salen del bundle inicial (se descargan al usarlos, con precarga al pasar el puntero), conexiones adelantadas a Firebase (`preconnect`) y caché de un año para los archivos con hash (`vercel.json`).
+
+### Fixed
+- Pullover: los dibujos de inicio y mitad estaban mal (la mitad salía por delante del cuerpo). La interpolación de ángulos ahora toma el camino corto.
+- Celular: el botón (i) de Analíticas (y el resto de las ventanas) podía ensanchar la página; ahora se abren en una capa propia sobre toda la pantalla y bloquean el scroll de fondo.
+- Ejercicios: no se repiten los alias sin Ñ cuando ya aparece la versión con Ñ.
+
 ## [4.2.0] - 2026-10-31
 
 ### Added

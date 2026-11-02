@@ -118,4 +118,50 @@ export const CHART_INFO = Object.freeze({
     ],
     tip: 'Planifica una semana de descarga (alrededor de la mitad del tonelaje) cada 4–6 semanas de subida.',
   },
+  fatigue: {
+    title: 'Mapa de fatiga muscular',
+    how: [
+      'Cada registro de los últimos 7 días aporta "series efectivas" a cada músculo (series × porcentaje de participación del ejercicio).',
+      'Ese aporte se disipa con el tiempo: la mitad cada ~30 h en músculos grandes (cuádriceps, glúteos, dorsales, pecho), ~24 h en medianos y ~18 h en chicos (antebrazos, gemelos).',
+      '100% equivale a una sesión exigente completa para ese músculo: ≈4 series efectivas en músculos grandes (cada cabeza del cuádriceps, pectoral, dorsal), 3,5 en medianos y 3 en chicos.',
+      'El tiempo de recuperación es lo que falta para bajar del 25% con el mismo ritmo de disipación.',
+      'Si registras el esfuerzo (RIR), cada serie pesa distinto: al fallo ×1,15, 1 en reserva ×1,05, 2 ×1, 3 ×0,85 y 4 o más ×0,7.',
+    ],
+    read: [
+      'Verde: músculo fresco, listo para una sesión fuerte.',
+      'Amarillo/naranja: todavía se está recuperando; sirve para trabajo liviano o técnico.',
+      'Rojo: fatiga alta; entrenarlo hoy rinde menos y aumenta el riesgo de sobrecarga.',
+      'Es un modelo orientativo: sin RIR no sabe cuán cerca del fallo llegaste, y nunca sabe cómo dormiste o comiste.',
+    ],
+    tip: 'Organiza la semana para que cada músculo vuelva a verde antes de su próxima sesión intensa (en general 48–72 h).',
+  },
+  energy: {
+    title: 'Calorías y alimentación',
+    how: [
+      'Calorías de cada ejercicio = MET × peso corporal × horas (Compendium of Physical Activities). Ejemplos de MET: pesas 5, correr 9,8, bici 7,5, yoga 2,5.',
+      'La duración se estima: en fuerza ≈ 2,5 minutos por serie (trabajo + descanso); en cardio, deportes y baile se usan las repeticiones como minutos.',
+      'El metabolismo basal usa la ecuación de Mifflin-St Jeor (peso, altura, edad y sexo).',
+      'Mantenimiento = basal × actividad diaria fuera del gimnasio + promedio diario del gasto registrado. El objetivo aplica −20% (bajar grasa, máx. 600 kcal) o +10% (ganar músculo, máx. 350 kcal).',
+      'Proteína según objetivo (1,6–2,4 g/kg), grasas ≥ 0,8 g/kg o 25% de las calorías y el resto carbohidratos.',
+    ],
+    read: [
+      'Son estimaciones con un margen de error de ±20%: úsalas como punto de partida y ajusta según tu peso semanal.',
+      'Si en 3 semanas el peso no se mueve en la dirección del objetivo, ajusta 150–200 kcal.',
+    ],
+    tip: 'La proteína repartida en 3–5 comidas (0,3–0,4 g/kg cada una) aprovecha mejor la síntesis muscular que concentrarla en una.',
+  },
+  monthly: {
+    title: 'Resumen del mes',
+    how: [
+      'Compara los últimos 30 días con los 30 anteriores: días entrenados, ejercicios, series, tonelaje, récords y minutos de cardio.',
+      'La progresión de cargas toma la mejor serie (1RM estimado) de cada sesión de cada ejercicio con peso: "estancado" = menos de +2% en el mes con 3 o más sesiones.',
+      'Las recomendaciones salen de reglas: menos de 2,5 días por semana, grupos con menos de 6 series efectivas semanales o más de 22, core con menos de 3, cardio por debajo de 150 min/semana, empuje mucho mayor que tirón y ejercicios estancados o en retroceso.',
+    ],
+    read: [
+      'Para los ejercicios estancados se aplica la doble progresión: primero sumar repeticiones hasta ~12 y recién entonces subir 2,5–5% el peso.',
+      'Con RIR registrado: si las series quedaron lejos del fallo (3 o más en reserva) la recomendación es acercarse más antes de subir el peso; un promedio muy cerca del fallo sugiere dejar alguna repetición en reserva.',
+      'Un retroceso del 1RM estimado de más del 5% suele indicar fatiga acumulada, no pérdida real de fuerza.',
+    ],
+    tip: 'Elige 2 o 3 recomendaciones por mes, no todas a la vez: los cambios chicos y sostenidos son los que se notan.',
+  },
 });

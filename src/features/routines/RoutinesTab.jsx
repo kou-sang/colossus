@@ -1,4 +1,4 @@
-import { CalendarDays, Copy, Pencil, Plus, Share2, Trash2, Users } from 'lucide-react';
+import { CalendarDays, Copy, Pencil, Plus, PowerOff, Share2, Trash2, Users } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { EmptyState, IconButton, LoadingState } from '../../components/ui';
 import { CATALOG_EXERCISE_NAMES, canonicalExerciseName } from '../../constants/exercises';
@@ -9,7 +9,9 @@ import { setActiveRoutine } from '../../services/userService';
 import { playClick } from '../../utils/audio';
 import { WEEK_DAYS } from '../../utils/dates';
 import { logError, toUserMessage } from '../../utils/errors';
+import { RoutineAnalysis } from './RoutineAnalysis';
 import { RoutineEditor } from './RoutineEditor';
+import { writeDayClipboard } from './dayClipboard';
 import { clearRoutineDraft, readRoutineDraft, writeRoutineDraft } from './routineDraftStorage';
 
 const DAY_INITIALS = { lunes: 'L', martes: 'M', 'miércoles': 'X', jueves: 'J', viernes: 'V', 'sábado': 'S', domingo: 'D' };
@@ -67,6 +69,13 @@ export const RoutinesTab = () => {
     }
   };
 
+  // Copia un día desde la tarjeta (sin abrir el editor): útil para armar una rutina a partir de una importada.
+  const handleCopyDay = (routine, day) => {
+    playClick();
+    const saved = writeDayClipboard({ routineName: routine.name, day, items: routine.days[day] });
+    if (saved) notify(`${day.charAt(0).toUpperCase() + day.slice(1)} de "${routine.name}" copiado. Abre una rutina y toca "Pegar" en un día.`, 'success');
+  };
+
   const handleDelete = async (routine) => {
     const accepted = await confirm({ title: `¿Eliminar "${routine.name}"?`, message: 'Esta acción no se puede deshacer.', confirmLabel: 'Eliminar', tone: 'danger' });
     if (!accepted) return;
@@ -117,40 +126,51 @@ export const RoutinesTab = () => {
       ) : routines.length === 0 ? (
         <EmptyState icon={CalendarDays} title="No tienes rutinas" description="Crea una o importa la de un amigo con su enlace." />
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 md:gap-4">
+        <ul className="grid grid-cols-[minmax(0,1fr)] items-start gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))] md:gap-4">
           {routines.map((routine) => {
             const isActive = user.activeRoutineId === routine.id;
             const isBusy = busyId === routine.id;
             const totalExercises = WEEK_DAYS.reduce((sum, day) => sum + routine.days[day].length, 0);
             return (
-              <li key={routine.id} className={`card relative p-4 md:p-5 ${isActive ? 'ring-2 ring-[var(--accent)]' : ''}`} aria-busy={isBusy}>
+              <li key={routine.id} className={`card relative min-w-0 p-4 md:p-5 ${isActive ? 'ring-2 ring-[var(--accent)]' : ''}`} aria-busy={isBusy}>
                 {isActive && <span className="badge badge-accent absolute right-3 top-3">Activa</span>}
-                <h3 className="pr-16 text-base font-bold md:text-lg">{routine.name}</h3>
+                <h3 className="break-words pr-16 text-base font-bold md:text-lg">{routine.name}</h3>
                 <p className="text-sm text-secondary">{totalExercises} ejercicios por semana</p>
                 <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-muted" title="Personas distintas que importaron esta rutina">
                   <Users size={13} aria-hidden />
                   {routine.copyCount === 0 ? 'Todavía nadie la copió' : `Copiada por ${routine.copyCount} ${routine.copyCount === 1 ? 'persona' : 'personas'}`}
                 </p>
 
-                {/* Vista de la semana: qué días tienen entrenamiento, de un vistazo. */}
-                <div className="mt-3 flex gap-1" aria-label="Días con entrenamiento">
+                {/* Vista de la semana. Los días con ejercicios se pueden tocar para COPIARLOS y pegarlos en otra rutina. */}
+                <div className="mt-3 flex flex-wrap gap-1" aria-label="Días con entrenamiento (toca uno para copiarlo)">
                   {WEEK_DAYS.map((day) => {
-                    const hasWork = routine.days[day].length > 0;
-                    return (
-                      <span key={day} title={`${day}: ${routine.days[day].length} ejercicio(s)`}
-                        className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold ${hasWork ? 'bg-[var(--accent-soft)] text-accent' : 'surface-2 text-muted'}`}>
+                    const count = routine.days[day].length;
+                    const chipClass = 'flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold';
+                    return count > 0 ? (
+                      <button key={day} type="button" title={`Copiar ${day} (${count} ejercicio(s))`} aria-label={`Copiar ${day} de ${routine.name}`}
+                        className={`${chipClass} bg-[var(--accent-soft)] text-accent hover:ring-2 hover:ring-[var(--accent)]`} onClick={() => handleCopyDay(routine, day)}>
                         {DAY_INITIALS[day]}
-                      </span>
+                      </button>
+                    ) : (
+                      <span key={day} title={`${day}: descanso`} className={`${chipClass} surface-2 text-muted`}>{DAY_INITIALS[day]}</span>
                     );
                   })}
                 </div>
+
+                <RoutineAnalysis routine={routine} />
 
                 <div className="mt-3 flex flex-wrap items-center gap-1">
                   <IconButton label="Editar" icon={Pencil} disabled={isBusy} onClick={() => openEditor(routine)} />
                   <IconButton label="Duplicar" icon={Copy} disabled={isBusy} onClick={() => runAction(routine.id, 'routine:duplicate', () => duplicateRoutine(routine, user), 'Rutina duplicada')} />
                   <IconButton label="Compartir" icon={Share2} disabled={isBusy} onClick={() => handleShare(routine)} />
                   <IconButton label="Eliminar" icon={Trash2} tone="danger" disabled={isBusy} onClick={() => handleDelete(routine)} />
-                  {!isActive && (
+                  {isActive ? (
+                    // Desactivar: la pestaña Hoy queda sin plan (útil en vacaciones, lesión o entre programas).
+                    <button type="button" className="btn btn-ghost ml-auto" disabled={isBusy}
+                      onClick={() => runAction(routine.id, 'routine:deactivate', () => setActiveRoutine(user.id, null), 'Rutina desactivada')}>
+                      <PowerOff size={16} aria-hidden /> Desactivar
+                    </button>
+                  ) : (
                     <button type="button" className="btn btn-outline ml-auto" disabled={isBusy}
                       onClick={() => runAction(routine.id, 'routine:activate', () => setActiveRoutine(user.id, routine.id), 'Rutina activada')}>
                       Activar

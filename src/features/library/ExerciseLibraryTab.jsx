@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, Camera, Lightbulb, ListOrdered, Activity, Plus, Search, Shuffle } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowLeft, Camera, GraduationCap, Lightbulb, ListOrdered, Plus, Search, Shuffle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { EmptyState, SectionCard } from '../../components/ui';
 import { CATEGORIES, CATEGORY_LABELS, EXERCISE_CATALOG, MUSCLE_LABELS, searchExercises } from '../../constants/exercises';
@@ -84,6 +84,10 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
   const guide = getExerciseGuide(exercise.name);
   const muscles = Object.entries(exercise.distribution).sort((a, b) => b[1] - a[1]);
   const alternatives = findAlternatives(exercise);
+  // Los alias sin Ñ (compatibilidad con historial viejo) no se muestran si ya aparece la versión con Ñ.
+  const withN = (label) => label.replace(/Ñ/g, 'N');
+  const enyeLabels = [exercise.name, ...exercise.aliases].filter((label) => label.includes('Ñ')).map(withN);
+  const visibleAliases = exercise.aliases.filter((alias) => !enyeLabels.includes(alias));
 
   return (
     <div className="min-w-0 space-y-4">
@@ -93,8 +97,8 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
       <header>
         <p className="text-xs font-bold text-muted">{CATEGORY_LABELS[exercise.category]}</p>
         <h2 className="text-xl font-black md:text-2xl">{exercise.name}</h2>
-        {exercise.aliases.length > 0 && (
-          <p className="mt-1 text-sm text-secondary">También conocido como: {exercise.aliases.slice(0, 4).join(', ')}</p>
+        {visibleAliases.length > 0 && (
+          <p className="mt-1 text-sm text-secondary">También conocido como: {visibleAliases.slice(0, 4).join(', ')}</p>
         )}
         <button type="button" className="btn btn-primary mt-3" onClick={() => { playClick(); setIsAdding(true); }}>
           <Plus size={16} aria-hidden /> Añadir a rutina
@@ -102,8 +106,8 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
       </header>
       {isAdding && <AddToRoutineDialog exerciseName={exercise.name} onClose={() => setIsAdding(false)} />}
 
-      <SectionCard title={<span className="flex items-center gap-2"><Camera size={18} aria-hidden /> Ejecución</span>} subtitle="Posición de inicio, mitad del recorrido y final">
-        <ExerciseFigure exerciseName={exercise.name} />
+      <SectionCard title={<span className="flex items-center gap-2"><Camera size={18} aria-hidden /> Ejecución</span>} subtitle="Inicio, mitad y final del recorrido en vista lateral, frontal y superior">
+        <ExerciseFigure key={exercise.name} exerciseName={exercise.name} />
       </SectionCard>
 
       <SectionCard title={<span className="flex items-center gap-2"><Activity size={18} aria-hidden /> Músculos que trabaja</span>} subtitle="Porcentaje del estímulo de cada serie (el mismo que usan tus Analíticas)">
@@ -130,6 +134,19 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
           <div className="md:col-span-2"><GuideSection icon={ListOrdered} title="Técnica paso a paso" items={guide.steps} ordered /></div>
           <GuideSection icon={Lightbulb} title="Consejos" items={guide.tips} />
           <GuideSection icon={AlertTriangle} title="Errores comunes" items={guide.mistakes} tone="warning" />
+          {guide.coachCues.length > 0 && (
+            <section className="rounded-xl border divider p-3 md:col-span-2 md:p-4">
+              <h4 className="mb-2 flex items-center gap-2 text-sm font-bold"><GraduationCap size={16} aria-hidden /> Claves de entrenadores e investigación</h4>
+              <ul className="space-y-2.5">
+                {guide.coachCues.map((cue) => (
+                  <li key={cue.text} className="text-sm">
+                    <p className="text-secondary">{cue.text}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-muted">— {cue.by}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       )}
 

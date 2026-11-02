@@ -6,6 +6,8 @@
  * Los músculos NO se repiten aquí: salen del diccionario (constants/exercises.js), así la ficha y las analíticas coinciden.
  */
 
+import { COACH_CUES } from './coachCues';
+
 export const GUIDE_FAMILIES = Object.freeze({
   press: {
     steps: [
@@ -16,7 +18,7 @@ export const GUIDE_FAMILIES = Object.freeze({
       'Empuja hacia arriba y levemente hacia la cara hasta estirar los brazos sin trabar los codos.',
     ],
     tips: [
-      'Inhala al bajar y exhala al pasar la parte más difícil de la subida.',
+      'Junta los omóplatos y mantén un arco leve en la espalda alta durante toda la serie: es la base firme desde la que empuja el pecho.',
       'Mantén los glúteos apoyados en el banco durante toda la serie.',
       'Usa un compañero o los seguros cuando trabajes cerca del fallo.',
     ],
@@ -161,7 +163,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     ],
     tips: [
       'Mantén las costillas abajo: el movimiento sale del hombro, no de la zona lumbar.',
-      'Exhala al volver a la posición inicial.',
+      'Los codos mantienen el mismo ángulo leve en todo el arco: si se doblan y estiran, pasa a ser un press de tríceps.',
       'Funciona bien con repeticiones medias (10–15) y peso moderado.',
     ],
     mistakes: [
@@ -271,7 +273,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     tips: [
       'Inclínate apenas hacia adelante al estirar y vuelve a vertical al tirar: más recorrido.',
       'El triángulo trabaja la espalda media; la barra ancha, más los deltoides posteriores.',
-      'Exhala al tirar.',
+      'Lleva la manija hacia el ombligo y saca el pecho al final: los codos pasan apenas por detrás del torso.',
     ],
     mistakes: [
       'Balancear el torso hacia atrás para mover el peso.',
@@ -397,7 +399,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     tips: [
       'Cuando el peso pasa la frente, lleva la cabeza "a través de la ventana" de los brazos.',
       'Sentado se aísla más el hombro; de pie trabaja más el core.',
-      'Exhala al pasar la parte más difícil.',
+      'Agarre apenas más ancho que los hombros, con los antebrazos verticales vistos de frente y de costado.',
     ],
     mistakes: [
       'Arquear la zona lumbar para empujar.',
@@ -747,6 +749,150 @@ export const GUIDE_FAMILIES = Object.freeze({
       'Recorridos cortos.',
     ],
   },
+  wristFlex: {
+    steps: [
+      'Siéntate con los antebrazos apoyados sobre los muslos o un banco, palmas hacia arriba y las muñecas por fuera del apoyo.',
+      'Deja que la barra o mancuerna baje y ruede hasta la punta de los dedos, sin soltarla.',
+      'Cierra los dedos y flexiona la muñeca hacia arriba todo lo que puedas, sin despegar el antebrazo.',
+      'Baja en 2–3 segundos hasta volver a estirar.',
+    ],
+    tips: [
+      'Trabaja los flexores de muñeca y dedos: es el músculo del agarre que limita remos, dominadas y peso muerto.',
+      'Rangos de 12 a 20 repeticiones con el recorrido completo responden mejor que pocas repeticiones pesadas.',
+      'Si te molesta la muñeca, prueba con mancuernas (cada mano encuentra su ángulo) en lugar de barra recta.',
+    ],
+    mistakes: [
+      'Despegar el antebrazo del apoyo y convertirlo en un curl de bíceps.',
+      'Recorrido corto: no dejar que la barra ruede hasta los dedos.',
+      'Ir rápido y rebotar abajo.',
+    ],
+  },
+  wristExt: {
+    steps: [
+      'Apoya los antebrazos sobre los muslos o un banco con las palmas hacia abajo y las muñecas por fuera.',
+      'Toma una barra o mancuerna liviana con agarre prono.',
+      'Lleva el dorso de la mano hacia arriba extendiendo solo la muñeca.',
+      'Baja despacio hasta sentir el estiramiento en la parte de arriba del antebrazo.',
+    ],
+    tips: [
+      'Trabaja los extensores (la cara de arriba del antebrazo): usa la mitad del peso del curl de muñeca.',
+      'Equilibra el agarre y es parte habitual de la prevención y rehabilitación del codo de tenista.',
+      'La bajada lenta (excéntrica) de 3 segundos es la parte más valiosa del ejercicio.',
+    ],
+    mistakes: [
+      'Usar el mismo peso que en el curl de muñeca: termina en rebotes y recorridos cortos.',
+      'Mover el codo o levantar el antebrazo.',
+      'Cerrar la mano con fuerza máxima todo el tiempo (tensa de más el codo).',
+    ],
+  },
+  grip: {
+    steps: [
+      'Elige la variante: aplastar (handgrip), pinza (discos lisos juntos) o sostener (colgarse, toalla).',
+      'Toma el implemento con toda la mano y alinea la muñeca con el antebrazo.',
+      'Aprieta o sostén con fuerza máxima el tiempo indicado (aplastar: repeticiones; pinza y colgarse: segundos).',
+      'Suelta de forma controlada y descansa 1–2 minutos antes de repetir.',
+    ],
+    tips: [
+      'Registra los segundos sostenidos como repeticiones para ver el progreso.',
+      'Dos o tres series al final de la sesión de espalda alcanzan: el agarre ya trabaja en remos y dominadas.',
+      'Abre los dedos contra una banda elástica para equilibrar tanto trabajo de cierre.',
+    ],
+    mistakes: [
+      'Entrenar el agarre al fallo antes de los ejercicios de espalda.',
+      'Doblar la muñeca hacia atrás mientras se aprieta.',
+      'Hacerlo todos los días con dolor en el codo o los dedos.',
+    ],
+  },
+  forearmRotation: {
+    steps: [
+      'Apoya el antebrazo en un banco o el muslo con la muñeca por fuera y toma una mancuerna solo de un extremo (o un martillo).',
+      'Empieza con el pulgar hacia arriba.',
+      'Gira la palma lentamente hacia abajo (pronación) y vuelve; luego hacia arriba (supinación) y vuelve.',
+      'El codo y el antebrazo no se mueven: solo gira la muñeca.',
+    ],
+    tips: [
+      'Cuanto más lejos de la mano esté el peso, más difícil: progresa tomando el mango más abajo.',
+      'Muy útil para deportes de raqueta, escalada y para la salud del codo.',
+      'Movimiento lento: 2 segundos para cada lado.',
+    ],
+    mistakes: [
+      'Girar rápido y dejar que el peso arrastre la muñeca.',
+      'Mover el codo para compensar.',
+      'Usar un peso con el que no puedes frenar el giro.',
+    ],
+  },
+  coreStability: {
+    steps: [
+      'Ponte en la posición inicial del ejercicio (boca arriba para dead bug y curl up, en cuatro apoyos para bird dog).',
+      'Tensa el abdomen como si fueras a recibir un golpe, sin dejar de respirar.',
+      'Mueve brazos y piernas (o eleva apenas la cabeza y hombros en el curl up) sin que la zona lumbar cambie de posición.',
+      'Mantén la posición final 8–10 segundos y vuelve con control; alterna lados.',
+    ],
+    tips: [
+      'El objetivo es que la columna NO se mueva: si la espalda se despega o rota, acorta el movimiento.',
+      'Haz series descendentes (por ejemplo 6, 4 y 2 repeticiones de 10 s): resistencia sin fatiga que deforme la técnica.',
+      'Son ideales para calentar antes de sentadillas o peso muerto y para quienes tienen la espalda sensible.',
+    ],
+    mistakes: [
+      'Arquear la zona lumbar al estirar brazos o piernas.',
+      'Contener la respiración durante toda la serie.',
+      'Ir rápido: pierde todo el trabajo de estabilidad.',
+    ],
+  },
+  hollow: {
+    steps: [
+      'Acuéstate boca arriba y pega la zona lumbar al piso.',
+      'Despega hombros y piernas del piso con los brazos estirados por detrás de la cabeza (o al costado para hacerlo más fácil).',
+      'Forma una "banana": todo el cuerpo tenso y la espalda baja apoyada.',
+      'Sostén el tiempo indicado (hollow hold) o cierra el cuerpo en V tocando los pies (V ups).',
+    ],
+    tips: [
+      'Base de la gimnasia: enseña a mantener el tronco firme en dominadas, flexiones en vertical y anillas.',
+      'Rodillas flexionadas o brazos al costado = versión más fácil.',
+      'Mide en segundos: 30 s de hollow perfecto es una buena meta.',
+    ],
+    mistakes: [
+      'Despegar la zona lumbar del piso.',
+      'Tensar el cuello en lugar del abdomen.',
+      'Piernas tan bajas que no puedes mantener la espalda apoyada.',
+    ],
+  },
+  copenhagen: {
+    steps: [
+      'Acuéstate de costado con el antebrazo debajo del hombro y apoya el empeine o la rodilla de la pierna de arriba sobre un banco.',
+      'Eleva la cadera hasta alinear el cuerpo; la pierna de abajo puede quedar colgando o subir hasta el banco.',
+      'Sostén 10–30 segundos (o sube y baja la cadera) sin dejar que caiga.',
+      'Cambia de lado.',
+    ],
+    tips: [
+      'Apoyar la rodilla (palanca corta) es la versión para empezar; el tobillo es la avanzada.',
+      'Trabaja los aductores y los oblicuos: muy útil para deportes con cambios de dirección.',
+      'Empieza con pocas series: genera bastante dolor muscular las primeras veces.',
+    ],
+    mistakes: [
+      'Cadera caída o girada hacia el piso.',
+      'Codo lejos del hombro.',
+      'Empezar con la versión larga sin experiencia.',
+    ],
+  },
+  superman: {
+    steps: [
+      'Acuéstate boca abajo con los brazos estirados hacia adelante.',
+      'Aprieta glúteos y despega a la vez brazos, pecho y piernas unos centímetros del piso.',
+      'Sostén 2–3 segundos con la mirada al piso.',
+      'Baja con control y repite.',
+    ],
+    tips: [
+      'Versión sin equipamiento para los extensores de la espalda y los glúteos.',
+      'Alternar brazo y pierna contraria (nadador) lo hace más suave para la zona lumbar.',
+      'Sube poco: la altura no suma, la tensión sí.',
+    ],
+    mistakes: [
+      'Echar la cabeza hacia atrás.',
+      'Subir con impulso.',
+      'Arquear de más la zona lumbar si molesta.',
+    ],
+  },
   deadHang: {
     steps: [
       'Toma la barra con agarre prono al ancho de los hombros.',
@@ -793,7 +939,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     tips: [
       'El objetivo es enrollar la pelvis, no solo mover las piernas.',
       'Movimiento lento y controlado.',
-      'Exhala al subir.',
+      'Despega la cadera del piso al final: ese enrollado de la pelvis es lo que trabaja el abdomen.',
     ],
     mistakes: [
       'Usar impulso de las piernas.',
@@ -865,7 +1011,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     tips: [
       'Empieza con recorridos cortos y aumenta de a poco.',
       'Rodar hacia una pared limita el recorrido mientras aprendes.',
-      'Exhala al volver.',
+      'Aprieta glúteos y lleva la pelvis hacia atrás (retroversión) antes de rodar: protege la zona lumbar.',
     ],
     mistakes: [
       'Hundir la zona lumbar.',
@@ -883,7 +1029,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     tips: [
       'Gira el pecho, no solo los brazos.',
       'Mantén la espalda recta, sin encorvarte.',
-      'Exhala en cada giro.',
+      'Pies apoyados es la versión base; elevarlos o sumar un disco aumenta la exigencia.',
     ],
     mistakes: [
       'Mover solo los brazos.',
@@ -1280,7 +1426,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     tips: [
       'Más rápido = más cardio; más lento = más core.',
       'Mantén los hombros sobre las manos.',
-      'Respira de forma rítmica.',
+      'Lleva la rodilla hacia el codo contrario para sumar oblicuos.',
     ],
     mistakes: [
       'Subir mucho la cadera.',
@@ -1389,7 +1535,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     tips: [
       'Las ondas deben llegar hasta el anclaje.',
       'Intervalos cortos (20–40 s) con descansos.',
-      'Respira de forma rítmica.',
+      'Media sentadilla y pecho alto: el movimiento sale de los hombros con los codos cerca del cuerpo.',
     ],
     mistakes: [
       'Estar erguido con las piernas rectas.',
@@ -1965,6 +2111,14 @@ export const EXERCISE_GUIDES = Object.freeze({
   'FLEXIONES DIAMANTE': entry('pushUp', 'pushUp', { extra: 'Manos juntas formando un rombo con pulgares e índices, debajo del pecho: carga mucho más el tríceps. Codos pegados al cuerpo.' }),
   'FONDOS PARA PECHO': entry('dips', 'dips', { extra: 'Inclina el torso hacia adelante y abre un poco los codos para cargar el pecho.' }),
   PULLOVER: entry('pullover', 'pullover'),
+  'PRESS HEX': entry('benchPress', 'press', { gear: 'dumbbell', extra: 'Aprieta las mancuernas una contra otra durante todo el recorrido: la presión hacia adentro suma trabajo del pecho interno sin cargar el hombro.' }),
+  'PRESS DE PISO': entry('floorPress', 'press', { extra: 'Acostado en el piso, el codo toca el suelo y frena el recorrido: menos estrés en el hombro y más trabajo de tríceps en el bloqueo.' }),
+  'APERTURAS DECLINADAS': entry('fly', 'fly', { extra: 'Banco declinado 15–30°: el estiramiento se concentra en la porción inferior del pecho.' }),
+  'APERTURAS EN POLEA': entry('fly', 'fly', { gear: 'cable', extra: 'Banco entre dos poleas bajas: a diferencia de las mancuernas, la tensión sigue alta arriba del recorrido.' }),
+  'CRUCE DE POLEAS MEDIAS': entry('cableCross', 'cableCross', { extra: 'Poleas a la altura del pecho y manos que se encuentran frente al esternón: enfoca la porción media.' }),
+  'FLEXIONES INCLINADAS': entry('pushUp', 'pushUp', { extra: 'Manos sobre un banco o la barra del multipower: cuanto más alto el apoyo, más fácil. La progresión ideal hacia las flexiones completas.' }),
+  'FLEXIONES ARQUERAS': entry('pushUp', 'pushUp', { extra: 'Manos muy separadas: bajas hacia un lado mientras el otro brazo queda casi estirado. Paso intermedio hacia la flexión a un brazo.' }),
+  'FLEXIONES PLIOMETRICAS': entry('pushUp', 'pushUp', { extra: 'Empuja tan fuerte que las manos se despeguen (con o sin palmada) y aterriza con los codos suaves. Series cortas (3–6) para potencia.' }),
 
   // Espalda
   'PESO MUERTO': entry('deadlift', 'deadlift'),
@@ -1987,6 +2141,13 @@ export const EXERCISE_GUIDES = Object.freeze({
   'BUENOS DIAS': entry('goodMorning', 'hinge', { extra: 'La barra va sobre la espalda alta, como en la sentadilla. Empieza muy liviano: el brazo de palanca es largo.' }),
   'ENCOGIMIENTOS CON BARRA': entry('shrug', 'shrug', { gear: 'barbell' }),
   'ENCOGIMIENTOS CON MANCUERNAS': entry('shrug', 'shrug'),
+  'REMO CON APOYO EN PECHO': entry('chestSupportedRow', 'machineRow', { gear: 'dumbbell', extra: 'Boca abajo sobre un banco a 30–45°: sin carga en la zona lumbar y sin posibilidad de balanceo.' }),
+  'REMO SEAL': entry('sealRow', 'machineRow', { gear: 'barbell', extra: 'Acostado boca abajo sobre un banco alto: la barra sube hasta tocar el banco. El remo más estricto que existe.' }),
+  'REMO KROC': entry('oneArmRow', 'oneArmRow', { extra: 'Mancuerna pesada y muchas repeticiones (15–30) con algo de impulso controlado al final de la serie.' }),
+  'REMO MEADOWS': entry('oneArmRow', 'oneArmRow', { gear: 'barbell', extra: 'De costado a una barra anclada (landmine), con agarre prono en el extremo: gran estiramiento del dorsal abajo.' }),
+  'PULLOVER EN MAQUINA': entry('pullover', 'pullover', { gear: 'none', extra: 'La máquina mantiene la tensión en todo el arco y aísla el dorsal mejor que la mancuerna.' }),
+  'JALON UNILATERAL': entry('latPulldown', 'pulldown', { extra: 'Una mano por vez con una manija: permite llevar el codo más atrás y abajo, y corregir diferencias entre lados.' }),
+  SUPERMAN: entry('superman', 'superman'),
 
   // Hombros
   'PRESS MILITAR': entry('overheadPress', 'ohp'),
@@ -2005,6 +2166,10 @@ export const EXERCISE_GUIDES = Object.freeze({
   'REMO MENTON': entry('uprightRow', 'uprightRow'),
   'ROTACION EXTERNA EN POLEA': entry('externalRotation', 'extRot'),
   'ELEVACIONES EN Y': entry('yRaise', 'yRaise'),
+  'PRESS Z': entry('zPress', 'ohp', { extra: 'Sentado en el piso con las piernas estiradas: sin apoyo para la espalda, el core debe sostener el tronco recto.' }),
+  'VUELO LATERAL INCLINADO': entry('lateralRaise', 'lateral', { extra: 'Tómate de un poste con la otra mano e inclina el cuerpo alejándote: la tensión empieza desde abajo.' }),
+  'CRUCE POSTERIOR EN POLEA': entry('rearDelt', 'rearDelt', { gear: 'none', extra: 'Poleas cruzadas a la altura de los hombros: tira hacia afuera con los brazos casi estirados.' }),
+  'PRESS CUBANO': entry('uprightRow', 'extRot', { extra: 'Remo al mentón hasta codos a la altura del hombro, rotación externa (antebrazos verticales) y press. Muy liviano: es trabajo de manguito.' }),
 
   // Bíceps
   'CURL CON BARRA': entry('curl', 'curl'),
@@ -2021,6 +2186,10 @@ export const EXERCISE_GUIDES = Object.freeze({
   'CURL ARAÑA': entry('preacherCurl', 'preacher', { gear: 'dumbbell', extra: 'Boca abajo sobre un banco inclinado, con los brazos colgando verticales: máxima contracción arriba.' }),
   'CURL 21': entry('curl', 'curl', { extra: '7 repeticiones de abajo a la mitad, 7 de la mitad hacia arriba y 7 completas, sin descanso. Usa menos peso.' }),
   'CURL EN MAQUINA': entry('preacherCurl', 'preacher', { gear: 'machine' }),
+  'CURL DRAG': entry('curl', 'curl', { gear: 'barbell', extra: 'La barra sube "arrastrándose" pegada al cuerpo mientras los codos van hacia atrás: más cabeza corta y menos deltoides.' }),
+  'CURL EN POLEA ALTA': entry('curl', 'curl', { gear: 'cable', extra: 'Entre dos poleas altas, brazos en cruz: el bíceps trabaja con el hombro flexionado, máxima contracción.' }),
+  'CURL ZOTTMAN': entry('curl', 'curl', { gear: 'dumbbell', extra: 'Sube con la palma hacia arriba y, arriba, gira a palma hacia abajo para bajar en 3 segundos: bíceps al subir y braquiorradial al bajar.' }),
+  'CURL MARTILLO CRUZADO': entry('curl', 'curl', { gear: 'dumbbell', extra: 'Agarre neutro y la mancuerna cruza hacia el hombro contrario: énfasis en braquial y braquiorradial.' }),
   'CURL INVERTIDO': entry('curl', 'curl', { extra: 'Palmas hacia abajo (agarre prono): trabaja sobre todo antebrazos y braquial. Usa bastante menos peso.' }),
 
   // Tríceps
@@ -2037,12 +2206,23 @@ export const EXERCISE_GUIDES = Object.freeze({
   'FONDOS EN BANCO': entry('benchDips', 'benchDips'),
   'FONDOS EN MAQUINA': entry('dips', 'dips', { extra: 'La máquina permite ajustar la carga: ideal para aprender o terminar la rutina cerca del fallo.' }),
   'PRESS CERRADO': entry('benchPress', 'closeGrip'),
+  'JM PRESS': entry('skullCrusher', 'closeGrip', { gear: 'barbell', extra: 'Híbrido entre press cerrado y press francés: la barra baja hacia la garganta con los codos adelante. Mucha carga para el tríceps.' }),
+  'EXTENSION UNILATERAL EN POLEA': entry('tricepsPushdown', 'pushdown', { extra: 'Una mano por vez con o sin manija: corrige diferencias de fuerza y permite un recorrido más largo.' }),
+  'PRESS TATE': entry('skullCrusher', 'skullCrusher', { gear: 'dumbbell', extra: 'Acostado, las mancuernas bajan hacia el pecho con los codos hacia afuera y se juntan: énfasis en la cabeza lateral.' }),
 
   // Antebrazos
-  'CURL DE MUÑECA': entry('wristCurl', 'wrist'),
-  'CURL DE MUÑECA INVERTIDO': entry('wristCurl', 'wrist', { extra: 'Palmas hacia abajo: trabaja los extensores del antebrazo. Usa la mitad de peso que en el curl de muñeca.' }),
+  'CURL DE MUÑECA': entry('wristCurl', 'wristFlex'),
+  'CURL DE MUÑECA INVERTIDO': entry('reverseWristCurl', 'wristExt'),
   'RODILLO DE MUÑECA': entry('frontRaise', 'wrist', { gear: 'none', extra: 'Con los brazos al frente, enrolla la cuerda girando las muñecas hasta subir el peso y desenróllala despacio.' }),
   'COLGADO EN BARRA': entry('deadHang', 'deadHang'),
+  'CURL DE MUÑECA TRAS LA ESPALDA': entry('behindBackWristCurl', 'wristFlex', { extra: 'De pie, con la barra detrás de los glúteos y las palmas hacia atrás: permite usar más peso que sentado.' }),
+  'CURL INVERTIDO EN POLEA': entry('curl', 'curl', { gear: 'cable', extra: 'Agarre prono en la barra de la polea baja: tensión constante en braquiorradial y extensores.' }),
+  'PRONOSUPINACION CON MANCUERNA': entry('wristCurl', 'forearmRotation', { gear: 'dumbbell' }),
+  'DESVIACION RADIAL CON MANCUERNA': entry('wristCurl', 'forearmRotation', { gear: 'dumbbell', extra: 'De pie con el brazo al costado y la mancuerna tomada de un extremo: levanta la punta hacia adelante solo con la muñeca.' }),
+  'PINZA CON DISCOS': entry('farmerWalk', 'grip', { gear: 'plate', extra: 'Junta dos discos lisos y sostenlos con los dedos y el pulgar (sin tocar el centro). Registra los segundos.' }),
+  'HAND GRIP': entry('wristCurl', 'grip', { gear: 'none', extra: 'Cierra el handgrip por completo y sostén 1–2 segundos; series de 8–15. Elige la dureza que puedas cerrar al menos 8 veces.' }),
+  'EXTENSION DE DEDOS CON BANDA': entry('wristCurl', 'grip', { gear: 'none', extra: 'Una banda elástica alrededor de los dedos estirados: abre la mano en abanico contra la resistencia. Equilibra el trabajo de agarre.' }),
+  'COLGADO CON TOALLA': entry('deadHang', 'deadHang', { extra: 'Dos toallas sobre la barra: el agarre grueso y vertical es mucho más exigente para los flexores de los dedos.' }),
 
   // Core
   CRUNCH: entry('crunch', 'crunch'),
@@ -2060,6 +2240,12 @@ export const EXERCISE_GUIDES = Object.freeze({
   'CRUNCH BICICLETA': entry('bicycleCrunch', 'bicycleCrunch'),
   'LEÑADOR EN POLEA': entry('woodchopper', 'woodchopper'),
   'PALLOF PRESS': entry('pallofPress', 'pallof'),
+  'DEAD BUG': entry('deadBug', 'coreStability', { extra: 'Boca arriba con brazos al techo y rodillas a 90°: estira brazo y pierna contrarios sin que la espalda se despegue del piso.' }),
+  'BIRD DOG': entry('birdDog', 'coreStability', { extra: 'En cuatro apoyos, estira brazo y pierna contrarios hasta la horizontal y sostén 8–10 s. Imagina un vaso de agua sobre la espalda.' }),
+  'HOLLOW HOLD': entry('hollowHold', 'hollow'),
+  'V UPS': entry('vUp', 'hollow', { extra: 'Desde la posición hollow, sube a la vez brazos y piernas estiradas hasta tocar los pies y baja sin apoyar del todo.' }),
+  'CURL UP DE MCGILL': entry('curlUp', 'coreStability', { extra: 'Una pierna flexionada, la otra estirada y las manos bajo la zona lumbar: eleva apenas cabeza y hombros como un bloque, sin flexionar el cuello.' }),
+  'PLANCHA COPENHAGUE': entry('copenhagenPlank', 'copenhagen'),
 
   // Piernas
   SENTADILLA: entry('squat', 'squat', { extra: 'La barra va apoyada en el trapecio, no en el cuello; aprieta la barra y lleva los codos hacia abajo.' }),
@@ -2085,6 +2271,13 @@ export const EXERCISE_GUIDES = Object.freeze({
   'ESTOCADAS INVERSAS': entry('reverseLunge', 'lunge', { extra: 'Paso hacia atrás: menos carga sobre la rodilla de adelante y más glúteo.' }),
   'SUBIDAS AL CAJON': entry('stepUp', 'stepUp'),
   ADUCTOR: entry('hipAdduction', 'adductor', { gear: 'none' }),
+  'SENTADILLA ESPAÑOLA': entry('spanishSquat', 'squat', { gear: 'none', extra: 'Una banda gruesa detrás de las rodillas anclada adelante: el torso queda vertical y las tibias también. Cuádriceps puro y amigable con rodillas sensibles.' }),
+  'SENTADILLA ZERCHER': entry('frontSquat', 'squat', { gear: 'barbell', extra: 'La barra va en el pliegue de los codos, pegada al cuerpo: obliga a mantener el torso erguido y suma mucho core y espalda alta.' }),
+  'PRENSA UNILATERAL': entry('legPress', 'legPress', { extra: 'Una pierna por vez con el pie en el centro de la plataforma: corrige diferencias entre lados.' }),
+  'ESTOCADA LATERAL': entry('lateralLunge', 'lunge', { extra: 'Paso amplio hacia el costado, cadera atrás y la otra pierna estirada: trabaja aductores y glúteo en el plano lateral.' }),
+  'PESO MUERTO RUMANO UNILATERAL': entry('singleLegRdl', 'hinge', { extra: 'La pierna libre sube por detrás alineada con el torso; la cadera no se abre. Sostente de algo al principio para el equilibrio.' }),
+  'CURL FEMORAL CON FITBALL': entry('ballLegCurl', 'legCurl', { gear: 'none', extra: 'Boca arriba con los talones sobre la pelota y la cadera elevada: acerca la pelota flexionando las rodillas sin bajar la cadera.' }),
+  'GLUTE HAM RAISE': entry('nordicCurl', 'nordic', { gear: 'none', extra: 'En la máquina GHD: baja controlado con el cuerpo recto y sube flexionando las rodillas. Más fácil que el nórdico y más difícil que el curl en máquina.' }),
 
   // Glúteos
   'HIP THRUST': entry('hipThrust', 'hipThrust'),
@@ -2097,6 +2290,8 @@ export const EXERCISE_GUIDES = Object.freeze({
   'CAMINATA LATERAL CON BANDA': entry('bandWalk', 'abductor', { extra: 'Banda en las rodillas o tobillos, media sentadilla y pasos laterales cortos sin juntar los pies.' }),
   'PULL THROUGH': entry('pullThrough', 'pullThrough'),
   ALMEJA: entry('hipAbduction', 'abductor', { gear: 'none', extra: 'Acostado de costado con las rodillas flexionadas: abre la rodilla de arriba manteniendo los pies juntos. Una banda lo hace más difícil.' }),
+  'HIP THRUST UNILATERAL': entry('hipThrust', 'hipThrust', { gear: 'none', extra: 'Una pierna apoyada y la otra en el aire: duplica la carga por lado sin barra pesada.' }),
+  'FROG PUMP': entry('frogPump', 'gluteBridge', { extra: 'Plantas de los pies juntas y rodillas abiertas: muchas repeticiones (20–50) con la cadera en rotación externa enfocan el glúteo.' }),
 
   // Pantorrillas
   'GEMELOS PARADO': entry('calfRaise', 'calf'),
@@ -2104,6 +2299,8 @@ export const EXERCISE_GUIDES = Object.freeze({
   'GEMELOS EN MULTIPOWER': entry('calfRaise', 'calf', { extra: 'Con la barra guiada sobre la espalda y un disco o escalón debajo de las puntas.' }),
   'SOLEO SENTADO': entry('seatedCalf', 'calf'),
   'ELEVACION DE PUNTAS': entry('tibialRaise', 'tibial'),
+  'GEMELOS A UNA PIERNA': entry('calfRaise', 'calf', { gear: 'dumbbell', extra: 'Sobre un escalón, una pierna por vez y una mancuerna en la mano del mismo lado: permite cargar mucho sin máquina.' }),
+  'GEMELOS BURRO': entry('donkeyCalf', 'calf', { gear: 'none', extra: 'Torso inclinado a 90° con la cadera flexionada: el gemelo trabaja muy estirado (clásico de Arnold Schwarzenegger).' }),
 
   // Funcional
   BURPEES: entry('burpee', 'burpee'),
@@ -2130,6 +2327,7 @@ export const EXERCISE_GUIDES = Object.freeze({
   'REMO EN TRX': entry('trxRow', 'trxRow'),
   'GET UP TURCO': entry('turkishGetUp', 'turkishGetUp'),
   'SLAM BALL': entry('slamBall', 'slamBall'),
+  'PASEO DE MALETA': entry('suitcaseCarry', 'farmerWalk', { gear: 'dumbbell', extra: 'Peso en una sola mano: los oblicuos del lado contrario trabajan para que no te inclines. Cambia de mano en cada tramo.' }),
 
   // Cardio
   RUNNING: entry('running', 'running'),
@@ -2206,5 +2404,6 @@ export const getExerciseGuide = (name) => {
     steps: family.steps,
     tips: guide.extra ? [guide.extra, ...family.tips] : family.tips,
     mistakes: family.mistakes,
+    coachCues: COACH_CUES[guide.family] ?? [],
   };
 };

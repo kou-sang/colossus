@@ -32,6 +32,9 @@ const mapLogDoc = (snapshot) => {
     reps: data.reps ?? null,
     weight: data.weight ?? null,
     e1rm: data.e1rm ?? null,
+    rir: Number.isInteger(data.rir) ? data.rir : null,
+    // Series una por una (desde 4.3.1). Registros anteriores: null → se usan sets/reps/weight.
+    setDetails: Array.isArray(data.setDetails) && data.setDetails.length ? data.setDetails : null,
     isPr: Boolean(data.isPr),
     previousBest: data.previousBest ?? null,
     // hasPendingWrites: true mientras el registro solo existe en la caché local (offline).

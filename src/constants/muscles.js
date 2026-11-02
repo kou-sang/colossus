@@ -41,7 +41,11 @@ export const MUSCLES = Object.freeze([
   { id: 'braquial', label: 'Braquial', short: 'Braquial', category: 'BICEPS' },
   { id: 'triceps_largo', label: 'Tríceps (cabeza larga)', short: 'Tríceps largo', category: 'TRICEPS' },
   { id: 'triceps_lateral', label: 'Tríceps (cabezas lateral y medial)', short: 'Tríceps lat.', category: 'TRICEPS' },
-  { id: 'antebrazos', label: 'Antebrazos (flexores, extensores, braquiorradial)', short: 'Antebrazos', category: 'ANTEBRAZOS' },
+  // Antebrazo dividido en 3 grupos funcionales (antes era un único "antebrazos"): así un curl de muñeca (flexores)
+  // y un curl de muñeca invertido (extensores) dejan de sumar al mismo músculo.
+  { id: 'braquiorradial', label: 'Braquiorradial', short: 'Braquiorradial', category: 'ANTEBRAZOS' },
+  { id: 'antebrazo_flexores', label: 'Flexores de muñeca y dedos (agarre)', short: 'Flexores antebrazo', category: 'ANTEBRAZOS' },
+  { id: 'antebrazo_extensores', label: 'Extensores de muñeca y dedos', short: 'Extensores antebrazo', category: 'ANTEBRAZOS' },
   { id: 'recto_abdominal', label: 'Recto abdominal', short: 'Abdominales', category: 'CORE' },
   { id: 'oblicuos', label: 'Oblicuos', short: 'Oblicuos', category: 'CORE' },
   { id: 'serrato', label: 'Serrato anterior', short: 'Serrato', category: 'CORE' },
@@ -68,7 +72,9 @@ export const LEGACY_MUSCLE_DISTRIBUTION = Object.freeze({
   pecho: { pecho_medio: 45, pecho_superior: 25, pecho_inferior: 20, deltoides_anterior: 10 },
   hombros: { deltoides_anterior: 35, deltoides_lateral: 40, deltoides_posterior: 25 },
   espalda: { dorsal_ancho: 45, trapecio_medio: 25, redondo_mayor: 10, deltoides_posterior: 10, biceps: 10 },
-  biceps: { biceps: 70, braquial: 20, antebrazos: 10 },
+  biceps: { biceps: 70, braquial: 20, braquiorradial: 10 },
+  // Id único de antebrazo hasta 4.2.0: se reparte como trabajo de agarre típico.
+  antebrazos: { antebrazo_flexores: 60, antebrazo_extensores: 25, braquiorradial: 15 },
   triceps: { triceps_lateral: 55, triceps_largo: 45 },
   abdominales: { recto_abdominal: 75, oblicuos: 25 },
   cuadriceps: { recto_femoral: 30, vasto_lateral: 35, vasto_medial: 35 },

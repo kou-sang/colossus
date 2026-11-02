@@ -26,6 +26,9 @@ import { AnalyticsFilters } from './AnalyticsFilters';
 import { CRITICAL_RECENCY_DAYS, DATE_PRESETS, MAP_MODES } from './analyticsConstants';
 import { CHART_INFO } from './chartInfo';
 import { ConsistencyChart } from './ConsistencyChart';
+import { EnergyCard } from './EnergyCard';
+import { FatigueMapCard } from './FatigueMapCard';
+import { MonthlySummaryCard } from './MonthlySummaryCard';
 import { MuscleMap } from './MuscleMap';
 import { MuscleDetailPanel } from './MuscleDetailPanel';
 import { MuscleSetsChart } from './MuscleSetsChart';
@@ -58,7 +61,7 @@ const resolveDateRange = (preset, customRange, todayKey) => {
 };
 
 export const AnalyticsTab = () => {
-  const { user, groups, profilesById } = useAppData();
+  const { user, groups, profilesById, visibleIds } = useAppData();
   const { chart } = useTheme();
   const todayKey = useToday();
 
@@ -71,7 +74,6 @@ export const AnalyticsTab = () => {
   const [customRange, setCustomRange] = useState(() => ({ from: toDateKey(addDays(new Date(), -29)), to: toDateKey() }));
   const [focusChoice, setFocusChoice] = useState(null);
   const [mapMode, setMapMode] = useState('recency');
-  const [mapGenderChoice, setMapGenderChoice] = useState(null);
   const [selectedMuscle, setSelectedMuscle] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(true); // Siempre visibles al entrar; se pueden ocultar con la flecha
@@ -80,11 +82,12 @@ export const AnalyticsTab = () => {
   const activeGroup = scopeChoice === 'self' ? null : groups.find((group) => group.id === scopeChoice) ?? (scopeChoice ? null : groups[0] ?? null);
   const scopeId = activeGroup?.id ?? 'self';
 
-  // Solo miembros del grupo elegido: perfiles fuera de tus grupos nunca aparecen en Analíticas.
+  // Solo miembros del grupo elegido y ya confirmados como amigos (las reglas rechazan la consulta entera si
+  // incluye a alguien no permitido; un recién llegado aparece apenas se sincroniza su alta).
   const memberIds = useMemo(() => {
-    const ids = activeGroup ? activeGroup.memberIds : [user.id];
+    const ids = activeGroup ? activeGroup.memberIds.filter((id) => visibleIds.has(id)) : [user.id];
     return [...ids].sort((a, b) => (a === user.id ? -1 : b === user.id ? 1 : (profilesById[a]?.username ?? '').localeCompare(profilesById[b]?.username ?? '', 'es')));
-  }, [activeGroup, user.id, profilesById]);
+  }, [activeGroup, user.id, profilesById, visibleIds]);
 
   // El color sigue a la persona (posición estable en el grupo), no a la selección: filtrar no repinta.
   const colorByUser = useMemo(
@@ -134,10 +137,11 @@ export const AnalyticsTab = () => {
     : effectiveUserIds.includes(focusChoice) ? focusChoice : effectiveUserIds.includes(user.id) ? user.id : effectiveUserIds[0];
   const focusIds = useMemo(() => (focusId === AGGREGATE_FOCUS ? effectiveUserIds : [focusId]), [focusId, effectiveUserIds]);
   const focusName = focusId === AGGREGATE_FOCUS ? 'Promedio de la selección' : profilesById[focusId]?.username ?? '—';
-  const mapGender = mapGenderChoice ?? (focusId === AGGREGATE_FOCUS ? user.gender : profilesById[focusId]?.gender ?? user.gender);
+  // El mapa usa el sexo del perfil foco (el selector manual se quitó en 4.2.0).
+  const mapGender = focusId === AGGREGATE_FOCUS ? user.gender : profilesById[focusId]?.gender ?? user.gender;
 
+  const focusLogs = useMemo(() => filteredLogs.filter((log) => focusIds.includes(log.userId)), [filteredLogs, focusIds]);
   const focusMetrics = useMemo(() => {
-    const focusLogs = filteredLogs.filter((log) => focusIds.includes(log.userId));
     const divisor = focusIds.length;
     const totals = buildEffectiveSetsByMuscle(focusLogs, { muscles });
     const weeklySetsByMuscle = Object.fromEntries(Object.entries(totals).map(([id, value]) => [id, value / weeksInRange / divisor]));
@@ -150,13 +154,22 @@ export const AnalyticsTab = () => {
       records: focusLogs.filter((log) => log.isPr).length,
       streak: divisor === 1 ? computeWeekStreak(logsState.data, focusIds[0]) : null,
     };
-  }, [filteredLogs, focusIds, muscles, weeksInRange, range.since, logsState.data]);
+  }, [focusLogs, focusIds, muscles, weeksInRange, range.since, logsState.data]);
 
   // Recuperación: mismos filtros salvo la fecha de inicio (usa toda la historia descargada, ≥ 30 días).
   const lastTrainedByMuscle = useMemo(
     () => buildMuscleLastTrained(filterLogs(logsState.data, { userIds: focusIds, categories, muscles }), null),
     [logsState.data, focusIds, categories, muscles],
   );
+
+  // Fatiga "de hoy": mismos filtros de categoría/músculo, sin la fecha de inicio (usa los últimos 7 días descargados).
+  const fatigueLogs = useMemo(
+    () => filterLogs(logsState.data, { userIds: focusIds, categories, muscles }),
+    [logsState.data, focusIds, categories, muscles],
+  );
+  // Resumen mensual y plan de alimentación son individuales: con "Promedio de la selección" se muestran los tuyos.
+  const personalId = focusId === AGGREGATE_FOCUS ? user.id : focusId;
+  const personalName = profilesById[personalId]?.username ?? user.username;
 
   // ───────── Gráficos comparativos (máx. 8 perfiles con color propio) ─────────
   const chartUsers = useMemo(
@@ -332,6 +345,8 @@ export const AnalyticsTab = () => {
             </div>
           </SectionCard>
 
+          <FatigueMapCard logs={fatigueLogs} userIds={focusIds} gender={mapGender} focusName={focusName} enabledMuscles={enabledMuscles} />
+
           <SectionCard title="Series efectivas por músculo" subtitle={`Promedio semanal de ${focusName}`} actions={<ChartInfo info={CHART_INFO.muscleSets} />}>
             <MuscleSetsChart weeklySetsByMuscle={focusMetrics.weeklySetsByMuscle} highlightMuscle={selectedMuscle} enabledMuscles={enabledMuscles} onSelect={setSelectedMuscle} />
           </SectionCard>
@@ -362,6 +377,18 @@ export const AnalyticsTab = () => {
           <SectionCard title="Tonelaje semanal" subtitle="Series × reps × kg por semana (ejercicios que pasan los filtros)" actions={<ChartInfo info={CHART_INFO.weeklyVolume} />}>
             <WeeklyVolumeChart rows={weeklyRows} users={chartUsers} rangeStart={range.since} rangeEnd={rangeEnd} />
           </SectionCard>
+
+          <EnergyCard
+            logs={focusId === AGGREGATE_FOCUS ? focusLogs.filter((log) => log.userId === user.id) : focusLogs}
+            rangeStart={range.since}
+            rangeEnd={rangeEnd}
+            rangeDays={rangeDays}
+            user={user}
+            isSelf={personalId === user.id}
+            focusName={personalName}
+          />
+
+          <MonthlySummaryCard userId={personalId} focusName={personalName} todayKey={todayKey} />
         </>
       )}
     </div>

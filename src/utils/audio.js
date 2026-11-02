@@ -82,3 +82,10 @@ export const playCelebration = (variantIndex, isPersonalRecord = false) => {
   // Récord: remate ascendente breve después del motivo base.
   if (isPersonalRecord) playTones([1046.5, 1318.51, 1567.98, 2093], { type: 'triangle', gain: 0.035, step: 0.07, duration: 0.18, delay: 0.3 });
 };
+
+// ───────── Reloj de entrenamiento ─────────
+// Más volumen que los clicks: se escuchan con música en el gimnasio. Respetan el botón de silencio.
+export const playCountdownTick = () => playTones([880], { type: 'square', gain: 0.03, duration: 0.09 });
+export const playWorkStart = () => playTones([660, 990], { type: 'square', gain: 0.04, step: 0.1, duration: 0.16 });
+export const playRestStart = () => playTones([660, 440], { type: 'triangle', gain: 0.05, step: 0.12, duration: 0.2 });
+export const playTimerFinish = () => playTones([523.25, 659.25, 783.99, 1046.5], { type: 'square', gain: 0.035, step: 0.12, duration: 0.22 });

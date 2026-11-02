@@ -1,7 +1,8 @@
-import { collection, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { COLLECTIONS } from '../constants/collections';
-import { sanitizeGender, sanitizeUsername } from './validation';
+import { subscribeToDocsByIds } from './firestoreQueries';
+import { sanitizeBodyStats, sanitizeGender, sanitizeUsername } from './validation';
 
 // Separación público/privado: el código original escuchaba TODA la colección 'users',
 // que incluía emails → cualquier usuario podía ver el correo de todos.
@@ -20,12 +21,12 @@ export const subscribeToAccount = (uid, onData, onError) =>
     onError,
   );
 
-export const subscribeToProfiles = (onData, onError) =>
-  onSnapshot(
-    collection(db, COLLECTIONS.PROFILES),
-    (snapshot) => onData(snapshot.docs.map((profileDoc) => ({ id: profileDoc.id, ...profileDoc.data() }))),
-    onError,
-  );
+/*
+ * Perfiles públicos SOLO de los ids pedidos (tú + integrantes de tus grupos).
+ * Antes se escuchaba la colección completa: cada apertura costaba 1 lectura por usuario registrado en la app.
+ */
+export const subscribeToProfiles = (ids, onData, onError) =>
+  subscribeToDocsByIds(COLLECTIONS.PROFILES, ids, (profileDoc) => ({ id: profileDoc.id, ...profileDoc.data() }), onData, onError);
 
 // Idempotente: crea perfil público y cuenta privada solo si no existen.
 export const ensureUserDocuments = async ({ uid, email, username, gender }) => {
@@ -74,4 +75,26 @@ export const savePreferences = async (uid, preferences) => {
 
 export const setActiveRoutine = async (uid, routineId) => {
   await setDoc(doc(db, COLLECTIONS.USERS, uid), { activeRoutineId: routineId ?? null }, { merge: true });
+};
+
+// Datos corporales (privados): viven en users/{uid}, que solo puede leer y escribir su dueño.
+export const saveBodyStats = async (uid, stats) => {
+  const clean = sanitizeBodyStats(stats);
+  await setDoc(doc(db, COLLECTIONS.USERS, uid), { bodyStats: { ...clean, updatedAt: serverTimestamp() } }, { merge: true });
+  return clean;
+};
+
+/*
+ * Lista de amigos (users/{uid}.friendIds): personas con las que compartes al menos un grupo.
+ * Las reglas de Firestore la usan para decidir qué perfiles, récords y registros puedes leer.
+ *  - Quitar ids: siempre permitido (una sola escritura).
+ *  - Agregar: de a UNO por escritura e indicando el grupo que lo justifica (`viaGroup`); las reglas verifican que
+ *    ambos estén en ese grupo. Así nadie puede agregarse a cualquier persona.
+ */
+export const setFriendList = async (uid, friendIds) => {
+  await setDoc(doc(db, COLLECTIONS.USERS, uid), { friendIds }, { merge: true });
+};
+
+export const addFriend = async (uid, friendId, groupId) => {
+  await setDoc(doc(db, COLLECTIONS.USERS, uid), { friendIds: arrayUnion(friendId), viaGroup: groupId }, { merge: true });
 };

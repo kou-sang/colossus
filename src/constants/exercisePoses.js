@@ -57,6 +57,7 @@ export const POSES = Object.freeze({
   },
   cableCross: {
     gear: 'cable',
+    dualCable: true,
     cableTo: [-34, -96],
     frames: [
       { t: 14, a1: [135, 150], l1: [18, 0], l2: [-18, -10], props: [G] },
@@ -65,6 +66,7 @@ export const POSES = Object.freeze({
   },
   lowCableCross: {
     gear: 'cable',
+    dualCable: true,
     cableTo: [-30, 4],
     frames: [
       { t: 6, a1: [20, 30], l1: [18, 0], l2: [-18, -10], props: [G] },
@@ -102,8 +104,16 @@ export const POSES = Object.freeze({
   pullover: {
     gear: 'dumbbell',
     frames: [
-      { t: -90, a1: [178, 178], l1: [62, 4], props: [BENCH_PAD, { ...G, both: false }] },
-      { t: -90, a1: [-108, -112], l1: [62, 4], props: [BENCH_PAD, { ...G, both: false }] },
+      { t: -90, a1: [178, 178], l1: [62, 4], abd: { a1: 2, a2: 2 }, props: [BENCH_PAD, { ...G, both: false }] },
+      { t: -90, a1: [218, 214], l1: [62, 4], abd: { a1: 2, a2: 2 }, props: [BENCH_PAD, { ...G, both: false }] },
+      { t: -90, a1: [252, 248], l1: [62, 4], abd: { a1: 2, a2: 2 }, props: [BENCH_PAD, { ...G, both: false }] },
+    ],
+  },
+  floorPress: {
+    gear: 'barbell',
+    frames: [
+      { t: -90, a1: [178, 180], l1: [138, 22], ground: 'lowest', props: [G] },
+      { t: -90, a1: [40, 172], l1: [138, 22], abd: { a1: 42, a2: 42 }, ground: 'lowest', props: [G] },
     ],
   },
 
@@ -1111,6 +1121,145 @@ export const POSES = Object.freeze({
     frames: [
       { t: -10, a1: [170, 176], a2: [140, 160], l1: [80, -10], l2: [20, -10], ground: 'grip', grip: [148, 40], props: [{ type: 'wall', pos: [156, 0], abs: true }] },
       { t: -6, a1: [140, 165], a2: [175, 178], l1: [40, -10], l2: [86, -10], ground: 'grip', grip: [148, 40], props: [{ type: 'wall', pos: [156, 0], abs: true }] },
+    ],
+  },
+
+  // ───────── Patrones agregados en 4.3.0 ─────────
+  chestSupportedRow: {
+    gear: 'dumbbell',
+    frames: [
+      { t: 52, a1: [0, 0], l1: [-8, 0], l2: [-14, -4], props: [{ type: 'pad', side: 'front', offset: 9, extend: [14, -4] }, G] },
+      { t: 52, a1: [-92, -2], l1: [-8, 0], l2: [-14, -4], props: [{ type: 'pad', side: 'front', offset: 9, extend: [14, -4] }, G] },
+    ],
+  },
+  sealRow: {
+    gear: 'barbell',
+    frames: [
+      { t: 90, a1: [0, 0], l1: 'line', ground: 'none', hip: [96, 62], props: [{ type: 'pad', side: 'front', offset: 8, extend: [34, -4] }, G] },
+      { t: 90, a1: [-96, -4], l1: 'line', ground: 'none', hip: [96, 62], props: [{ type: 'pad', side: 'front', offset: 8, extend: [34, -4] }, G] },
+    ],
+  },
+  superman: {
+    gear: 'none',
+    frames: [
+      { t: 90, a1: [90, 90], l1: 'line', ground: 'lowest' },
+      { t: 80, a1: [78, 78], l1: ['rel', -10, -10], ground: 'lowest' },
+    ],
+  },
+  zPress: {
+    gear: 'barbell',
+    frames: [
+      { t: 0, a1: [36, 168], l1: [90, 90, 180], ground: 'lowest', props: [G] },
+      { t: -2, a1: [178, 178], l1: [90, 90, 180], ground: 'lowest', props: [G] },
+    ],
+  },
+  reverseWristCurl: {
+    gear: 'barbell',
+    frames: [
+      { t: 30, a1: [28, 88], l1: [88, -4], props: [SEAT, { ...G, r: 8, offset: [3, 5] }] },
+      { t: 30, a1: [28, 88], l1: [88, -4], props: [SEAT, { ...G, r: 8, offset: [3, -4] }] },
+    ],
+  },
+  behindBackWristCurl: {
+    gear: 'barbell',
+    frames: [
+      { ...STAND, a1: [-10, -10], props: [{ ...G, offset: [-1, 4] }] },
+      { ...STAND, a1: [-10, -10], props: [{ ...G, offset: [-3, -3] }] },
+    ],
+  },
+  deadBug: {
+    gear: 'none',
+    frames: [
+      { t: -90, a1: [180, 180], l1: [180, 90], ground: 'lowest' },
+      { t: -90, a1: [-100, -100], a2: [180, 180], l1: [180, 90], l2: [96, 96], ground: 'lowest' },
+    ],
+  },
+  birdDog: {
+    gear: 'none',
+    frames: [
+      { t: 75, a1: [0, 0], l1: [0, -90], ground: 'lowest' },
+      { t: 75, a1: [86, 86], a2: [0, 0], l1: [0, -90], l2: [-96, -96], ground: 'lowest' },
+    ],
+  },
+  hollowHold: {
+    gear: 'none',
+    frames: [
+      { t: -90, a1: [-90, -90], l1: [90, 90], ground: 'lowest' },
+      { t: -80, a1: [-102, -102], l1: [100, 100], ground: 'lowest' },
+    ],
+  },
+  vUp: {
+    gear: 'none',
+    frames: [
+      { t: -80, a1: [-102, -102], l1: [100, 100], ground: 'lowest' },
+      { t: -60, a1: [-140, 120], l1: [120, 120], ground: 'lowest' },
+      { t: -38, a1: [140, 140], l1: [142, 142], ground: 'lowest' },
+    ],
+  },
+  curlUp: {
+    gear: 'none',
+    frames: [
+      { t: -90, a1: [60, 100], l1: [138, 22], l2: [90, 90], ground: 'lowest' },
+      { t: -78, a1: [62, 100], l1: [138, 22], l2: [90, 90], ground: 'lowest' },
+    ],
+  },
+  copenhagenPlank: {
+    view: 'front',
+    gear: 'none',
+    frames: [
+      { view: 'front', rot: -72, arms: [[-72, -160], [18, 18]], legs: [[16, 16], [0, 0]], props: [{ type: 'seat', pos: [-6, 40], w: 30 }] },
+      { view: 'front', rot: -72, arms: [[-72, -160], [18, 18]], legs: [[2, 2], [0, 0]], props: [{ type: 'seat', pos: [-6, 40], w: 30 }] },
+    ],
+  },
+  spanishSquat: {
+    gear: 'none',
+    frames: [
+      { ...STAND, a1: [90, 90], props: [{ type: 'seg', rel: 'knee', from: [0, 0], to: [52, 2], width: 2.5 }, { type: 'post', rel: 'knee', pos: [52, 0] }] },
+      { t: 8, a1: [90, 90], l1: [92, 4], props: [{ type: 'seg', rel: 'knee', from: [0, 0], to: [52, 2], width: 2.5 }, { type: 'post', rel: 'knee', pos: [52, 0] }] },
+    ],
+  },
+  lateralLunge: {
+    view: 'front',
+    gear: 'none',
+    frames: [
+      { view: 'front', arms: [[10, 70], [10, 70]], legs: [[8, 8], [8, 8]] },
+      { view: 'front', tilt: 6, arms: [[20, 90], [20, 90]], legs: [[38, 38], [44, -20]], dx: 10 },
+    ],
+  },
+  singleLegRdl: {
+    gear: 'dumbbell',
+    frames: [
+      { ...STAND, props: [G] },
+      { t: 86, a1: [0, 0], l1: [8, 0], l2: 'line', props: [G] },
+    ],
+  },
+  ballLegCurl: {
+    gear: 'none',
+    frames: [
+      { t: -76, a1: [80, 80], l1: [100, 100], ground: 'lowest', props: [{ type: 'ball', rel: 'ankle', pos: [2, 8], r: 9 }] },
+      { t: -60, a1: [80, 80], l1: [128, 32], ground: 'lowest', props: [{ type: 'ball', rel: 'ankle', pos: [2, 8], r: 9 }] },
+    ],
+  },
+  frogPump: {
+    gear: 'none',
+    frames: [
+      { t: -90, a1: [90, 90], l1: [130, 30], abd: { l1: 48, l2: 48 }, ground: 'lowest' },
+      { t: -72, a1: [62, 62], l1: [104, 20], abd: { l1: 48, l2: 48 }, ground: 'lowest' },
+    ],
+  },
+  donkeyCalf: {
+    gear: 'none',
+    frames: [
+      { t: 88, a1: [4, 0], l1: [0, 0, 90], props: [{ type: 'box', rel: 'wrist', pos: [-12, 2], w: 24 }] },
+      { t: 88, a1: [4, 0], l1: [0, 0, 32], lift: 6, props: [{ type: 'box', rel: 'wrist', pos: [-12, 8], w: 24 }] },
+    ],
+  },
+  suitcaseCarry: {
+    gear: 'dumbbell',
+    frames: [
+      { t: 2, a1: [2, 2], a2: [0, 0], l1: [24, 0], l2: [-20, -20], props: [{ ...G, both: false }] },
+      { t: 2, a1: [0, 0], l1: [0, 0], l2: [10, -40], props: [{ ...G, both: false }] },
+      { t: 2, a1: [0, 0], a2: [2, 2], l1: [-20, -20], l2: [24, 0], props: [{ ...G, both: false }] },
     ],
   },
 });
