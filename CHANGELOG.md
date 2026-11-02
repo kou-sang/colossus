@@ -17,6 +17,34 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.3.0] - 2026-11-02
+
+### Added
+- **Reloj de entrenamiento** en Hoy, con modos Series + descanso, Tabata, EMOM, AMRAP, For Time e Intervalos y tiempos personalizables (se recuerdan por dispositivo). Pitidos en los últimos 3 segundos, vibración en los cambios de fase y pantalla siempre encendida mientras corre. También hay un reloj libre (botón "Reloj").
+- Hoy: cada ejercicio del plan tiene **Hacer ahora** (abre el reloj con series, reps y kg de la serie actual) y **Hecho** (pide confirmar series, reps y kg).
+- Hoy: el registro se prellena con los **valores que completaste la última vez**; el botón **Completar con valores de rutina** vuelve al plan.
+- Rutinas: **análisis muscular** de cada rutina (porcentaje por categoría y por músculo, series efectivas semanales, músculos sin trabajar y desequilibrios empuje/tirón y cuádriceps/isquiotibiales).
+- Rutinas: botón **Desactivar** para la rutina activa.
+- Analíticas: **mapa de fatiga muscular** (estimación para hoy según los últimos 7 días, con tiempo de recuperación por músculo).
+- Analíticas: **calorías y alimentación** (gasto estimado por MET, metabolismo basal Mifflin-St Jeor, objetivo diario, macronutrientes, agua y fibra). Los datos corporales se cargan en Perfil o en la misma tarjeta y son privados.
+- Analíticas: **resumen del mes** (últimos 30 días contra los 30 anteriores, progresión de cargas) con **recomendaciones**: aumentar series, kg, días o repeticiones, reducir volumen, hacer abdomen, sumar cardio, equilibrar empuje/tirón.
+- Ejercicios: **52 ejercicios nuevos** (8 de antebrazo y agarre, 8 de pecho, 7 de espalda, 4 de hombros, 4 de bíceps, 3 de tríceps, 6 de core, 7 de piernas, 2 de glúteos, 2 de pantorrillas y 1 funcional). Total: 261.
+- Ejercicios: **ilustraciones con volumen y tres vistas** (lateral, frontal y superior) generadas desde un esqueleto 3D, con encuadre automático.
+- Ejercicios: sección **Claves de entrenadores e investigación** con indicaciones atribuidas a su fuente (Rippetoe, McGill, Contreras, Nippard, Cressey, Israetel, estudios de Maeo, Schoenfeld, Kubo, etc.).
+
+### Changed
+- El antebrazo se divide en **braquiorradial, flexores y extensores**: el curl de muñeca (flexores) y el curl de muñeca invertido (extensores) ya no suman al mismo músculo. El id viejo `antebrazos` se reparte automáticamente (historial intacto).
+- Distribución muscular revisada en curls (supino, martillo, invertido, Scott, inclinado…) y en ejercicios que tenían porcentajes idénticos a otro distinto.
+- Consejos menos genéricos en varias familias de ejercicios (press, pullover, remo, press militar, abdominales, cardio).
+- Rutinas (celular): los días con ejercicios se **pliegan** (muestran solo los nombres) y los días de descanso ocupan una sola fila.
+- La **versión** se muestra al pie de todas las pestañas (antes solo en Perfil).
+- Las tarjetas mantienen el botón (i) en la misma línea del título.
+
+### Fixed
+- Pullover: los dibujos de inicio y mitad estaban mal (la mitad salía por delante del cuerpo). La interpolación de ángulos ahora toma el camino corto.
+- Celular: el botón (i) de Analíticas (y el resto de las ventanas) podía ensanchar la página; ahora se abren en una capa propia sobre toda la pantalla y bloquean el scroll de fondo.
+- Ejercicios: no se repiten los alias sin Ñ cuando ya aparece la versión con Ñ.
+
 ## [4.2.0] - 2026-10-31
 
 ### Added
