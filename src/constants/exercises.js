@@ -12,7 +12,9 @@ export { CATEGORIES, CATEGORY_LABELS, MUSCLES, MUSCLE_LABELS } from './muscles';
  *   ps pecho_superior · pm pecho_medio · pi pecho_inferior
  *   ts trapecio_superior · tm trapecio_medio · da dorsal_ancho · rm redondo_mayor · lu lumbares
  *   dan deltoides_anterior · dl deltoides_lateral · dp deltoides_posterior · mr manguito_rotador
- *   bi biceps · br braquial · tl triceps_largo · tla triceps_lateral · ab antebrazos
+ *   bi biceps · br braquial · tl triceps_largo · tla triceps_lateral
+ *   brr braquiorradial · fx flexores del antebrazo (agarre) · ex extensores del antebrazo
+ *   ab = "agarre genérico" (código compuesto): se reparte 65% flexores · 20% extensores · 15% braquiorradial
  *   ra recto_abdominal · ob oblicuos · se serrato
  *   rf recto_femoral · vl vasto_lateral · vm vasto_medial · bf biceps_femoral · st semitendinoso · ad aductores
  *   gm gluteo_mayor · gme gluteo_medio · ge gemelos · so soleo · ti tibial
@@ -21,10 +23,16 @@ const CODE_TO_MUSCLE = Object.freeze({
   ps: 'pecho_superior', pm: 'pecho_medio', pi: 'pecho_inferior',
   ts: 'trapecio_superior', tm: 'trapecio_medio', da: 'dorsal_ancho', rm: 'redondo_mayor', lu: 'lumbares',
   dan: 'deltoides_anterior', dl: 'deltoides_lateral', dp: 'deltoides_posterior', mr: 'manguito_rotador',
-  bi: 'biceps', br: 'braquial', tl: 'triceps_largo', tla: 'triceps_lateral', ab: 'antebrazos',
+  bi: 'biceps', br: 'braquial', tl: 'triceps_largo', tla: 'triceps_lateral',
+  brr: 'braquiorradial', fx: 'antebrazo_flexores', ex: 'antebrazo_extensores',
   ra: 'recto_abdominal', ob: 'oblicuos', se: 'serrato',
   rf: 'recto_femoral', vl: 'vasto_lateral', vm: 'vasto_medial', bf: 'biceps_femoral', st: 'semitendinoso', ad: 'aductores',
   gm: 'gluteo_mayor', gme: 'gluteo_medio', ge: 'gemelos', so: 'soleo', ti: 'tibial',
+});
+
+// Códigos compuestos: un porcentaje que se reparte entre varios músculos (proporciones que suman 1).
+const COMPOSITE_CODES = Object.freeze({
+  ab: { antebrazo_flexores: 0.65, antebrazo_extensores: 0.2, braquiorradial: 0.15 },
 });
 
 const CATALOG_ENTRIES = [
@@ -70,8 +78,8 @@ const CATALOG_ENTRIES = [
   ['REMO INVERTIDO', 'ESPALDA', { da: 30, tm: 25, dp: 15, bi: 15, br: 5, ra: 5, ab: 5 }, ['REMO AUSTRALIANO']],
   ['HIPEREXTENSIONES', 'ESPALDA', { lu: 50, gm: 30, bf: 10, st: 10 }, ['EXTENSIONES LUMBARES', 'BANCO ROMANO', 'LUMBARES']],
   ['BUENOS DIAS', 'ESPALDA', { lu: 35, bf: 22, st: 22, gm: 21 }, ['GOOD MORNING']],
-  ['ENCOGIMIENTOS CON BARRA', 'ESPALDA', { ts: 80, tm: 10, ab: 10 }, ['SHRUGS', 'ENCOGIMIENTOS DE HOMBROS', 'ENCOGIMIENTOS']],
-  ['ENCOGIMIENTOS CON MANCUERNAS', 'ESPALDA', { ts: 80, tm: 8, ab: 12 }, []],
+  ['ENCOGIMIENTOS CON BARRA', 'ESPALDA', { ts: 80, tm: 10, fx: 10 }, ['SHRUGS', 'ENCOGIMIENTOS DE HOMBROS', 'ENCOGIMIENTOS']],
+  ['ENCOGIMIENTOS CON MANCUERNAS', 'ESPALDA', { ts: 80, tm: 8, fx: 12 }, []],
 
   // ───────── HOMBROS ─────────
   ['PRESS MILITAR', 'HOMBROS', { dan: 45, dl: 20, tla: 15, tl: 5, ts: 8, ps: 5, ra: 2 }, ['PRESS HOMBRO BARRAS', 'PRESS MILITAR CON BARRA', 'PRESS MILITAR PARADO']],
@@ -92,26 +100,26 @@ const CATALOG_ENTRIES = [
   ['ELEVACIONES EN Y', 'HOMBROS', { tm: 35, dl: 25, dp: 20, ts: 10, mr: 10 }, ['Y RAISE']],
 
   // ───────── BÍCEPS ─────────
-  ['CURL CON BARRA', 'BICEPS', { bi: 65, br: 20, ab: 15 }, ['CURL DE BICEPS CON BARRA', 'CURL BARRA RECTA']],
-  ['CURL CON BARRA W', 'BICEPS', { bi: 60, br: 25, ab: 15 }, ['CURL BARRA W', 'CURL CON BARRA Z', 'CURL BARRA Z']],
-  ['CURL CON MANCUERNAS', 'BICEPS', { bi: 65, br: 20, ab: 15 }, ['CURL SIMULTANEO']],
-  ['CURL ALTERNADO CON MANCUERNAS', 'BICEPS', { bi: 65, br: 20, ab: 15 }, ['ALT CON MANCUERNA', 'CURL ALTERNADO', 'BICEPS ALTERNADO']],
-  ['CURL MARTILLO', 'BICEPS', { br: 45, ab: 30, bi: 25 }, ['MARTILLO', 'CURL MARTILLO CON MANCUERNAS']],
-  ['CURL MARTILLO CON SOGA', 'BICEPS', { br: 45, ab: 30, bi: 25 }, ['MARTILLO CON SOGA', 'MARTILLO EN POLEA']],
-  ['CURL POLEA', 'BICEPS', { bi: 65, br: 20, ab: 15 }, ['CURL EN POLEA BAJA', 'CURL EN POLEA']],
-  ['CURL SCOTT', 'BICEPS', { bi: 60, br: 30, ab: 10 }, ['SCOTT', 'BANCO SCOTT', 'CURL PREDICADOR']],
-  ['CURL CONCENTRADO', 'BICEPS', { bi: 70, br: 20, ab: 10 }, ['BICEP CONCENTRADO', 'BICEPS CONCENTRADO']],
-  ['CURL BAYESIANO', 'BICEPS', { bi: 75, br: 15, ab: 10 }, ['BAYESIANA', 'CURL BAYESIANA']],
-  ['CURL BICEPS INCLINADO', 'BICEPS', { bi: 75, br: 15, ab: 10 }, ['CURL INCLINADO']],
-  ['CURL ARAÑA', 'BICEPS', { bi: 70, br: 20, ab: 10 }, ['CURL SPIDER', 'SPIDER CURL']],
-  ['CURL 21', 'BICEPS', { bi: 65, br: 20, ab: 15 }, ['21S', 'VEINTIUNOS']],
-  ['CURL EN MAQUINA', 'BICEPS', { bi: 65, br: 25, ab: 10 }, []],
-  ['CURL INVERTIDO', 'ANTEBRAZOS', { ab: 45, br: 40, bi: 15 }, ['CURL PRONO', 'CURL REVERSO']],
+  ['CURL CON BARRA', 'BICEPS', { bi: 64, br: 20, brr: 8, fx: 8 }, ['CURL DE BICEPS CON BARRA', 'CURL BARRA RECTA']],
+  ['CURL CON BARRA W', 'BICEPS', { bi: 56, br: 24, brr: 12, fx: 8 }, ['CURL BARRA W', 'CURL CON BARRA Z', 'CURL BARRA Z']],
+  ['CURL CON MANCUERNAS', 'BICEPS', { bi: 66, br: 18, brr: 8, fx: 8 }, ['CURL SIMULTANEO']],
+  ['CURL ALTERNADO CON MANCUERNAS', 'BICEPS', { bi: 68, br: 17, brr: 8, fx: 7 }, ['ALT CON MANCUERNA', 'CURL ALTERNADO', 'BICEPS ALTERNADO']],
+  ['CURL MARTILLO', 'BICEPS', { br: 38, brr: 32, bi: 22, fx: 5, ex: 3 }, ['MARTILLO', 'CURL MARTILLO CON MANCUERNAS']],
+  ['CURL MARTILLO CON SOGA', 'BICEPS', { br: 38, brr: 30, bi: 24, fx: 6, ex: 2 }, ['MARTILLO CON SOGA', 'MARTILLO EN POLEA']],
+  ['CURL POLEA', 'BICEPS', { bi: 66, br: 20, brr: 7, fx: 7 }, ['CURL EN POLEA BAJA', 'CURL EN POLEA']],
+  ['CURL SCOTT', 'BICEPS', { bi: 58, br: 30, brr: 7, fx: 5 }, ['SCOTT', 'BANCO SCOTT', 'CURL PREDICADOR']],
+  ['CURL CONCENTRADO', 'BICEPS', { bi: 70, br: 20, brr: 5, fx: 5 }, ['BICEP CONCENTRADO', 'BICEPS CONCENTRADO']],
+  ['CURL BAYESIANO', 'BICEPS', { bi: 76, br: 14, brr: 5, fx: 5 }, ['BAYESIANA', 'CURL BAYESIANA']],
+  ['CURL BICEPS INCLINADO', 'BICEPS', { bi: 74, br: 15, brr: 6, fx: 5 }, ['CURL INCLINADO']],
+  ['CURL ARAÑA', 'BICEPS', { bi: 70, br: 22, brr: 4, fx: 4 }, ['CURL SPIDER', 'SPIDER CURL']],
+  ['CURL 21', 'BICEPS', { bi: 66, br: 20, brr: 7, fx: 7 }, ['21S', 'VEINTIUNOS']],
+  ['CURL EN MAQUINA', 'BICEPS', { bi: 62, br: 28, brr: 5, fx: 5 }, []],
+  ['CURL INVERTIDO', 'ANTEBRAZOS', { brr: 38, br: 32, ex: 18, bi: 12 }, ['CURL PRONO', 'CURL REVERSO']],
 
   // ───────── TRÍCEPS ─────────
   ['EXTENSION DE TRICEPS EN POLEA', 'TRICEPS', { tla: 65, tl: 30, ab: 5 }, ['EXT POLEA ALTA', 'TRICEPS EN POLEA', 'PUSHDOWN', 'EMPUJES EN POLEA']],
   ['EXTENSION DE TRICEPS CON SOGA', 'TRICEPS', { tla: 60, tl: 35, ab: 5 }, ['TRICEPS CON SOGA', 'SOGA TRICEPS']],
-  ['EXTENSION DE TRICEPS AGARRE INVERTIDO', 'TRICEPS', { tla: 65, tl: 25, ab: 10 }, ['TRICEPS INVERTIDO', 'TRICEPS SUPINO EN POLEA']],
+  ['EXTENSION DE TRICEPS AGARRE INVERTIDO', 'TRICEPS', { tla: 65, tl: 25, fx: 10 }, ['TRICEPS INVERTIDO', 'TRICEPS SUPINO EN POLEA']],
   ['PRESS FRANCES', 'TRICEPS', { tl: 50, tla: 45, ab: 5 }, ['ROMPECRANEOS', 'PRESS FRANCES CON BARRA']],
   ['PRESS FRANCES CON MANCUERNAS', 'TRICEPS', { tl: 50, tla: 45, ab: 5 }, []],
   ['EXTENSION DE TRICEPS CON MANCUERNA', 'TRICEPS', { tl: 60, tla: 35, ab: 5 }, ['EXT CON MANCUERNA', 'EXTENSION TRAS NUCA CON MANCUERNA']],
@@ -124,10 +132,10 @@ const CATALOG_ENTRIES = [
   ['PRESS CERRADO', 'TRICEPS', { tla: 35, tl: 15, pm: 25, pi: 5, ps: 5, dan: 15 }, ['PRESS BANCA AGARRE CERRADO', 'PRESS BANCA CERRADO']],
 
   // ───────── ANTEBRAZOS ─────────
-  ['CURL DE MUÑECA', 'ANTEBRAZOS', { ab: 100 }, ['CURL DE MUNECAS', 'FLEXION DE MUNECA']],
-  ['CURL DE MUÑECA INVERTIDO', 'ANTEBRAZOS', { ab: 100 }, ['EXTENSION DE MUNECA', 'EXTENSIONES DE MUNECA']],
-  ['RODILLO DE MUÑECA', 'ANTEBRAZOS', { ab: 90, dan: 10 }, ['ENROLLADOR', 'WRIST ROLLER']],
-  ['COLGADO EN BARRA', 'ANTEBRAZOS', { ab: 65, da: 20, ra: 10, rm: 5 }, ['DEAD HANG', 'COLGARSE EN BARRA']],
+  ['CURL DE MUÑECA', 'ANTEBRAZOS', { fx: 100 }, ['CURL DE MUNECAS', 'FLEXION DE MUNECA']],
+  ['CURL DE MUÑECA INVERTIDO', 'ANTEBRAZOS', { ex: 90, brr: 10 }, ['EXTENSION DE MUNECA', 'EXTENSIONES DE MUNECA']],
+  ['RODILLO DE MUÑECA', 'ANTEBRAZOS', { fx: 45, ex: 40, dan: 10, brr: 5 }, ['ENROLLADOR', 'WRIST ROLLER']],
+  ['COLGADO EN BARRA', 'ANTEBRAZOS', { fx: 55, da: 20, ra: 10, rm: 5, ex: 5, brr: 5 }, ['DEAD HANG', 'COLGARSE EN BARRA']],
 
   // ───────── CORE ─────────
   ['CRUNCH', 'CORE', { ra: 85, ob: 15 }, ['ABDOMINALES', 'CRUNCH ABDOMINAL', 'ABDOMINALES CORTOS']],
@@ -200,7 +208,7 @@ const CATALOG_ENTRIES = [
   ['ARRANQUE', 'FUNCIONAL', { ts: 15, dl: 10, dan: 10, gm: 20, bf: 10, vl: 10, vm: 8, lu: 10, ab: 7 }, ['SNATCH']],
   ['WALL BALL', 'FUNCIONAL', { vl: 18, vm: 15, rf: 10, gm: 20, dan: 20, tla: 10, ra: 7 }, ['LANZAMIENTO A LA PARED', 'WALL BALLS']],
   ['BATTLE ROPES', 'FUNCIONAL', { dan: 25, dl: 20, ra: 15, ob: 10, ab: 15, tla: 5, bi: 5, ts: 5 }, ['SOGAS DE BATALLA', 'CUERDAS DE BATALLA']],
-  ['PASEO DEL GRANJERO', 'FUNCIONAL', { ab: 35, ts: 25, ra: 10, ob: 10, gm: 5, lu: 10, ge: 5 }, ['FARMER WALK', 'CAMINATA DEL GRANJERO']],
+  ['PASEO DEL GRANJERO', 'FUNCIONAL', { fx: 30, ex: 5, ts: 25, ra: 10, ob: 10, gm: 5, lu: 10, ge: 5 }, ['FARMER WALK', 'CAMINATA DEL GRANJERO']],
   ['EMPUJE DE TRINEO', 'FUNCIONAL', { vl: 20, vm: 18, rf: 12, gm: 25, ge: 15, so: 10 }, ['TRINEO', 'SLED PUSH']],
   ['CIRCUITO FUNCIONAL', 'FUNCIONAL', { vl: 12, vm: 10, rf: 8, gm: 16, bf: 6, st: 4, dan: 8, ra: 12, ob: 6, da: 6, pm: 6, ge: 6 }, ['CIRCUITO', 'ENTRENAMIENTO FUNCIONAL', 'FUNCIONAL', 'HIIT', 'TABATA', 'CIRCUITO HIIT']],
   ['SENTADILLA SIN PESO', 'FUNCIONAL', { vl: 24, vm: 22, rf: 12, gm: 28, ad: 8, ge: 3, lu: 3 }, ['AIR SQUAT', 'SENTADILLA CON PESO CORPORAL', 'SENTADILLAS']],
@@ -232,14 +240,14 @@ const CATALOG_ENTRIES = [
 
   // ───────── CROSSFIT ─────────
   ['MUSCLE UP', 'CROSSFIT', { da: 28, rm: 8, tm: 8, bi: 12, br: 4, pm: 8, pi: 6, tla: 10, tl: 6, ab: 5, ra: 5 }, ['MUSCLE-UP', 'MUSCLE UPS']],
-  ['TOES TO BAR', 'CROSSFIT', { ra: 35, ob: 12, rf: 15, ab: 18, da: 10, ad: 5, rm: 5 }, ['T2B', 'PIES A LA BARRA']],
+  ['TOES TO BAR', 'CROSSFIT', { ra: 35, ob: 12, rf: 15, fx: 15, ex: 3, da: 10, ad: 5, rm: 5 }, ['T2B', 'PIES A LA BARRA']],
   ['DOBLE SALTO DE SOGA', 'CROSSFIT', { ge: 40, so: 20, ti: 8, ab: 12, dan: 6, dl: 4, ra: 6, ob: 4 }, ['DOUBLE UNDERS', 'DU', 'DOBLES']],
   ['BURPEE SOBRE LA BARRA', 'CROSSFIT', { pm: 12, dan: 10, tla: 8, vl: 12, vm: 8, rf: 8, gm: 14, ge: 8, ra: 12, ob: 4, ps: 4 }, ['BURPEE OVER BAR', 'BURPEES SOBRE BARRA']],
   ['DEVIL PRESS', 'CROSSFIT', { dan: 16, dl: 6, tla: 8, gm: 14, bf: 8, st: 4, lu: 8, vl: 8, vm: 6, ra: 8, ab: 7, ts: 7 }, ['DEVILS PRESS']],
   ['ENVION', 'CROSSFIT', { ts: 12, dan: 14, dl: 6, tla: 8, tl: 3, gm: 16, bf: 6, st: 4, vl: 8, vm: 6, lu: 7, ab: 4, ra: 3, ge: 3 }, ['CLEAN AND JERK', 'CLEAN & JERK', 'DOS TIEMPOS']],
   ['FLEXIONES EN VERTICAL', 'CROSSFIT', { dan: 38, dl: 10, tla: 22, tl: 8, ts: 10, se: 6, ra: 6 }, ['HSPU', 'HANDSTAND PUSH UP', 'FLEXIONES EN PARADA DE MANOS']],
   ['FONDOS EN ANILLAS', 'CROSSFIT', { tla: 38, tl: 14, pi: 18, pm: 6, dan: 14, ra: 10 }, ['RING DIPS', 'FONDOS EN ARGOLLAS']],
-  ['TREPADA DE SOGA', 'CROSSFIT', { da: 25, bi: 16, br: 6, ab: 22, rm: 8, tm: 6, ra: 10, rf: 7 }, ['ROPE CLIMB', 'TREPAR LA SOGA']],
+  ['TREPADA DE SOGA', 'CROSSFIT', { da: 25, bi: 16, br: 6, fx: 18, brr: 4, rm: 8, tm: 6, ra: 10, rf: 7 }, ['ROPE CLIMB', 'TREPAR LA SOGA']],
   ['PECHO A LA BARRA', 'CROSSFIT', { da: 42, rm: 10, tm: 14, bi: 14, br: 5, dp: 5, ab: 5, ra: 5 }, ['CHEST TO BAR', 'C2B', 'DOMINADAS PECHO A LA BARRA']],
   ['DOMINADAS KIPPING', 'CROSSFIT', { da: 40, rm: 10, tm: 10, bi: 12, br: 4, ab: 6, ra: 12, ob: 6 }, ['KIPPING PULL UP', 'KIPPING']],
   ['SENTADILLA OVERHEAD', 'CROSSFIT', { vl: 18, vm: 16, rf: 10, gm: 20, dan: 10, dl: 5, ts: 6, tm: 4, lu: 5, ra: 6 }, ['OVERHEAD SQUAT', 'OHS', 'SENTADILLA CON BARRA ARRIBA']],
@@ -269,7 +277,7 @@ const CATALOG_ENTRIES = [
   ['TENIS', 'DEPORTES', { ge: 10, so: 5, vl: 10, vm: 8, rf: 5, gm: 10, gme: 6, ob: 12, ra: 8, dan: 8, dl: 4, tla: 6, ab: 8 }, ['PARTIDO DE TENIS']],
   ['BASQUET', 'DEPORTES', { vl: 14, vm: 10, rf: 8, gm: 14, ge: 16, so: 8, ti: 4, dan: 8, tla: 6, ra: 6, ob: 6 }, ['BASQUETBOL', 'BASKET', 'BALONCESTO']],
   ['VOLEY', 'DEPORTES', { ge: 14, so: 6, vl: 14, vm: 10, rf: 8, gm: 12, dan: 10, dl: 4, tla: 6, ra: 8, ob: 4, ab: 4 }, ['VOLEIBOL', 'VOLEYBOL', 'VOLLEY']],
-  ['ESCALADA', 'DEPORTES', { da: 22, rm: 6, tm: 8, bi: 14, br: 6, ab: 22, dp: 6, ra: 8, gm: 4, vl: 2, vm: 2 }, ['ESCALADA DEPORTIVA', 'BOULDER', 'ROCODROMO']],
+  ['ESCALADA', 'DEPORTES', { da: 22, rm: 6, tm: 8, bi: 14, br: 6, fx: 18, ex: 4, dp: 6, ra: 8, gm: 4, vl: 2, vm: 2 }, ['ESCALADA DEPORTIVA', 'BOULDER', 'ROCODROMO']],
 ];
 
 // Normaliza nombres para que "press  banca" y "PRESS BANCA" sean el mismo ejercicio.
@@ -288,6 +296,22 @@ export const normalizeExerciseName = (rawName) => {
 const withoutEnyeFor = (name, aliasList) =>
   [name, ...aliasList.map(normalizeExerciseName)].filter((label) => label.includes('Ñ')).map((label) => label.replace(/Ñ/g, 'N'));
 
+/*
+ * Redondeo por mayor resto: convierte porcentajes fraccionarios (de los códigos compuestos) en enteros
+ * que siguen sumando exactamente `total`. Los músculos que quedan en 0% se descartan.
+ */
+const roundToTotal = (raw, total) => {
+  const entries = Object.entries(raw).map(([id, value]) => ({ id, floor: Math.floor(value), rest: value - Math.floor(value) }));
+  let missing = total - entries.reduce((sum, entry) => sum + entry.floor, 0);
+  [...entries].sort((a, b) => b.rest - a.rest).forEach((entry) => {
+    if (missing > 0) {
+      entry.floor += 1;
+      missing -= 1;
+    }
+  });
+  return Object.fromEntries(entries.filter((entry) => entry.floor > 0).map((entry) => [entry.id, entry.floor]));
+};
+
 const CATEGORY_IDS = new Set(CATEGORIES.map(({ id }) => id));
 
 // Convierte códigos → ids y porcentajes → fracciones; valida la integridad del diccionario al cargar.
@@ -301,15 +325,19 @@ const buildCatalog = () => {
     if (catalog[name] || aliases[name]) problems.push(`Duplicado: ${name}`);
     if (!CATEGORY_IDS.has(category)) problems.push(`Categoría inválida en ${name}: ${category}`);
 
-    const distribution = {};
     let total = 0;
+    const raw = {};
     Object.entries(codes).forEach(([code, percent]) => {
-      const muscleId = CODE_TO_MUSCLE[code];
-      if (!muscleId) problems.push(`Código desconocido en ${name}: ${code}`);
-      else distribution[muscleId] = percent;
       total += percent;
+      const parts = COMPOSITE_CODES[code] ?? (CODE_TO_MUSCLE[code] ? { [CODE_TO_MUSCLE[code]]: 1 } : null);
+      if (!parts) {
+        problems.push(`Código desconocido en ${name}: ${code}`);
+        return;
+      }
+      Object.entries(parts).forEach(([muscleId, ratio]) => { raw[muscleId] = (raw[muscleId] ?? 0) + percent * ratio; });
     });
     if (total !== 100) problems.push(`${name}: la distribución suma ${total}`);
+    const distribution = roundToTotal(raw, total);
 
     const primaryMuscle = Object.entries(distribution).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'otros';
     catalog[name] = { name, category, distribution, primaryMuscle, aliases: [...new Set([...aliasList.map(normalizeExerciseName), ...withoutEnyeFor(name, aliasList)])] };

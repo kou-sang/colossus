@@ -37,7 +37,9 @@ const FRONT_MUSCLES = [
   { id: 'recto_abdominal', part: 'torso', points: [[86, 131], [98, 130], [98, 208], [92, 210], [88, 196], [86, 160]] },
   { id: 'biceps', part: 'arm', points: [[64, 116], [67, 124], [65, 150], [61, 164], [56, 160], [55, 136], [58, 120]] },
   { id: 'braquial', part: 'arm', points: [[50, 112], [55, 118], [54, 140], [55, 160], [51, 166], [48, 148], [48, 126]] },
-  { id: 'antebrazos', part: 'arm', points: [[48, 172], [56, 168], [64, 174], [63, 200], [59, 232], [53, 234], [48, 210], [46, 188]] },
+  // Antebrazo (cara anterior): braquiorradial en el borde externo, flexores de muñeca/dedos hacia adentro.
+  { id: 'braquiorradial', part: 'arm', points: [[48, 172], [55, 168], [56, 186], [54, 210], [51, 226], [47, 208], [46, 188]] },
+  { id: 'antebrazo_flexores', part: 'arm', points: [[58, 169], [64, 174], [63, 200], [59, 232], [53, 234], [54, 222], [57, 204], [59, 186]] },
   { id: 'gluteo_medio', part: 'leg', points: [[71, 202], [78, 206], [77, 218], [70, 222], [69, 212]] },
   { id: 'vasto_lateral', part: 'leg', points: [[70, 224], [76, 222], [79, 254], [80, 290], [79, 306], [75, 300], [71, 268], [69, 244]] },
   { id: 'recto_femoral', part: 'leg', points: [[79, 214], [86, 220], [89, 250], [88, 284], [84, 300], [81, 292], [80, 252]] },
@@ -66,7 +68,9 @@ const BACK_MUSCLES = [
   { id: 'oblicuos', part: 'torso', points: [[75, 170], [80, 186], [88, 184], [88, 198], [76, 202], [73, 186]] },
   { id: 'triceps_largo', part: 'arm', points: [[63, 112], [67, 122], [65, 148], [61, 162], [57, 156], [57, 132], [59, 118]] },
   { id: 'triceps_lateral', part: 'arm', points: [[50, 114], [56, 118], [55, 140], [55, 160], [50, 164], [47, 146], [47, 126]] },
-  { id: 'antebrazos', part: 'arm', points: [[48, 172], [56, 168], [64, 174], [63, 200], [59, 232], [53, 234], [48, 210], [46, 188]] },
+  // Antebrazo (cara posterior): extensores de muñeca/dedos; el braquiorradial asoma en el borde externo.
+  { id: 'braquiorradial', part: 'arm', points: [[48, 172], [53, 169], [53, 188], [50, 206], [46, 190]] },
+  { id: 'antebrazo_extensores', part: 'arm', points: [[55, 168], [64, 174], [63, 200], [59, 232], [53, 234], [50, 216], [54, 192]] },
   { id: 'gluteo_medio', part: 'leg', points: [[73, 198], [88, 196], [86, 208], [76, 216], [70, 214]] },
   { id: 'gluteo_mayor', part: 'leg', points: [[71, 218], [80, 212], [90, 210], [98, 214], [98, 248], [88, 254], [76, 250], [70, 236]] },
   { id: 'biceps_femoral', part: 'leg', points: [[71, 256], [81, 258], [84, 284], [83, 306], [79, 314], [74, 296], [70, 272]] },
