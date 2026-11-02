@@ -39,6 +39,8 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 - Rutinas (celular): los días con ejercicios se **pliegan** (muestran solo los nombres) y los días de descanso ocupan una sola fila.
 - La **versión** se muestra al pie de todas las pestañas (antes solo en Perfil).
 - Las tarjetas mantienen el botón (i) en la misma línea del título.
+- **Perfiles y récords solo de tus grupos:** antes la app descargaba las colecciones completas `profiles` y `personalBests` (1 lectura por cada usuario registrado en cada apertura). Ahora pide únicamente los documentos tuyos y de quienes comparten un grupo contigo (consultas por id en bloques de 30).
+- Velocidad: el reloj y las pantallas de inicio de sesión salen del bundle inicial (se descargan al usarlos, con precarga al pasar el puntero), conexiones adelantadas a Firebase (`preconnect`) y caché de un año para los archivos con hash (`vercel.json`).
 
 ### Fixed
 - Pullover: los dibujos de inicio y mitad estaban mal (la mitad salía por delante del cuerpo). La interpolación de ángulos ahora toma el camino corto.

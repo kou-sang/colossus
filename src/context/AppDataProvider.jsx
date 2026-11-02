@@ -9,14 +9,31 @@ import { AppDataContext } from './AppDataContext';
 // Datos compartidos por varias pestañas. Elimina el prop drilling de prs/routines/usersDb/t/theme.
 
 export const AppDataProvider = ({ user, children }) => {
-  const profilesState = useSubscription((onData, onError) => subscribeToProfiles(onData, onError), [], []);
-  const bestsState = useSubscription((onData, onError) => subscribeToPersonalBests(onData, onError), [], {});
   const routinesState = useSubscription(
     (onData, onError) => subscribeToOwnRoutines(user.id, onData, onError),
     [user.id],
     [],
   );
   const groupsState = useSubscription((onData, onError) => subscribeToMyGroups(user.id, onData, onError), [user.id], []);
+
+  /*
+   * Personas visibles = tú + integrantes de tus grupos. Perfiles y récords se piden SOLO para ellas
+   * (antes: colecciones completas → el costo crecía con cada usuario nuevo de la app).
+   * Se espera a que carguen los grupos para no suscribirse dos veces al arrancar.
+   */
+  const peopleKey = groupsState.loading
+    ? null
+    : [...new Set([user.id, ...groupsState.data.flatMap((group) => group.memberIds ?? [])])].sort().join('|');
+  const profilesState = useSubscription(
+    peopleKey ? (onData, onError) => subscribeToProfiles(peopleKey.split('|'), onData, onError) : null,
+    [peopleKey],
+    [],
+  );
+  const bestsState = useSubscription(
+    peopleKey ? (onData, onError) => subscribeToPersonalBests(peopleKey.split('|'), onData, onError) : null,
+    [peopleKey],
+    {},
+  );
 
   const value = useMemo(() => {
     const profilesById = Object.fromEntries(profilesState.data.map((profile) => [profile.id, profile]));

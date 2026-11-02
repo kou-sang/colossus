@@ -1,6 +1,7 @@
 import { collection, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { COLLECTIONS } from '../constants/collections';
+import { subscribeToDocsByIds } from './firestoreQueries';
 import { sanitizeBodyStats, sanitizeGender, sanitizeUsername } from './validation';
 
 // Separación público/privado: el código original escuchaba TODA la colección 'users',
@@ -20,12 +21,12 @@ export const subscribeToAccount = (uid, onData, onError) =>
     onError,
   );
 
-export const subscribeToProfiles = (onData, onError) =>
-  onSnapshot(
-    collection(db, COLLECTIONS.PROFILES),
-    (snapshot) => onData(snapshot.docs.map((profileDoc) => ({ id: profileDoc.id, ...profileDoc.data() }))),
-    onError,
-  );
+/*
+ * Perfiles públicos SOLO de los ids pedidos (tú + integrantes de tus grupos).
+ * Antes se escuchaba la colección completa: cada apertura costaba 1 lectura por usuario registrado en la app.
+ */
+export const subscribeToProfiles = (ids, onData, onError) =>
+  subscribeToDocsByIds(COLLECTIONS.PROFILES, ids, (profileDoc) => ({ id: profileDoc.id, ...profileDoc.data() }), onData, onError);
 
 // Idempotente: crea perfil público y cuenta privada solo si no existen.
 export const ensureUserDocuments = async ({ uid, email, username, gender }) => {

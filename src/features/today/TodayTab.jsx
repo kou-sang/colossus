@@ -1,5 +1,5 @@
 import { CalendarDays, Check, CloudOff, Flame, Plus, Timer, Trophy, Undo2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { EmptyState, IconButton, SectionCard, Spinner, StatTile } from '../../components/ui';
 import { QUERY_LIMITS } from '../../constants/collections';
 import { CATALOG_EXERCISE_NAMES, canonicalExerciseName } from '../../constants/exercises';
@@ -14,7 +14,12 @@ import { addDays, formatLongDate, formatShortDate, getDayKey, parseDateKey, star
 import { logError, toUserMessage } from '../../utils/errors';
 import { computeWeekStreak, countPlannedDays, countTrainingDays } from '../../utils/metrics';
 import { LogEntryForm } from './LogEntryForm';
-import { WorkoutTimer } from './timer/WorkoutTimer';
+import { lazyWithPrefetch } from '../../utils/lazyWithPrefetch';
+
+// El reloj (~15 KB) sale del bundle inicial: se descarga al tocar o pasar el puntero por "Hacer ahora" / "Reloj".
+const WORKOUT_TIMER = lazyWithPrefetch(() => import('./timer/WorkoutTimer'), 'WorkoutTimer');
+const WorkoutTimer = WORKOUT_TIMER.Component;
+const prefetchTimer = () => WORKOUT_TIMER.prefetch();
 
 const hasValue = (value) => value !== '' && value !== null && value !== undefined;
 
@@ -81,7 +86,7 @@ const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen
           <span className="badge badge-good shrink-0"><Check size={14} aria-hidden /> Hecho</span>
         ) : (
           <div className="flex shrink-0 items-center gap-1.5">
-            <button type="button" className="btn btn-ghost px-3" onClick={() => onOpenTimer(item)}>
+            <button type="button" className="btn btn-ghost px-3" onClick={() => onOpenTimer(item)} onPointerEnter={prefetchTimer} onTouchStart={prefetchTimer} onFocus={prefetchTimer}>
               <Timer size={16} aria-hidden /> Hacer ahora
             </button>
             <button type="button" className="btn btn-outline px-3" aria-expanded={isConfirming} onClick={() => onOpenConfirm(item)}>
@@ -232,7 +237,8 @@ export const TodayTab = ({ onCelebrate }) => {
             <p className="text-sm font-semibold capitalize text-secondary">{formatLongDate(parseDateKey(todayKey))}</p>
             <h2 className="mt-1 text-xl font-black md:text-2xl">¡A entrenar, {user.username}!</h2>
           </div>
-          <button type="button" className="btn btn-ghost shrink-0 px-3" onClick={() => { playClick(); setTimerTarget({ item: null }); }}>
+          <button type="button" className="btn btn-ghost shrink-0 px-3" onClick={() => { playClick(); setTimerTarget({ item: null }); }}
+            onPointerEnter={prefetchTimer} onTouchStart={prefetchTimer} onFocus={prefetchTimer}>
             <Timer size={16} aria-hidden /> Reloj
           </button>
         </div>
@@ -323,13 +329,15 @@ export const TodayTab = ({ onCelebrate }) => {
       </SectionCard>
 
       {timerTarget && (
-        <WorkoutTimer
-          exercise={timerItem?.exercise ?? null}
-          initialValues={timerInitialValues}
-          routineValues={timerItem ? buildRoutineValues(timerItem) : null}
-          onFinish={timerItem ? handleTimerFinish : undefined}
-          onClose={() => setTimerTarget(null)}
-        />
+        <Suspense fallback={null}>
+          <WorkoutTimer
+            exercise={timerItem?.exercise ?? null}
+            initialValues={timerInitialValues}
+            routineValues={timerItem ? buildRoutineValues(timerItem) : null}
+            onFinish={timerItem ? handleTimerFinish : undefined}
+            onClose={() => setTimerTarget(null)}
+          />
+        </Suspense>
       )}
     </div>
   );
