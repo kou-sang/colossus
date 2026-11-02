@@ -1,0 +1,58 @@
+# Verificación automática de cada PR y de cada push a main: instala, lint, pruebas y build.
+# Si un paso falla, el PR lo muestra en rojo con el detalle del error (pestaña "Checks").
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Un push nuevo a la misma rama cancela la verificación anterior (no se gastan minutos en commits viejos).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, pruebas y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node 22 (con caché de npm)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias (npm ci)
+        run: npm ci
+
+      - name: Lint (npm run lint)
+        run: npm run lint
+
+      - name: Pruebas (npm test)
+        run: |
+          if [ -d node_modules/vitest ]; then
+            npm test
+          else
+            # Respaldo hasta que vitest esté en devDependencies (npm i -D vitest + commit del lock).
+            echo "::warning::vitest no está en devDependencies: se ejecuta con npx. Corre 'npm i -D vitest' y commitea package-lock.json."
+            npx --yes vitest run
+          fi
+
+      - name: Build (npm run build)
+        run: npm run build
+        env:
+          # Valores de relleno: el build solo los incrusta; la app real usa los de Vercel.
+          VITE_FIREBASE_API_KEY: ci
+          VITE_FIREBASE_AUTH_DOMAIN: ci.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: ci
+          VITE_FIREBASE_STORAGE_BUCKET: ci.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID: '0'
+          VITE_FIREBASE_APP_ID: ci
