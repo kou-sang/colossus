@@ -168,7 +168,7 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
 
 /**
  * Biblioteca de ejercicios: lista navegable + ficha con ilustraciones del movimiento, diagrama de músculos,
- * técnica, consejos y errores comunes (ver constants/exerciseGuides.js y constants/exercisePoses.js).
+ * técnica, consejos y errores comunes (ver constants/exerciseGuides.js, constants/guides/ y constants/figures/).
  */
 export const ExerciseLibraryTab = () => {
   const isDesktop = useMediaQuery(DESKTOP_QUERY);

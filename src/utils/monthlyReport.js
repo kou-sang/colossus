@@ -39,7 +39,7 @@ const CORE_SUGGESTIONS = ['PLANCHA', 'DEAD BUG', 'RUEDA ABDOMINAL', 'PALLOF PRES
 const summarize = (logs) => {
   const days = new Set(logs.map((log) => toDateKey(log.performedAt)));
   const cardioMinutes = logs
-    .filter((log) => ['CARDIO', 'DEPORTES', 'BAILE', 'COMBATE'].includes(getExerciseCategory(log)))
+    .filter((log) => ['CARDIO', 'COMBATE'].includes(getExerciseCategory(log)))
     .reduce((sum, log) => sum + estimateMinutes(log), 0);
   const exerciseCounts = {};
   logs.forEach((log) => { exerciseCounts[log.exercise] = (exerciseCounts[log.exercise] ?? 0) + 1; });

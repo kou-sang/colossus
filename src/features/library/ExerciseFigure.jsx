@@ -4,7 +4,7 @@ import { buildExerciseFrames, defaultViewFor, FRAME_LABELS, VIEW_OPTIONS } from 
 
 /*
  * Tres fotogramas del movimiento (inicio, mitad y final) en tres vistas: lateral, frontal y superior.
- * Se dibujan por código desde un esqueleto 3D (utils/poseFigure.js). El SVG lo genera la propia app a partir
+ * Se dibujan por código desde un esqueleto 3D (utils/figure/ y constants/figures/). El SVG lo genera la propia app a partir
  * de datos fijos (sin entrada del usuario): es seguro inyectarlo. Usa las variables de color del tema.
  * `key={exerciseName}` en el padre reinicia la vista al cambiar de ejercicio.
  */

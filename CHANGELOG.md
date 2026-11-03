@@ -17,6 +17,27 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.6.0] - 2026-11-03
+
+### Added
+- **Nuevo motor de dibujo de ejercicios:** esqueleto 3D con cinemática directa e inversa (codos, rodillas y puños apuntan a donde corresponde) y un cuerpo hecho de secciones musculares en lugar de figuras geométricas. Se distinguen mano, muñeca y antebrazo; pie, tobillo y pantorrilla; pectorales, abdominales, oblicuos, trapecio, glúteos y la silueta de cada músculo de brazos y piernas. Las extremidades del fondo se dibujan atenuadas para que se lea la profundidad en las 3 vistas.
+- **Equipamiento dibujado con sus proporciones:** barras con discos, mancuernas, kettlebells, barra W y hexagonal, poleas con su torre y cable, manijas (estribo, soga, barra, V, tobillera), bancos planos/inclinados/declinados, máquinas con su almohadilla, rodillo, palanca y pila de discos, multipower, rack, paralelas, barra fija, anillas, TRX, cajones, fitball, trineo, neumático, cinta, bicicletas, elíptico, remo y ski erg.
+- **101 ejercicios nuevos (402 en total), todos distintos entre sí:** más máquinas y variantes por implemento (press de pecho hammer, remo alto en máquina, extensión lumbar en máquina, rotación de tronco en máquina, hack inversa, sentadilla V, prensa vertical, multicadera abducción, gemelos en hack…), mano y antebrazo (curl de muñeca con mancuerna y en polea, extensión de muñeca, desviación cubital, curl de dedos, agarre estático, barra gruesa, colgado a una mano, apretar pelota, cubo de arroz, flexiones sobre los dedos), abdomen (sit up declinado, crunch oblicuo, flexiones laterales, planchas con elevación y en fitball, patadas de tijera, toques de talón, rotación con landmine, molino con kettlebell…), piernas y glúteos (sentadilla barra baja, en cajón, isométrica en pared, con cinturón, estocada estática y cruzada, nórdico inverso, puentes con barra y a una pierna, hidrante, hiperextensión inversa…) y acondicionamiento (ski erg, bicicleta reclinada, stepper, muscle up en anillas, GHD sit up, wall walk, caminata en vertical, arranque con mancuerna, cargada colgante, tirón alto sumo, paseo del camarero, sandbag, arrastre de trineo…). Cada uno con ficha, dibujo en 3 vistas y distribución muscular propia.
+- **Variantes separadas:** cuando un nombre agrupaba posturas distintas se dividió en ejercicios propios (por ejemplo press cerrado con barra y en multipower; remo con apoyo en pecho deja de confundirse con el remo en T).
+- **Tests de integridad del catálogo:** ningún ejercicio comparte dibujo ni pasos de técnica con otro, todas las posturas pasan un control anatómico (rango de codos, rodillas, caderas, hombros y tobillos, y nada atraviesa el piso) y las 3 vistas se generan sin errores.
+
+### Changed
+- **Los 402 dibujos se rehicieron uno por uno** con inicio, mitad y final que corresponden al nombre del ejercicio (posición, dirección del movimiento, ancho de agarre y de pies) y coinciden con el paso a paso. Cada ejercicio abre en la vista que mejor lo muestra (por ejemplo, de frente las elevaciones laterales o el jumping jack y desde arriba el limpiaparabrisas o el Pallof press).
+- **Fichas de técnica revisadas:** pasos propios para cada ejercicio (ninguno se repite entre ejercicios) y consejos y errores comunes agrupados por familia de movimiento; todas las fichas muestran claves del entrenador.
+- **Analíticas:** el resumen mensual de cardio considera Cardio y Combate; las actividades por tiempo son Cardio, Combate y Movilidad. Nuevos valores MET para ski erg, bicicleta reclinada, stepper, arrastre de trineo, snatch con kettlebell, paseo del camarero, halo, caminata de gusano y saltos de tobillo.
+- Artes marciales se dibuja y se explica como deporte de agarre (lucha, judo, BJJ), en línea con su distribución muscular.
+
+### Removed
+- **Categorías Baile y Deportes** y sus ejercicios (samba, zumba, salsa, cumbia, reggaetón, aeróbico, fútbol, pádel, tenis, básquet, vóley y escalada). Los registros que ya existían se conservan: se leen como Cardio en Analíticas y mantienen su gasto calórico.
+
+### Fixed
+- Dibujos con manos que salían por cualquier lado, piernas en posiciones imposibles, pies que atravesaban el piso y vistas que no correspondían al ejercicio.
+
 ## [4.5.0] - 2026-11-03
 
 ### Added

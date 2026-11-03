@@ -5,7 +5,7 @@ import { hasSetDetails } from './sets';
 /*
  * Gasto calórico y recomendaciones de alimentación (funciones puras).
  * - Calorías: kcal = MET × kg × horas (Compendium of Physical Activities, Ainsworth y col., 2011; actualización 2024).
- *   La duración se estima: fuerza ≈ 2,5 min por serie (trabajo + descanso); cardio y deportes usan las
+ *   La duración se estima: fuerza ≈ 2,5 min por serie (trabajo + descanso); cardio, combate y movilidad usan las
  *   repeticiones como minutos (así se indica en la ficha de cada ejercicio).
  * - Metabolismo basal: Mifflin-St Jeor (1990), la ecuación más precisa en adultos sin datos de composición corporal.
  * - Proteína: 1,6–2,2 g/kg para ganar músculo (Morton y col., 2018); hasta 2,4 g/kg en déficit (Helms y col., 2014).
@@ -18,14 +18,17 @@ export const DEFAULT_BODY_WEIGHT = 70;
 const EXERCISE_METS = Object.freeze({
   RUNNING: 9.8, SPRINTS: 12, CINTA: 9, CAMINATA: 3.5, 'CAMINATA EN PENDIENTE': 6, CICLISMO: 7.5, 'BICICLETA FIJA': 7,
   NATACION: 7, ELIPTICO: 5, ESCALADORA: 9, 'REMO ERGOMETRO': 7, SOGA: 11, 'DOBLE SALTO DE SOGA': 12, 'ASSAULT BIKE': 10,
-  YOGA: 2.5, PILATES: 3, BOXEO: 7.8, KICKBOXING: 10, 'ARTES MARCIALES': 10, FUTBOL: 7, PADEL: 6, TENIS: 7.3, BASQUET: 6.5,
-  VOLEY: 4, ESCALADA: 8, ZUMBA: 6.5, SAMBA: 6, SALSA: 5, CUMBIA: 5, REGGAETON: 5.5, AEROBICO: 7,
-  BURPEES: 8, 'CIRCUITO FUNCIONAL': 8, 'BATTLE ROPES': 10, 'KETTLEBELL SWING': 9.8, 'EMPUJE DE TRINEO': 9,
+  YOGA: 2.5, PILATES: 3, BOXEO: 7.8, KICKBOXING: 10, 'ARTES MARCIALES': 10,
+  'SKI ERG': 7.5, 'BICICLETA RECLINADA': 5.5, STEPPER: 7,
+  BURPEES: 8, 'CIRCUITO FUNCIONAL': 8, 'BATTLE ROPES': 10, 'KETTLEBELL SWING': 9.8, 'EMPUJE DE TRINEO': 9, 'ARRASTRE DE TRINEO': 9,
+  'SNATCH CON KETTLEBELL': 9.8, 'PASEO DEL CAMARERO': 5, 'HALO CON KETTLEBELL': 4, 'CAMINATA DE GUSANO': 4, 'SALTOS DE TOBILLO': 8,
+  // Actividades retiradas del catálogo (4.6.0): se conservan para el historial.
+  FUTBOL: 7, PADEL: 6, TENIS: 7.3, BASQUET: 6.5, VOLEY: 4, ESCALADA: 8, ZUMBA: 6.5, SAMBA: 6, SALSA: 5, CUMBIA: 5, REGGAETON: 5.5, AEROBICO: 7,
 });
-const CATEGORY_METS = Object.freeze({ CARDIO: 7, DEPORTES: 6.5, BAILE: 5.5, COMBATE: 8, MOVILIDAD: 2.8, FUNCIONAL: 8, CROSSFIT: 8, CORE: 3.8 });
+const CATEGORY_METS = Object.freeze({ CARDIO: 7, COMBATE: 8, MOVILIDAD: 2.8, FUNCIONAL: 8, CROSSFIT: 8, CORE: 3.8 });
 const STRENGTH_MET = 5; // Entrenamiento con pesas, esfuerzo moderado-vigoroso (Compendium 02050–02054)
 const MINUTES_PER_STRENGTH_SET = 2.5;
-const TIMED_CATEGORIES = new Set(['CARDIO', 'DEPORTES', 'BAILE', 'COMBATE', 'MOVILIDAD']);
+const TIMED_CATEGORIES = new Set(['CARDIO', 'COMBATE', 'MOVILIDAD']);
 const DEFAULT_TIMED_MINUTES = 30;
 
 // Minutos estimados de un registro (para calorías e hidratación).
