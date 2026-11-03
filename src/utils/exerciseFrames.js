@@ -4,6 +4,7 @@ import { FIGURE_SIZE, interpolatePose, measurePose, renderPoseSvg } from './pose
 
 // Anclaje de polea por defecto (baja, al frente) para ejercicios que en la ficha usan polea y el patrón no define uno.
 const DEFAULT_CABLE_ANCHOR = [56, 28];
+const DEFAULT_FRONT_ANCHORS = [[26, 62], [-26, 62]];
 
 const gearProp = (gear, pattern) => {
   switch (gear) {
@@ -12,7 +13,10 @@ const gearProp = (gear, pattern) => {
     case 'kettlebell': return { type: 'kettlebell' };
     case 'plate': return { type: 'plate' };
     case 'wheel': return { type: 'wheel' };
-    case 'cable': return { type: 'cable', to: pattern.cableTo ?? DEFAULT_CABLE_ANCHOR, dual: Boolean(pattern.dualCable) };
+    case 'cable':
+      // Las poses de frente dibujan un cable por mano hacia `cableAnchors` (por defecto, poleas bajas cruzadas).
+      if (pattern.view === 'front') return { type: 'cable', anchors: pattern.cableAnchors ?? DEFAULT_FRONT_ANCHORS };
+      return { type: 'cable', to: pattern.cableTo ?? DEFAULT_CABLE_ANCHOR, dual: Boolean(pattern.dualCable) };
     default: return null; // 'machine' | 'none': sin implemento en la mano
   }
 };
@@ -59,7 +63,8 @@ export const VIEW_OPTIONS = Object.freeze([
 // Vista que mejor muestra el movimiento: la del plano en que se definió el patrón.
 export const defaultViewFor = (name) => {
   const guide = EXERCISE_GUIDES[name];
-  return POSES[guide?.pose]?.view === 'front' ? 'front' : 'side';
+  const pattern = POSES[guide?.pose];
+  return pattern?.view === 'front' || pattern?.bestView === 'front' ? 'front' : 'side';
 };
 
 /**

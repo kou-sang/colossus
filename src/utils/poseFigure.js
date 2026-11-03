@@ -444,7 +444,15 @@ const buildSideProps = (pose, rig) => {
       case 'bar': {
         const c = prop.pos ? at2(prop.pos) : v(handsMid[0], handsMid[1], 0);
         items.push(prim.line(vAdd(c, v(0, 0, -32)), vAdd(c, v(0, 0, 32)), COLORS.frame, 4));
-        items.push(prim.sphere(c, 2.6, { fill: COLORS.frame })); // En la vista lateral la barra se ve de punta
+        items.push(prim.sphere(c, 3.4, { fill: COLORS.frame })); // En la vista lateral la barra se ve de punta
+        if (prop.rig) {
+          // Estructura de barra fija: travesaño corto hacia adelante y parantes al piso en cada extremo (visible en las 3 vistas).
+          const reach = prop.rig === true ? 24 : prop.rig;
+          [-32, 32].forEach((z) => {
+            items.push(prim.line(vAdd(c, v(0, 0, z)), vAdd(c, v(reach, 0, z)), COLORS.frame, 3));
+            items.push(prim.line(vAdd(c, v(reach, 0, z)), v(c[0] + reach, floorY, z), COLORS.frame, 3));
+          });
+        }
         break;
       }
       case 'rope': {
