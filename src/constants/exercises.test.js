@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildExerciseFrames } from '../utils/exerciseFrames';
+import { COACH_CUES } from './coachCues';
 import { EXERCISE_GUIDES, GUIDE_FAMILIES } from './exerciseGuides';
 import { POSES } from './exercisePoses';
 import { canonicalExerciseName, CATALOG_INTEGRITY_PROBLEMS, EXERCISE_CATALOG, resolveMuscleDistribution } from './exercises';
@@ -25,6 +26,13 @@ describe('catálogo de ejercicios', () => {
   it('cada ejercicio tiene ficha, familia y patrón de dibujo', () => {
     expect(names.filter((name) => !EXERCISE_GUIDES[name])).toEqual([]);
     expect(Object.entries(EXERCISE_GUIDES).filter(([, guide]) => !GUIDE_FAMILIES[guide.family] || !POSES[guide.pose]).map(([name]) => name)).toEqual([]);
+  });
+
+  it('cada familia tiene pasos, consejos y errores, y `cuesFrom` apunta a claves existentes', () => {
+    const incomplete = Object.entries(GUIDE_FAMILIES)
+      .filter(([, family]) => family.steps.length < 3 || family.tips.length < 2 || family.mistakes.length < 2 || (family.cuesFrom && !COACH_CUES[family.cuesFrom]))
+      .map(([id]) => id);
+    expect(incomplete).toEqual([]);
   });
 
   it('curl de muñeca y curl de muñeca invertido trabajan músculos distintos', () => {

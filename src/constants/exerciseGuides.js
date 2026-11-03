@@ -427,7 +427,7 @@ export const GUIDE_FAMILIES = Object.freeze({
   },
   lateral: {
     steps: [
-      'Párate con las mancuernas a los costados y los codos apenas flexionados.',
+      'Párate con el peso a los costados (mancuernas, polea o máquina) y los codos apenas flexionados.',
       'Inclina levemente el torso hacia adelante.',
       'Eleva los brazos hacia los costados hasta la altura de los hombros, guiando con los codos.',
       'Baja despacio hasta los costados sin dejar caer el peso.',
@@ -681,7 +681,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     steps: [
       'Inclina el torso hasta casi paralelo al piso, apoyándote en un banco si quieres.',
       'Lleva el codo atrás, pegado al cuerpo, con el brazo paralelo al piso.',
-      'Estira el codo llevando la mancuerna hacia atrás.',
+      'Estira el codo llevando el peso hacia atrás.',
       'Vuelve despacio hasta 90°.',
     ],
     tips: [
@@ -2083,6 +2083,456 @@ export const GUIDE_FAMILIES = Object.freeze({
       'Entrenar con los dedos doloridos.',
     ],
   },
+  // ───────── Familias propias (4.5.0): ejercicios que antes compartían pasos con otro parecido ─────────
+  cablePress: {
+    cuesFrom: 'chestMachine',
+    steps: [
+      'Ubica las dos poleas a la altura del pecho y toma una manija en cada mano.',
+      'Da un paso al frente con un pie adelantado, de espaldas a las poleas.',
+      'Empieza con las manos a los costados del pecho y los codos un poco por detrás del torso.',
+      'Empuja las manos hacia adelante hasta estirar los brazos, como en un press de banca de pie.',
+      'Vuelve despacio hasta sentir el pecho estirado.',
+    ],
+    tips: [
+      'Al estar de pie, el abdomen tiene que trabajar para que no te lleve hacia atrás.',
+      'Sirve para variar el press de banca sin cargar tanto el hombro.',
+    ],
+    mistakes: [
+      'Abrir los brazos en arco: eso ya es un cruce de poleas.',
+      'Arquear la espalda baja para empujar más peso.',
+    ],
+  },
+  machinePullover: {
+    cuesFrom: 'pullover',
+    steps: [
+      'Ajusta el asiento para que los hombros queden a la altura del eje de la máquina.',
+      'Apoya los codos o los antebrazos en los almohadones, con los brazos arriba.',
+      'Lleva los brazos hacia abajo en arco hasta que queden frente al abdomen.',
+      'Vuelve despacio hasta sentir el estiramiento en los dorsales.',
+    ],
+    tips: [
+      'Empuja con los codos, no con las manos: así trabaja el dorsal y no los brazos.',
+      'Mantén la espalda apoyada en todo el recorrido.',
+    ],
+    mistakes: [
+      'Despegar la espalda del respaldo al bajar.',
+      'Usar tanto peso que el recorrido queda a la mitad.',
+    ],
+  },
+  cableCrunch: {
+    cuesFrom: 'crunch',
+    steps: [
+      'Arrodíllate frente a la polea alta y toma la soga con las manos junto a la cabeza.',
+      'Deja la cadera fija, un poco por detrás de las rodillas.',
+      'Enrolla el torso llevando los codos hacia los muslos.',
+      'Vuelve despacio hasta estirar el abdomen, sin soltar la tensión.',
+    ],
+    tips: [
+      'Piensa en acercar las costillas a la pelvis, no la cabeza al piso.',
+      'Al tener carga, puedes trabajar en 10–15 repeticiones como cualquier otro músculo.',
+    ],
+    mistakes: [
+      'Sentarte sobre los talones y tirar con la cadera.',
+      'Tirar de la soga con los brazos.',
+    ],
+  },
+  machineCrunch: {
+    cuesFrom: 'crunch',
+    steps: [
+      'Siéntate en la máquina con la espalda apoyada y los pies trabados.',
+      'Toma las manijas o apoya el pecho en el almohadón, según el modelo.',
+      'Enrolla el torso hacia adelante y abajo, como si quisieras hacerte una bolita.',
+      'Vuelve despacio sin que el peso toque el tope.',
+    ],
+    tips: [
+      'Exhala al bajar: ayuda a contraer más el abdomen.',
+      'Elige un peso que te permita 10–20 repeticiones con el movimiento completo.',
+    ],
+    mistakes: [
+      'Doblarte por la cadera con la espalda recta: eso trabaja más los flexores de cadera.',
+      'Empujar con los brazos.',
+    ],
+  },
+  tricepsMachine: {
+    cuesFrom: 'pushdown',
+    steps: [
+      'Ajusta el asiento para que los codos queden alineados con el eje de la máquina.',
+      'Apoya la parte de atrás de los brazos en el almohadón y toma las manijas.',
+      'Estira los codos empujando las manijas hacia abajo o adelante.',
+      'Vuelve despacio hasta que los antebrazos queden casi verticales.',
+    ],
+    tips: [
+      'Los brazos no se despegan del almohadón: solo se mueven los antebrazos.',
+      'Buena opción para llegar cerca del fallo sin riesgo.',
+    ],
+    mistakes: [
+      'Inclinar el torso hacia adelante para mover más peso.',
+      'Cortar el recorrido arriba.',
+    ],
+  },
+  lSit: {
+    steps: [
+      'Apóyate en paralelas, en dos soportes o en el piso con las manos al lado de la cadera.',
+      'Estira los brazos y empuja hacia abajo para despegar el cuerpo, con los hombros lejos de las orejas.',
+      'Levanta las piernas estiradas hasta que queden paralelas al piso.',
+      'Sostén la posición el tiempo indicado.',
+    ],
+    tips: [
+      'Si todavía no puedes con las piernas rectas, empieza con las rodillas dobladas (tuck).',
+      'Registra los segundos como repeticiones.',
+    ],
+    mistakes: [
+      'Hundir los hombros: pierdes la base y cargas la articulación.',
+      'Dejar caer las piernas por debajo de la cadera.',
+    ],
+  },
+  pikePushUp: {
+    cuesFrom: 'pushUp',
+    steps: [
+      'Ponte en posición de flexión y camina con los pies hacia las manos hasta formar una V invertida.',
+      'Deja la cadera alta y la cabeza entre los brazos.',
+      'Flexiona los codos y baja la cabeza hacia el piso, un poco por delante de las manos.',
+      'Empuja hasta estirar los brazos.',
+    ],
+    tips: [
+      'Cuanto más cerca estén los pies de las manos, más trabajo para el hombro.',
+      'Para hacerlo más difícil, apoya los pies en un banco.',
+    ],
+    mistakes: [
+      'Bajar la cadera: se convierte en una flexión común.',
+      'Abrir mucho los codos hacia los costados.',
+    ],
+  },
+  bayesianCurl: {
+    cuesFrom: 'curl',
+    steps: [
+      'Párate de espaldas a la polea baja con un pie adelante y toma la manija.',
+      'Deja que el brazo quede un poco por detrás del cuerpo, estirado.',
+      'Flexiona el codo sin moverlo de lugar y sube la mano hacia el hombro.',
+      'Baja despacio hasta estirar el brazo por completo.',
+    ],
+    tips: [
+      'El brazo atrás estira el bíceps al principio del movimiento, donde más tensión recibe.',
+      'Hazlo a un brazo por vez para controlar mejor.',
+    ],
+    mistakes: [
+      'Llevar el codo hacia adelante al subir.',
+      'Inclinar el torso para ayudarte.',
+    ],
+  },
+  highCableCurl: {
+    cuesFrom: 'curl',
+    steps: [
+      'Párate entre dos poleas altas y toma una manija en cada mano.',
+      'Abre los brazos en cruz, a la altura de los hombros, con las palmas hacia arriba.',
+      'Flexiona los codos llevando las manos hacia las orejas.',
+      'Vuelve despacio hasta estirar los brazos.',
+    ],
+    tips: [
+      'Los codos quedan fijos en el aire: solo se mueven los antebrazos.',
+      'Funciona bien con poco peso y repeticiones altas al final del día de brazos.',
+    ],
+    mistakes: [
+      'Bajar los codos a medida que te cansas.',
+      'Usar tanto peso que los hombros terminan haciendo el trabajo.',
+    ],
+  },
+  spiderCurl: {
+    cuesFrom: 'curl',
+    steps: [
+      'Acuéstate boca abajo en un banco inclinado a unos 45°, con el pecho apoyado.',
+      'Deja los brazos colgando verticales con el peso en las manos.',
+      'Flexiona los codos y sube el peso sin mover los brazos.',
+      'Baja despacio hasta estirar los brazos.',
+    ],
+    tips: [
+      'Al no poder balancearte, es uno de los curls más estrictos.',
+      'La tensión es máxima arriba: aprieta un segundo.',
+    ],
+    mistakes: [
+      'Llevar los codos hacia adelante para subir el peso.',
+      'Despegar el pecho del banco.',
+    ],
+  },
+  trxCurl: {
+    cuesFrom: 'curl',
+    steps: [
+      'Toma las manijas del TRX con las palmas hacia arriba y camina con los pies hacia adelante.',
+      'Inclina el cuerpo hacia atrás con los brazos estirados al frente, el cuerpo recto como una tabla.',
+      'Flexiona los codos y lleva las manos hacia la frente, sin bajar los codos.',
+      'Vuelve despacio hasta estirar los brazos.',
+    ],
+    tips: [
+      'Cuanto más inclinado estés, más difícil.',
+      'Aprieta glúteos y abdomen para que la cadera no se doble.',
+    ],
+    mistakes: [
+      'Doblar la cadera para ayudarte a subir.',
+      'Bajar los codos: se convierte en un remo.',
+    ],
+  },
+  cableOverheadExt: {
+    cuesFrom: 'overheadExt',
+    steps: [
+      'Engancha la soga en la polea, de espaldas a ella, con un pie adelantado.',
+      'Toma la soga detrás de la cabeza e inclina un poco el torso hacia adelante.',
+      'Con los codos apuntando al frente, estira los brazos hacia adelante y arriba.',
+      'Vuelve despacio hasta que las manos queden detrás de la cabeza.',
+    ],
+    tips: [
+      'Con los brazos arriba, la cabeza larga del tríceps trabaja estirada.',
+      'Mantén los codos cerca de la cabeza.',
+    ],
+    mistakes: [
+      'Abrir los codos hacia los costados.',
+      'Mover los hombros en vez de los codos.',
+    ],
+  },
+  wristRoller: {
+    cuesFrom: 'wristFlex',
+    steps: [
+      'Párate con los brazos estirados al frente, a la altura de los hombros, tomando el rodillo.',
+      'Gira las muñecas de a una para enrollar la cuerda hasta subir el peso.',
+      'Cuando llegue arriba, desenrolla despacio hasta que el peso toque el piso.',
+    ],
+    tips: [
+      'Enrollar hacia ti trabaja los flexores; hacia afuera, los extensores.',
+      'Usa poco peso: el antebrazo se cansa rápido.',
+    ],
+    mistakes: [
+      'Bajar los brazos a medida que te cansas.',
+      'Dejar caer el peso al desenrollar.',
+    ],
+  },
+  tireFlip: {
+    steps: [
+      'Ponte en cuclillas frente al neumático, con los dedos debajo del borde y el pecho contra él.',
+      'Empuja con las piernas hacia adelante y arriba, como en un salto.',
+      'Cuando el neumático pase la cintura, lleva una rodilla hacia él y cambia a las manos.',
+      'Empújalo con los brazos hasta que se dé vuelta.',
+    ],
+    tips: [
+      'La fuerza sale de las piernas y la cadera, no de tirar con la espalda.',
+      'Hazlo en series cortas (3–6 vueltas) con descanso completo.',
+    ],
+    mistakes: [
+      'Levantar con la espalda redonda, como un peso muerto mal hecho.',
+      'Tirar del neumático con los bíceps: los brazos solo sostienen.',
+    ],
+  },
+  stoneLift: {
+    steps: [
+      'Párate sobre la piedra con los pies a los costados y abrázala por debajo.',
+      'Levántala del piso y apóyala sobre los muslos.',
+      'Acomoda las manos más arriba y extiende la cadera de golpe para llevarla al pecho.',
+      'Súbela a la plataforma o al hombro, según la variante.',
+    ],
+    tips: [
+      'Es normal que la espalda se redondee un poco con la piedra: por eso se empieza muy liviano.',
+      'Usa ropa con mangas: la piedra raspa los antebrazos.',
+    ],
+    mistakes: [
+      'Intentar subirla de un tirón sin apoyarla en los muslos.',
+      'Hacerlo con cansancio acumulado.',
+    ],
+  },
+  sledgehammer: {
+    steps: [
+      'Párate frente al neumático con los pies al ancho de los hombros.',
+      'Toma la maza con una mano cerca de la cabeza y la otra al final del mango.',
+      'Súbela por encima del hombro y golpea el neumático deslizando la mano de arriba hacia abajo.',
+      'Alterna el lado en cada golpe o cada serie.',
+    ],
+    tips: [
+      'El golpe sale del giro de la cadera y del tronco.',
+      'Sirve como cardio: registra los minutos como repeticiones.',
+    ],
+    mistakes: [
+      'Golpear solo con los brazos.',
+      'Pararte tan cerca que la maza rebote hacia ti.',
+    ],
+  },
+  jeffersonCurl: {
+    steps: [
+      'Párate sobre un cajón o escalón con las piernas estiradas y el peso en las manos.',
+      'Baja el mentón al pecho y enrolla la espalda de arriba hacia abajo, vértebra por vértebra.',
+      'Baja hasta donde llegues sin dolor; el peso puede pasar por debajo de los pies.',
+      'Sube desenrollando desde la espalda baja hasta la cabeza.',
+    ],
+    tips: [
+      'Es un ejercicio de movilidad: empieza sin peso o con muy poco y aumenta de a poco.',
+      'Muévete lento, sobre todo al subir.',
+    ],
+    mistakes: [
+      'Usar mucho peso o hacerlo rápido.',
+      'Hacerlo con dolor lumbar o después de una sesión pesada.',
+    ],
+  },
+  dragonFlag: {
+    steps: [
+      'Acuéstate en un banco y agárrate del borde por detrás de la cabeza.',
+      'Sube el cuerpo recto hasta que solo los hombros toquen el banco.',
+      'Baja todo el cuerpo en bloque, despacio, sin doblar la cadera.',
+      'Frena antes de tocar el banco y vuelve a subir.',
+    ],
+    tips: [
+      'Es avanzado: empieza con las rodillas dobladas o haciendo solo la bajada.',
+      'Aprieta glúteos y abdomen para mantener el cuerpo recto.',
+    ],
+    mistakes: [
+      'Doblar la cadera al bajar.',
+      'Apoyar el cuello en vez de los hombros.',
+    ],
+  },
+  windshieldWiper: {
+    steps: [
+      'Cuélgate de la barra (o acuéstate boca arriba con los brazos abiertos).',
+      'Sube las piernas hasta que queden apuntando hacia arriba.',
+      'Llévalas hacia un lado sin girar los hombros, como un limpiaparabrisas.',
+      'Vuelve al centro y repite hacia el otro lado.',
+    ],
+    tips: [
+      'Acostado es mucho más fácil: empieza por ahí.',
+      'Las piernas pueden ir un poco dobladas al principio.',
+    ],
+    mistakes: [
+      'Balancearte para tomar impulso.',
+      'Bajar las piernas más de lo que puedes controlar.',
+    ],
+  },
+  clamshell: {
+    steps: [
+      'Acuéstate de costado con las rodillas dobladas a unos 45° y los pies juntos.',
+      'Apoya la cabeza en el brazo de abajo y alinea la cadera, una encima de la otra.',
+      'Sin separar los pies, abre la rodilla de arriba todo lo que puedas.',
+      'Ciérrala despacio.',
+    ],
+    tips: [
+      'Con una banda arriba de las rodillas es más difícil.',
+      'Buen ejercicio de calentamiento para el glúteo medio.',
+    ],
+    mistakes: [
+      'Girar la cadera hacia atrás para abrir más.',
+      'Hacerlo rápido.',
+    ],
+  },
+  pressCalf: {
+    cuesFrom: 'calf',
+    steps: [
+      'Siéntate en la prensa y apoya solo la punta de los pies en el borde de la plataforma.',
+      'Estira las piernas sin trabar las rodillas y quita los seguros.',
+      'Empuja con la punta de los pies hasta extender los tobillos.',
+      'Vuelve despacio hasta sentir el estiramiento de la pantorrilla.',
+    ],
+    tips: [
+      'Haz una pausa de un segundo abajo, con la pantorrilla estirada.',
+      'Las rodillas quedan fijas todo el tiempo.',
+    ],
+    mistakes: [
+      'Doblar las rodillas para empujar.',
+      'Dejar que los pies se resbalen de la plataforma.',
+    ],
+  },
+  cossackSquat: {
+    cuesFrom: 'lunge',
+    steps: [
+      'Párate con las piernas muy abiertas y las puntas un poco hacia afuera.',
+      'Baja hacia un lado flexionando esa rodilla, con el talón apoyado.',
+      'La otra pierna queda estirada, con la punta del pie hacia arriba.',
+      'Vuelve al centro y baja hacia el otro lado.',
+    ],
+    tips: [
+      'Lleva los brazos al frente para equilibrarte.',
+      'Baja solo hasta donde puedas mantener el talón en el piso.',
+    ],
+    mistakes: [
+      'Levantar el talón de la pierna que se dobla.',
+      'Inclinar mucho el torso hacia adelante.',
+    ],
+  },
+  skaterSquat: {
+    steps: [
+      'Párate en una pierna con la otra doblada hacia atrás.',
+      'Lleva los brazos adelante para equilibrarte.',
+      'Baja hasta que la rodilla de atrás roce el piso o un almohadón.',
+      'Sube empujando con todo el pie de apoyo.',
+    ],
+    tips: [
+      'Pon un almohadón o un disco debajo de la rodilla para marcar la profundidad.',
+      'Es más fácil que la pistol y trabaja lo mismo: buen paso previo.',
+    ],
+    mistakes: [
+      'Apoyar la rodilla de golpe.',
+      'Dejar que la rodilla de apoyo se vaya hacia adentro.',
+    ],
+  },
+  cubanPress: {
+    cuesFrom: 'extRot',
+    steps: [
+      'Párate con una barra liviana o mancuernas, brazos estirados frente a los muslos.',
+      'Sube los codos hacia los costados hasta la altura de los hombros (como un remo al mentón).',
+      'Sin bajar los codos, gira los antebrazos hacia arriba hasta que queden verticales.',
+      'Empuja el peso por encima de la cabeza y baja haciendo el camino al revés.',
+    ],
+    tips: [
+      'Usa muy poco peso: es para fortalecer y calentar el manguito rotador.',
+      'Muévete lento en el giro.',
+    ],
+    mistakes: [
+      'Bajar los codos al girar.',
+      'Usar el peso de tu press: el manguito rotador es chico.',
+    ],
+  },
+  devilPress: {
+    steps: [
+      'Párate con una mancuerna a cada lado de los pies.',
+      'Apoya las manos en las mancuernas, salta atrás y baja el pecho al piso como en un burpee.',
+      'Vuelve con los pies hacia las manos.',
+      'Lleva las mancuernas desde el piso hasta arriba de la cabeza en un solo movimiento, usando la cadera.',
+    ],
+    tips: [
+      'El impulso sale de la cadera, como en un kettlebell swing.',
+      'Elige un peso liviano: es un ejercicio de condición física.',
+    ],
+    mistakes: [
+      'Subir las mancuernas con la espalda redonda.',
+      'Tirar solo con los brazos.',
+    ],
+  },
+  spanishSquat: {
+    cuesFrom: 'squat',
+    steps: [
+      'Engancha una banda gruesa en un soporte fijo y pásala por detrás de las rodillas.',
+      'Retrocede hasta que la banda quede tensa y apoya bien los pies.',
+      'Baja con el torso erguido, dejando que la banda sostenga las rodillas.',
+      'Sube hasta estirar las piernas.',
+    ],
+    tips: [
+      'Las tibias quedan casi verticales: trabaja mucho el cuádriceps sin cargar la rodilla.',
+      'Se usa mucho en rehabilitación del tendón rotuliano.',
+    ],
+    mistakes: [
+      'Llevar la cadera atrás como en una sentadilla común.',
+      'Usar una banda floja.',
+    ],
+  },
+  cableRearFly: {
+    cuesFrom: 'rearDelt',
+    steps: [
+      'Ubica las dos poleas a la altura de los hombros, sin manijas o con manijas chicas.',
+      'Toma el cable izquierdo con la mano derecha y el derecho con la izquierda, brazos cruzados al frente.',
+      'Abre los brazos hacia los costados y atrás, con los codos apenas doblados.',
+      'Vuelve despacio hasta cruzar los brazos.',
+    ],
+    tips: [
+      'Piensa en llevar las manos lejos, no en juntar los omóplatos.',
+      'Funciona muy bien con poco peso y 12–20 repeticiones.',
+    ],
+    mistakes: [
+      'Doblar los codos y convertirlo en un remo.',
+      'Subir los hombros hacia las orejas.',
+    ],
+  },
 });
 
 // [pose, familia, opciones] — `gear` fuerza el implemento del dibujo; `extra` agrega un consejo propio.
@@ -2145,7 +2595,7 @@ export const EXERCISE_GUIDES = Object.freeze({
   'REMO SEAL': entry('sealRow', 'machineRow', { gear: 'barbell', extra: 'Acostado boca abajo sobre un banco alto: la barra sube hasta tocar el banco. El remo más estricto que existe.' }),
   'REMO KROC': entry('oneArmRow', 'oneArmRow', { extra: 'Mancuerna pesada y muchas repeticiones (15–30) con algo de impulso controlado al final de la serie.' }),
   'REMO MEADOWS': entry('oneArmRow', 'oneArmRow', { gear: 'barbell', extra: 'De costado a una barra anclada (landmine), con agarre prono en el extremo: gran estiramiento del dorsal abajo.' }),
-  'PULLOVER EN MAQUINA': entry('machinePullover', 'pullover', { extra: 'La máquina mantiene la tensión en todo el arco y aísla el dorsal mejor que la mancuerna.' }),
+  'PULLOVER EN MAQUINA': entry('machinePullover', 'machinePullover', { extra: 'La máquina mantiene la tensión en todo el arco y aísla el dorsal mejor que la mancuerna.' }),
   'JALON UNILATERAL': entry('latPulldown', 'pulldown', { extra: 'Una mano por vez con una manija: permite llevar el codo más atrás y abajo, y corregir diferencias entre lados.' }),
   SUPERMAN: entry('superman', 'superman'),
 
@@ -2167,9 +2617,9 @@ export const EXERCISE_GUIDES = Object.freeze({
   'ROTACION EXTERNA EN POLEA': entry('externalRotation', 'extRot'),
   'ELEVACIONES EN Y': entry('yRaise', 'yRaise'),
   'PRESS Z': entry('zPress', 'ohp', { extra: 'Sentado en el piso con las piernas estiradas: sin apoyo para la espalda, el core debe sostener el tronco recto.' }),
-  'VUELO LATERAL INCLINADO': entry('lateralRaise', 'lateral', { extra: 'Tómate de un poste con la otra mano e inclina el cuerpo alejándote: la tensión empieza desde abajo.' }),
-  'CRUCE POSTERIOR EN POLEA': entry('cableRearFly', 'rearDelt', { extra: 'Poleas cruzadas a la altura de los hombros: tira hacia afuera con los brazos casi estirados.' }),
-  'PRESS CUBANO': entry('uprightRow', 'extRot', { extra: 'Remo al mentón hasta codos a la altura del hombro, rotación externa (antebrazos verticales) y press. Muy liviano: es trabajo de manguito.' }),
+  'VUELO LATERAL INCLINADO': entry('leaningLateralRaise', 'lateral', { extra: 'Tómate de un poste con la otra mano e inclina el cuerpo alejándote: la tensión empieza desde abajo.' }),
+  'CRUCE POSTERIOR EN POLEA': entry('cableRearFly', 'cableRearFly'),
+  'PRESS CUBANO': entry('uprightRow', 'cubanPress'),
 
   // Bíceps
   'CURL CON BARRA': entry('curl', 'curl'),
@@ -2181,13 +2631,13 @@ export const EXERCISE_GUIDES = Object.freeze({
   'CURL POLEA': entry('curl', 'curl', { gear: 'cable', extra: 'La polea mantiene la tensión también abajo, donde la mancuerna "descansa".' }),
   'CURL SCOTT': entry('preacherCurl', 'preacher'),
   'CURL CONCENTRADO': entry('concentrationCurl', 'concentration'),
-  'CURL BAYESIANO': entry('bayesianCurl', 'curl', { gear: 'cable', extra: 'De espaldas a la polea baja, con el brazo por detrás del cuerpo: estira mucho el bíceps al empezar.' }),
+  'CURL BAYESIANO': entry('bayesianCurl', 'bayesianCurl', { gear: 'cable' }),
   'CURL BICEPS INCLINADO': entry('inclineCurl', 'inclineCurl'),
-  'CURL ARAÑA': entry('spiderCurl', 'curl', { gear: 'dumbbell', extra: 'Boca abajo sobre un banco inclinado, con los brazos colgando verticales: máxima contracción arriba.' }),
+  'CURL ARAÑA': entry('spiderCurl', 'spiderCurl', { gear: 'dumbbell' }),
   'CURL 21': entry('curl', 'curl', { extra: '7 repeticiones de abajo a la mitad, 7 de la mitad hacia arriba y 7 completas, sin descanso. Usa menos peso.' }),
   'CURL EN MAQUINA': entry('preacherCurl', 'preacher', { gear: 'machine' }),
   'CURL DRAG': entry('curl', 'curl', { gear: 'barbell', extra: 'La barra sube "arrastrándose" pegada al cuerpo mientras los codos van hacia atrás: más cabeza corta y menos deltoides.' }),
-  'CURL EN POLEA ALTA': entry('highCableCurl', 'curl', { extra: 'Entre dos poleas altas, brazos en cruz: el bíceps trabaja con el hombro flexionado, máxima contracción.' }),
+  'CURL EN POLEA ALTA': entry('highCableCurl', 'highCableCurl'),
   'CURL ZOTTMAN': entry('curl', 'curl', { gear: 'dumbbell', extra: 'Sube con la palma hacia arriba y, arriba, gira a palma hacia abajo para bajar en 3 segundos: bíceps al subir y braquiorradial al bajar.' }),
   'CURL MARTILLO CRUZADO': entry('curl', 'curl', { gear: 'dumbbell', extra: 'Agarre neutro y la mancuerna cruza hacia el hombro contrario: énfasis en braquial y braquiorradial.' }),
   'CURL INVERTIDO': entry('curl', 'curl', { extra: 'Palmas hacia abajo (agarre prono): trabaja sobre todo antebrazos y braquial. Usa bastante menos peso.' }),
@@ -2200,7 +2650,7 @@ export const EXERCISE_GUIDES = Object.freeze({
   'PRESS FRANCES CON MANCUERNAS': entry('skullCrusher', 'skullCrusher', { gear: 'dumbbell' }),
   'EXTENSION DE TRICEPS CON MANCUERNA': entry('overheadExtension', 'overheadExt'),
   'TRICEPS COPA': entry('overheadExtension', 'overheadExt', { extra: 'Sostén una mancuerna con ambas manos por el disco superior, formando una copa.' }),
-  'TRICEPS TRAS NUCA EN POLEA': entry('cableOverheadExtension', 'overheadExt', { extra: 'De espaldas a la polea, con la soga detrás de la cabeza e inclinado hacia adelante: tensión constante.' }),
+  'TRICEPS TRAS NUCA EN POLEA': entry('cableOverheadExtension', 'cableOverheadExt'),
   'PATADA DE TRICEPS': entry('tricepsKickback', 'kickback'),
   'FONDOS EN PARALELAS': entry('dips', 'dips', { extra: 'Torso vertical y codos hacia atrás para cargar el tríceps.' }),
   'FONDOS EN BANCO': entry('benchDips', 'benchDips'),
@@ -2213,7 +2663,7 @@ export const EXERCISE_GUIDES = Object.freeze({
   // Antebrazos
   'CURL DE MUÑECA': entry('wristCurl', 'wristFlex'),
   'CURL DE MUÑECA INVERTIDO': entry('reverseWristCurl', 'wristExt'),
-  'RODILLO DE MUÑECA': entry('wristRoller', 'wrist', { gear: 'none', extra: 'Con los brazos al frente, enrolla la cuerda girando las muñecas hasta subir el peso y desenróllala despacio.' }),
+  'RODILLO DE MUÑECA': entry('wristRoller', 'wristRoller', { gear: 'none' }),
   'COLGADO EN BARRA': entry('deadHang', 'deadHang'),
   'CURL DE MUÑECA TRAS LA ESPALDA': entry('behindBackWristCurl', 'wristFlex', { extra: 'De pie, con la barra detrás de los glúteos y las palmas hacia atrás: permite usar más peso que sentado.' }),
   'CURL INVERTIDO EN POLEA': entry('curl', 'curl', { gear: 'cable', extra: 'Agarre prono en la barra de la polea baja: tensión constante en braquiorradial y extensores.' }),
@@ -2226,8 +2676,8 @@ export const EXERCISE_GUIDES = Object.freeze({
 
   // Core
   CRUNCH: entry('crunch', 'crunch'),
-  'CRUNCH EN POLEA': entry('cableCrunch', 'crunch', { extra: 'De rodillas frente a la polea alta, con la soga junto a la cabeza: enrolla el torso hacia las rodillas sin mover la cadera.' }),
-  'CRUNCH EN MAQUINA': entry('machineCrunch', 'crunch', { extra: 'Ajusta el peso para hacer entre 10 y 20 repeticiones enrollando la columna, no doblando la cadera.' }),
+  'CRUNCH EN POLEA': entry('cableCrunch', 'cableCrunch'),
+  'CRUNCH EN MAQUINA': entry('machineCrunch', 'machineCrunch'),
   'CRUNCH INVERSO': entry('reverseCrunch', 'reverseCrunch'),
   'SIT UP': entry('sitUp', 'crunch', { extra: 'Sube hasta sentarte por completo; trabaja también los flexores de cadera. Fija los pies si hace falta.' }),
   PLANCHA: entry('plank', 'plank'),
@@ -2265,14 +2715,14 @@ export const EXERCISE_GUIDES = Object.freeze({
   'CURL NORDICO': entry('nordicCurl', 'nordic'),
   'PESO MUERTO RUMANO': entry('romanianDeadlift', 'hinge'),
   'PESO MUERTO PIERNAS RIGIDAS': entry('stiffLeg', 'hinge', { extra: 'Rodillas casi estiradas: más estiramiento de isquiotibiales. Baja solo mientras la espalda siga recta.' }),
-  'PESO MUERTO SUMO': entry('deadlift', 'deadlift', { extra: 'Pies muy abiertos con las puntas hacia afuera y manos por dentro de las piernas: torso más vertical y más trabajo de aductores.' }),
+  'PESO MUERTO SUMO': entry('sumoDeadlift', 'deadlift', { extra: 'Pies muy abiertos con las puntas hacia afuera y manos por dentro de las piernas: torso más vertical y más trabajo de aductores.' }),
   ESTOCADAS: entry('lunge', 'lunge'),
   'ESTOCADAS CAMINANDO': entry('lunge', 'lunge', { extra: 'Avanza con cada estocada: el equilibrio exige más trabajo de glúteo medio.' }),
   'ESTOCADAS INVERSAS': entry('reverseLunge', 'lunge', { extra: 'Paso hacia atrás: menos carga sobre la rodilla de adelante y más glúteo.' }),
   'SUBIDAS AL CAJON': entry('stepUp', 'stepUp'),
   ADUCTOR: entry('seatedAdduction', 'adductor'),
-  'SENTADILLA ESPAÑOLA': entry('spanishSquat', 'squat', { gear: 'none', extra: 'Una banda gruesa detrás de las rodillas anclada adelante: el torso queda vertical y las tibias también. Cuádriceps puro y amigable con rodillas sensibles.' }),
-  'SENTADILLA ZERCHER': entry('frontSquat', 'squat', { gear: 'barbell', extra: 'La barra va en el pliegue de los codos, pegada al cuerpo: obliga a mantener el torso erguido y suma mucho core y espalda alta.' }),
+  'SENTADILLA ESPAÑOLA': entry('spanishSquat', 'spanishSquat', { gear: 'none' }),
+  'SENTADILLA ZERCHER': entry('zercherSquat', 'squat', { gear: 'barbell', extra: 'La barra va en el pliegue de los codos, pegada al cuerpo: obliga a mantener el torso erguido y suma mucho core y espalda alta.' }),
   'PRENSA UNILATERAL': entry('legPress', 'legPress', { extra: 'Una pierna por vez con el pie en el centro de la plataforma: corrige diferencias entre lados.' }),
   'ESTOCADA LATERAL': entry('lateralLunge', 'lunge', { extra: 'Paso amplio hacia el costado, cadera atrás y la otra pierna estirada: trabaja aductores y glúteo en el plano lateral.' }),
   'PESO MUERTO RUMANO UNILATERAL': entry('singleLegRdl', 'hinge', { extra: 'La pierna libre sube por detrás alineada con el torso; la cadera no se abre. Sostente de algo al principio para el equilibrio.' }),
@@ -2289,13 +2739,13 @@ export const EXERCISE_GUIDES = Object.freeze({
   'ABDUCCION EN POLEA': entry('hipAbduction', 'abductor', { gear: 'none', extra: 'Tobillera en la polea baja, de costado: separa la pierna más lejana.' }),
   'CAMINATA LATERAL CON BANDA': entry('bandWalk', 'abductor', { extra: 'Banda en las rodillas o tobillos, media sentadilla y pasos laterales cortos sin juntar los pies.' }),
   'PULL THROUGH': entry('pullThrough', 'pullThrough'),
-  ALMEJA: entry('sideLyingClam', 'abductor', { gear: 'none', extra: 'Acostado de costado con las rodillas flexionadas: abre la rodilla de arriba manteniendo los pies juntos. Una banda lo hace más difícil.' }),
+  ALMEJA: entry('sideLyingClam', 'clamshell', { gear: 'none' }),
   'HIP THRUST UNILATERAL': entry('hipThrust', 'hipThrust', { gear: 'none', extra: 'Una pierna apoyada y la otra en el aire: duplica la carga por lado sin barra pesada.' }),
   'FROG PUMP': entry('frogPump', 'gluteBridge', { extra: 'Plantas de los pies juntas y rodillas abiertas: muchas repeticiones (20–50) con la cadera en rotación externa enfocan el glúteo.' }),
 
   // Pantorrillas
   'GEMELOS PARADO': entry('calfRaise', 'calf'),
-  'GEMELOS EN PRENSA': entry('pressCalf', 'calf', { extra: 'En la prensa, con las piernas casi estiradas y solo la punta de los pies en la plataforma.' }),
+  'GEMELOS EN PRENSA': entry('pressCalf', 'pressCalf'),
   'GEMELOS EN MULTIPOWER': entry('calfRaise', 'calf', { extra: 'Con la barra guiada sobre la espalda y un disco o escalón debajo de las puntas.' }),
   'SOLEO SENTADO': entry('seatedCalf', 'calf'),
   'ELEVACION DE PUNTAS': entry('tibialRaise', 'tibial'),
@@ -2348,7 +2798,7 @@ export const EXERCISE_GUIDES = Object.freeze({
   'TOES TO BAR': entry('toesToBar', 'legRaise', { extra: 'Lleva los pies hasta tocar la barra. El kipping (balanceo controlado) permite encadenar repeticiones.' }),
   'DOBLE SALTO DE SOGA': entry('jumpRope', 'jumpRope', { extra: 'La soga pasa dos veces por salto: salta un poco más alto y acelera el giro de muñecas.' }),
   'BURPEE SOBRE LA BARRA': entry('burpeeOverBar', 'burpee', { extra: 'Al subir, salta por encima de la barra con los dos pies y empieza el siguiente burpee del otro lado.' }),
-  'DEVIL PRESS': entry('devilPress', 'olympic', { extra: 'Burpee con las manos sobre dos mancuernas; al subir, llévalas sobre la cabeza en un solo movimiento de cadera.' }),
+  'DEVIL PRESS': entry('devilPress', 'devilPress'),
   ENVION: entry('splitJerk', 'olympic', { extra: 'Dos tiempos: cargada a los hombros y luego envión, flexionando las rodillas y metiéndote debajo de la barra en tijera.' }),
   'FLEXIONES EN VERTICAL': entry('handstandPushUp', 'hspu'),
   'FONDOS EN ANILLAS': entry('dips', 'dips', { extra: 'Las anillas son inestables: gira las palmas hacia afuera arriba y mantén las anillas pegadas al cuerpo.' }),
@@ -2385,7 +2835,7 @@ export const EXERCISE_GUIDES = Object.freeze({
   ESCALADA: entry('climbing', 'climbing'),
 
   // Ampliación 4.5.0
-  'PRESS DE PECHO EN POLEA': entry('cablePress', 'cableCross', { extra: 'De pie entre dos poleas a la altura del pecho, un pie adelante. Empuja al frente como en un press, no en arco.' }),
+  'PRESS DE PECHO EN POLEA': entry('cablePress', 'cablePress'),
   'PRESS DECLINADO EN MAQUINA': entry('machinePress', 'chestMachine', { extra: 'Las manijas tienen que quedar a la altura de la parte baja del pecho.' }),
   'PRESS GUILLOTINA': entry('benchPress', 'press', { extra: 'La barra baja hacia el cuello con los codos abiertos. Estira mucho el pecho, pero carga el hombro: poco peso, siempre con seguros o compañero.' }),
   'FLEXIONES EN ANILLAS': entry('pushUp', 'pushUp', { extra: 'Las anillas se mueven: tienes que estabilizar el hombro todo el tiempo. Arriba, gíralas hacia afuera.' }),
@@ -2409,11 +2859,11 @@ export const EXERCISE_GUIDES = Object.freeze({
   'VUELOS ANTERIORES CON DISCO': entry('frontRaise', 'frontRaise', { gear: 'plate', extra: 'Toma el disco por los costados y súbelo hasta los ojos sin balancearte.' }),
   'PRESS DE HOMBROS CON KETTLEBELL': entry('overheadPress', 'ohp', { extra: 'La pesa descansa sobre el antebrazo. Sube con el puño firme y la muñeca recta.' }),
   'REMO MENTON EN POLEA': entry('uprightRow', 'uprightRow', { extra: 'Sube hasta la altura del pecho, no más: por encima se comprime el hombro.' }),
-  'FLEXIONES PIKE': entry('pikePushUp', 'hspu', { extra: 'Cadera bien alta, como una V invertida. Baja la cabeza entre las manos. Es la base para la flexión en vertical.' }),
+  'FLEXIONES PIKE': entry('pikePushUp', 'pikePushUp'),
   'CURL SCOTT CON MANCUERNA': entry('preacherCurl', 'preacher', { extra: 'A un brazo: no puedes compensar con el otro lado.' }),
   'CURL SCOTT EN MAQUINA': entry('preacherCurl', 'preacher', { extra: 'El recorrido guiado te deja llegar cerca del fallo sin perder la técnica.' }),
-  'CURL DE BICEPS EN TRX': entry('trxRow', 'curl', { gear: 'cable', extra: 'Cuerpo inclinado atrás, brazos al frente. Flexiona los codos y lleva las manos a la frente. Cuanto más inclinado, más difícil.' }),
-  'EXTENSION DE TRICEPS EN MAQUINA': entry('seatedTricepsMachine', 'pushdown', { extra: 'Sentado, con los brazos apoyados en el almohadón: solo se mueven los antebrazos.' }),
+  'CURL DE BICEPS EN TRX': entry('trxRow', 'trxCurl', { gear: 'cable' }),
+  'EXTENSION DE TRICEPS EN MAQUINA': entry('seatedTricepsMachine', 'tricepsMachine'),
   'PRESS FRANCES EN POLEA': entry('skullCrusher', 'skullCrusher', { extra: 'Acostado con la polea detrás de la cabeza: la tensión se mantiene durante todo el recorrido.' }),
   'PATADA DE TRICEPS EN POLEA': entry('tricepsKickback', 'kickback', { extra: 'Con la polea, el brazo sigue cargado también abajo, no solo al estirar.' }),
   'FONDOS EN BARRA RECTA': entry('dips', 'dips', { extra: 'Sobre una barra, con el cuerpo un poco adelante. Más difícil que en paralelas y clave para el muscle up.' }),
@@ -2421,23 +2871,23 @@ export const EXERCISE_GUIDES = Object.freeze({
   'SENTADILLA CON MANCUERNAS': entry('squat', 'squat', { gear: 'dumbbell', extra: 'Mancuernas a los costados con los brazos estirados. El agarre suele cansarse antes que las piernas.' }),
   'ESTOCADAS CON BARRA': entry('lunge', 'lunge', { gear: 'barbell', extra: 'Barra sobre la espalda alta. Da un paso largo y estable: el equilibrio es lo difícil.' }),
   'ESTOCADAS EN MULTIPOWER': entry('lunge', 'lunge', { gear: 'barbell', extra: 'Pies fijos, uno adelante y otro atrás. La barra guiada resuelve el equilibrio.' }),
-  'SENTADILLA COSACA': entry('lateralLunge', 'lunge', { extra: 'Piernas muy abiertas: bajas hacia un lado y la otra pierna queda estirada con la punta hacia arriba. Mejora mucho la movilidad de cadera.' }),
-  'SENTADILLA DEL PATINADOR': entry('pistolSquat', 'pistol', { extra: 'A una pierna, la otra rodilla baja hacia atrás hasta rozar el piso. Más fácil que la pistol.' }),
+  'SENTADILLA COSACA': entry('lateralLunge', 'cossackSquat'),
+  'SENTADILLA DEL PATINADOR': entry('pistolSquat', 'skaterSquat'),
   'CURL FEMORAL CON MANCUERNA': entry('lyingLegCurl', 'legCurl', { extra: 'Boca abajo en un banco con la mancuerna entre los pies. Sube despacio para que no se caiga.' }),
   'PESO MUERTO RUMANO CON MANCUERNAS': entry('romanianDeadlift', 'hinge', { gear: 'dumbbell' }),
   'SILLON DE CUADRICEPS UNILATERAL': entry('legExtension', 'legExtension', { extra: 'A una pierna: corrige diferencias de fuerza entre lados.' }),
-  'PATADA DE GLUTEO EN POLEA': entry('gluteKickback', 'gluteKickback', { gear: 'cable', extra: 'Tobillera en la polea baja. Patea hacia atrás sin arquear la espalda.' }),
+  'PATADA DE GLUTEO EN POLEA': entry('cableKickback', 'gluteKickback', { extra: 'Tobillera en la polea baja. Patea hacia atrás sin arquear la espalda.' }),
   'HIP THRUST EN MULTIPOWER': entry('hipThrust', 'hipThrust', { extra: 'La barra guiada evita que se desplace: más fácil de armar y de cargar.' }),
   'PATADA DE GLUTEO EN MAQUINA': entry('gluteKickback', 'gluteKickback', { gear: 'machine' }),
   'GEMELOS EN MAQUINA': entry('calfRaise', 'calf', { gear: 'machine' }),
   'GEMELOS CON MANCUERNAS': entry('calfRaise', 'calf', { gear: 'dumbbell', extra: 'Sube a un escalón para bajar el talón más allá del piso.' }),
-  'L SIT': entry('lSit', 'hollow', { extra: 'Apoyado en paralelas o en el piso, brazos estirados y piernas rectas al frente. Si no puedes, empieza con las rodillas dobladas.' }),
-  'DRAGON FLAG': entry('reverseCrunch', 'legRaise', { extra: 'Acostado en un banco, agarrado detrás de la cabeza: bajas el cuerpo recto apoyado solo en los hombros. Avanzado; empieza con rodillas dobladas.' }),
-  LIMPIAPARABRISAS: entry('hangingLegRaise', 'legRaise', { extra: 'Colgado o acostado, con las piernas arriba, llévalas de un lado al otro como un limpiaparabrisas.' }),
-  'VOLTEO DE NEUMATICO': entry('tireFlip', 'deadlift', { extra: 'Pecho contra el neumático, empuja con las piernas hacia adelante y arriba, y termina empujando con las manos. No lo levantes con la espalda redonda.' }),
-  'GOLPES CON MAZA': entry('slamBall', 'slamBall', { extra: 'Golpea el neumático alternando lados. La fuerza sale del giro de cadera, no solo de los brazos.' }),
-  'LEVANTAMIENTO DE PIEDRA': entry('stoneLift', 'deadlift', { extra: 'Abraza la piedra entre las piernas, súbela a los muslos y después extiende la cadera para llevarla al pecho o a una plataforma.' }),
-  'JEFFERSON CURL': entry('stiffLeg', 'hinge', { gear: 'none', extra: 'Ejercicio de movilidad: bajas enrollando la espalda vértebra por vértebra. Empieza sin peso o muy liviano y nunca lo hagas con cansancio.' }),
+  'L SIT': entry('lSit', 'lSit'),
+  'DRAGON FLAG': entry('reverseCrunch', 'dragonFlag'),
+  LIMPIAPARABRISAS: entry('hangingLegRaise', 'windshieldWiper'),
+  'VOLTEO DE NEUMATICO': entry('tireFlip', 'tireFlip'),
+  'GOLPES CON MAZA': entry('slamBall', 'sledgehammer'),
+  'LEVANTAMIENTO DE PIEDRA': entry('stoneLift', 'stoneLift'),
+  'JEFFERSON CURL': entry('stiffLeg', 'jeffersonCurl', { gear: 'none' }),
 });
 
 // Implemento del dibujo según el nombre (si la ficha no lo fuerza).
@@ -2459,6 +2909,6 @@ export const getExerciseGuide = (name) => {
     steps: family.steps,
     tips: guide.extra ? [guide.extra, ...family.tips] : family.tips,
     mistakes: family.mistakes,
-    coachCues: COACH_CUES[guide.family] ?? [],
+    coachCues: COACH_CUES[guide.family] ?? COACH_CUES[family.cuesFrom] ?? [],
   };
 };

@@ -432,7 +432,7 @@ const buildSideProps = (pose, rig) => {
         const anchor2 = at2(prop.to);
         const ends = prop.dual ? [['near', 1], ['far', -1]] : [[prop.side ?? null, 0]];
         ends.forEach(([side, sign]) => {
-          const hand = side ? hand3d(rig, side) : handsMid;
+          const hand = prop.at ? anchorAt(prop.at) : side ? hand3d(rig, side) : handsMid; // `at`: el cable puede ir al tobillo (patadas)
           const anchor = v(anchor2[0], anchor2[1], sign * 42);
           items.push(prim.line(v(anchor[0], Math.min(anchor[1] - 6, FIGURE_SIZE.top + 6), anchor[2]), v(anchor[0], floorY, anchor[2]), COLORS.frame, 3.2));
           items.push(prim.sphere(anchor, 3.4, { fill: COLORS.frame }));
@@ -544,7 +544,7 @@ const buildFrontProps = (pose, rig) => {
   (pose.props ?? []).forEach((prop) => {
     switch (prop.type) {
       case 'dumbbell':
-        hands.forEach((h) => {
+        (prop.both === false ? [hands[1]] : hands).forEach((h) => {
           items.push(prim.line(vAdd(h, v(-5, 0, 0)), vAdd(h, v(5, 0, 0)), COLORS.frame, 2.4));
           [-5, 5].forEach((x) => items.push(disc(vAdd(h, v(x, 0, 0)), v(1, 0, 0), 5, { fill: COLORS.gear, width: 1.6 })));
         });
@@ -586,6 +586,12 @@ const buildFrontProps = (pose, rig) => {
       case 'band':
         items.push(prim.line(rig.legs.far.knee, rig.legs.near.knee, COLORS.gear, 2.5));
         break;
+      case 'pole': {
+        // Poste de apoyo junto a la mano lejana (vuelo lateral inclinado).
+        const h = hands[0];
+        items.push(prim.line(v(h[0], h[1] - 40, h[2] - 3), v(h[0], FLOOR_Y, h[2] - 3), COLORS.frame, 4));
+        break;
+      }
       default:
         break;
     }

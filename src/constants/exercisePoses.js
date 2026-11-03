@@ -1432,4 +1432,35 @@ export const POSES = Object.freeze({
       { t: -4, a1: [30, 30], ...SEATED, props: [BENCH_PAD, SEAT, { type: 'pad', side: 'front', offset: 9, extend: [-24, -10], legs: false }] },
     ],
   },
+  leaningLateralRaise: {
+    view: 'front',
+    gear: 'dumbbell',
+    frames: [
+      { view: 'front', tilt: -12, arms: [[52, 52], [8, 8]], legs: [[2, 2], [8, 8]], props: [{ ...G, both: false }, { type: 'pole' }] },
+      { view: 'front', tilt: -12, arms: [[52, 52], [92, 96]], legs: [[2, 2], [8, 8]], props: [{ ...G, both: false }, { type: 'pole' }] },
+    ],
+  },
+  sumoDeadlift: {
+    gear: 'barbell',
+    bestView: 'front',
+    frames: [
+      { t: 42, a1: [0, 0], l1: [70, -10], abd: { l1: 34, l2: 34, a1: 4, a2: 4 }, solve: { joint: 'wrist', range: [20, 70], offset: 9 }, props: [G] },
+      { t: 20, a1: [0, 0], l1: [30, -4], abd: { l1: 24, l2: 24, a1: 4, a2: 4 }, props: [G] },
+      { t: 0, a1: [0, 0], l1: [0, 0], abd: { l1: 20, l2: 20, a1: 4, a2: 4 }, props: [G] },
+    ],
+  },
+  zercherSquat: {
+    gear: 'barbell',
+    frames: [
+      { t: 0, a1: [30, 160], l1: [0, 0], props: [{ ...G, at: 'elbow', offset: [2, -2] }] },
+      { t: 18, a1: [40, 168], l1: [92, -34], props: [{ ...G, at: 'elbow', offset: [2, -2] }] },
+    ],
+  },
+  cableKickback: {
+    gear: 'none',
+    frames: [
+      { t: 18, a1: [60, 70], l1: [-4, -4], l2: [6, 0], props: [{ type: 'post', pos: [44, -30] }, { type: 'cable', to: [40, 10], at: 'ankle' }] },
+      { t: 26, a1: [60, 70], l1: [-40, -30], l2: [6, 0], props: [{ type: 'post', pos: [44, -30] }, { type: 'cable', to: [40, 10], at: 'ankle' }] },
+    ],
+  },
 });
