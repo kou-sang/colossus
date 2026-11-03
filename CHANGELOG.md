@@ -17,6 +17,28 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.5.0] - 2026-11-03
+
+### Added
+- **Agregar a una rutina desde "Registrado hoy":** cada ejercicio registrado tiene un botón para sumarlo a un día de una rutina. Por defecto propone la rutina activa y el día de hoy, con las series, repeticiones y kg que registraste.
+- **Configuración (ruedita del encabezado):** volumen general y por tipo de sonido (botones, reloj, festejos), silenciar todo y vibración del reloj. Los colores y el tema se mudaron aquí desde Perfil.
+- **Reloj en segundo plano:** el reloj sigue corriendo al cerrar la ventana, al cambiar de pestaña o al recargar la página (hasta 12 h). Mientras corre, aparece un reloj flotante abajo a la derecha con pausa/reanudar.
+- **52 ejercicios nuevos (313 en total):** máquinas (jalón, press declinado, curl Scott, tríceps, gemelos, patada de glúteo, sentadilla pendular), variantes por implemento (mancuernas, polea, barra, multipower, kettlebell, barra hexagonal), calistenia (L-sit, dragon flag, flexiones pike, en anillas y pseudo plancha, dominadas arqueras y lastradas, sentadilla cosaca y del patinador, fondos en barra recta) y no convencionales (volteo de neumático, golpes con maza, levantamiento de piedra, Jefferson curl). Todos con ficha, dibujo en 3 vistas y distribución muscular propia.
+- Las ventanas (i) de Analíticas muestran las fuentes de las cifras de referencia.
+
+### Changed
+- **Inicio:** "Ejercicio libre" y "Reloj libre" pasan a la sección *Plan de hoy*. Cada ejercicio planificado tiene un solo botón, **Hacer** (antes "Hacer ahora" y "Hecho"); para cronometrar se usa el reloj libre, que sigue corriendo mientras registras.
+- **Perfil:** cada sección es plegable y arranca cerrada. *Cerrar sesión* pasó al final de Perfil y pide confirmación (se quitó del encabezado).
+- **Textos explicativos reescritos:** las ventanas (i) de Analíticas ahora dicen primero qué muestra el gráfico, después cómo leerlo y un consejo; el cálculo queda plegado en "Cómo se calcula". También se acortaron subtítulos de Analíticas, ayudas del reloj, RIR, Perfil y biblioteca.
+- Indicadores de Inicio en una sola fila de tres en el celular.
+
+### Fixed
+- El reloj perdía el progreso al cerrarlo y volver a abrirlo.
+- El formulario de ejercicio (libre o planificado) se vaciaba al cambiar de pestaña o al usar el reloj: ahora conserva el borrador del día, incluidas las series cargadas.
+- Pausar y reanudar el reloj sumaba o saltaba un segundo.
+- La lista de ejercicios del selector (rutinas) no dejaba deslizar: volvía sola al elemento activo.
+- El reloj flotante ya no tapa el final de la página.
+
 ## [4.4.1] - 2026-11-02
 
 ### Added

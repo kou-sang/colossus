@@ -50,7 +50,7 @@ export const FatigueMapCard = ({ logs, userIds, gender, focusName, enabledMuscle
   return (
     <SectionCard
       title="Mapa de fatiga muscular"
-      subtitle={`${focusName} · estimación para hoy según los últimos 7 días`}
+      subtitle={`${focusName} · cómo están tus músculos hoy`}
       actions={<ChartInfo info={CHART_INFO.fatigue} />}
     >
       <div className="grid gap-4 lg:grid-cols-2">
@@ -90,7 +90,7 @@ export const FatigueMapCard = ({ logs, userIds, gender, focusName, enabledMuscle
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-secondary">Todos los músculos están recuperados: buen momento para una sesión exigente.</p>
+              <p className="text-sm text-secondary">Todo recuperado. Buen día para una sesión fuerte.</p>
             )}
           </div>
           {fatigued.length > 0 && (

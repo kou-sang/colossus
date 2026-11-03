@@ -156,9 +156,9 @@ export const importSharedRoutine = async (source, owner) => {
  * Agrega un ejercicio al final de un día de una rutina existente (usado desde la pestaña Ejercicios).
  * Series y repeticiones vacías toman los valores por defecto (3 × 10).
  */
-export const addExerciseToRoutine = async (routine, { day, exercise, sets, reps }, owner) => {
+export const addExerciseToRoutine = async (routine, { day, exercise, sets, reps, weight = '' }, owner) => {
   if (!WEEK_DAYS.includes(day)) throw new ValidationError('Elige un día válido.');
-  const newItem = { ...createEmptyRoutineItem(), exercise, sets, reps };
+  const newItem = { ...createEmptyRoutineItem(), exercise, sets, reps, weight: weight ?? '' };
   const days = { ...routine.days, [day]: [...(routine.days[day] ?? []), newItem] };
   return saveRoutine({ ...routine, days }, owner);
 };

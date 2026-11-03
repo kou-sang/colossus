@@ -1,17 +1,13 @@
-import { AlertTriangle, CheckCircle2, KeyRound, Mail, Moon, Palette, RotateCcw, Scale, Sun, UserRound } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { ColorPicker } from '../../components/ColorPicker';
-import { FieldLabel, InlineSpinner, SectionCard, SegmentedControl } from '../../components/ui';
+import { KeyRound, LogOut, Mail, Scale, Settings, UserRound } from 'lucide-react';
+import { useState } from 'react';
+import { CollapsibleSection, FieldLabel, InlineSpinner } from '../../components/ui';
 import { useAppData } from '../../context/AppDataContext';
 import { useFeedback } from '../../context/FeedbackContext';
-import { colorsKey, contrastRatio, CUSTOM_COLOR_FIELDS, markLocalColorsWrite, sanitizeRecentColors, useTheme } from '../../context/ThemeContext';
-import { changeEmail, changePassword, hasPasswordProvider, updateDisplayName } from '../../services/authService';
-import { savePreferences, updateProfileData } from '../../services/userService';
+import { changeEmail, changePassword, hasPasswordProvider, logout, updateDisplayName } from '../../services/authService';
+import { updateProfileData } from '../../services/userService';
 import { playClick } from '../../utils/audio';
 import { logError, toUserMessage, ValidationError } from '../../utils/errors';
 import { BodyStatsForm } from './BodyStatsForm';
-
-const MIN_TEXT_CONTRAST = 4.5; // WCAG AA para texto normal
 
 // Estado de envío + errores por formulario (cada sección es independiente).
 const useFormAction = () => {
@@ -56,8 +52,8 @@ const ProfileDataSection = () => {
   };
 
   return (
-    <SectionCard title={<span className="flex items-center gap-2"><UserRound size={18} aria-hidden /> Datos del perfil</span>}
-      subtitle="Tu nombre es visible para tus grupos y en el ranking.">
+    <CollapsibleSection icon={UserRound} title="Datos del perfil"
+      subtitle="Tus grupos ven este nombre.">
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <FieldLabel htmlFor="profile-username">Nombre de usuario</FieldLabel>
@@ -76,7 +72,7 @@ const ProfileDataSection = () => {
           {isSubmitting ? <><InlineSpinner /> Guardando perfil…</> : 'Guardar cambios'}
         </button>
       </form>
-    </SectionCard>
+    </CollapsibleSection>
   );
 };
 
@@ -97,7 +93,7 @@ const EmailSection = () => {
   };
 
   return (
-    <SectionCard title={<span className="flex items-center gap-2"><Mail size={18} aria-hidden /> Correo</span>}
+    <CollapsibleSection icon={Mail} title="Correo"
       subtitle={`Actual: ${user.email ?? '—'}`}>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
@@ -123,7 +119,7 @@ const EmailSection = () => {
           {isSubmitting ? <><InlineSpinner /> Enviando verificación…</> : 'Cambiar correo'}
         </button>
       </form>
-    </SectionCard>
+    </CollapsibleSection>
   );
 };
 
@@ -142,7 +138,7 @@ const PasswordSection = () => {
   };
 
   return (
-    <SectionCard title={<span className="flex items-center gap-2"><KeyRound size={18} aria-hidden /> {usesPassword ? 'Cambiar contraseña' : 'Crear contraseña'}</span>}
+    <CollapsibleSection icon={KeyRound} title={usesPassword ? 'Cambiar contraseña' : 'Crear contraseña'}
       subtitle={usesPassword ? 'Mínimo 6 caracteres.' : 'Tu cuenta usa Google. Puedes agregar una contraseña para ingresar también con correo.'}>
       <form onSubmit={handleSubmit} className="space-y-3">
         {/* Campo oculto de usuario: ayuda a los gestores de contraseñas a asociar la credencial correcta. */}
@@ -172,137 +168,7 @@ const PasswordSection = () => {
           {isSubmitting ? <><InlineSpinner /> Actualizando contraseña…</> : usesPassword ? 'Cambiar contraseña' : 'Crear contraseña'}
         </button>
       </form>
-    </SectionCard>
-  );
-};
-
-const AUTOSAVE_DELAY_MS = 1200;
-
-/*
- * Autoguardado de colores y recientes en la cuenta (antes había que tocar "Guardar" y, si no, al recargar
- * los colores de la cuenta pisaban los últimos elegidos). Debounce para no escribir en cada arrastre del selector;
- * si se sale de Perfil con cambios pendientes, se guardan igual.
- */
-const useColorAutosave = () => {
-  const { user } = useAppData();
-  const { customColors, recentColors } = useTheme();
-  // Clave local cuyo último guardado falló (null = sin error). El estado visible se DERIVA en el render:
-  // así ningún efecto llama setState de forma síncrona (regla react-hooks/set-state-in-effect).
-  const [failedKey, setFailedKey] = useState(null);
-  const pendingSaveRef = useRef(null);
-
-  const localKey = JSON.stringify({ colors: colorsKey(customColors), recent: sanitizeRecentColors(recentColors) });
-  const remoteKey = JSON.stringify({ colors: colorsKey(user.preferences?.colors), recent: sanitizeRecentColors(user.preferences?.recentColors) });
-  const isSynced = localKey === remoteKey;
-
-  const userRef = useRef(user);
-  useEffect(() => {
-    userRef.current = user;
-  }, [user]);
-
-  useEffect(() => {
-    if (isSynced) {
-      pendingSaveRef.current = null;
-      return undefined;
-    }
-    const save = async () => {
-      pendingSaveRef.current = null;
-      const { colors, recent } = JSON.parse(localKey);
-      try {
-        markLocalColorsWrite(colors);
-        await savePreferences(userRef.current.id, { ...userRef.current.preferences, colors: JSON.parse(colors), recentColors: recent });
-        setFailedKey(null);
-      } catch (saveError) {
-        logError('profile:colors-autosave', saveError);
-        setFailedKey(localKey);
-      }
-    };
-    pendingSaveRef.current = save;
-    const timer = setTimeout(save, AUTOSAVE_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [localKey, isSynced]);
-
-  // Al salir de Perfil: guarda lo pendiente en vez de perderlo (se lee el ref al desmontar a propósito).
-  useEffect(() => () => pendingSaveRef.current?.(), []);
-
-  if (isSynced) return 'saved';
-  return failedKey === localKey ? 'error' : 'pending';
-};
-
-const AutosaveStatus = ({ status }) => {
-  if (status === 'pending') return <span className="flex items-center gap-1.5 text-xs font-semibold text-muted"><InlineSpinner /> Guardando en tu cuenta…</span>;
-  if (status === 'error') return <span className="flex items-center gap-1.5 text-xs font-semibold text-accent"><AlertTriangle size={14} aria-hidden /> No se pudo guardar; se reintentará con el próximo cambio.</span>;
-  return <span className="flex items-center gap-1.5 text-xs font-semibold text-muted"><CheckCircle2 size={14} aria-hidden /> Guardado en tu cuenta</span>;
-};
-
-const AppearanceSection = () => {
-  const { theme, toggleTheme, customColors, setCustomColor, resetCustomColors, replaceCustomColors, recentColors, rememberColor } = useTheme();
-  const saveStatus = useColorAutosave();
-  const [editMode, setEditMode] = useState(theme);
-  const modeColors = customColors[editMode] ?? {};
-  const resolved = Object.fromEntries(CUSTOM_COLOR_FIELDS.map((field) => [field.key, modeColors[field.key] ?? field.defaults[editMode]]));
-
-  // Avisos de legibilidad: el usuario puede elegir cualquier color, pero se le advierte si el texto no se lee.
-  const contrastChecks = [
-    { label: 'Texto sobre fondo', ratio: contrastRatio(resolved.text, resolved.bg) },
-    { label: 'Texto sobre tarjetas', ratio: contrastRatio(resolved.text, resolved.surface) },
-    { label: 'Texto secundario sobre tarjetas', ratio: contrastRatio(resolved['text-2'], resolved.surface) },
-  ];
-  const failingChecks = contrastChecks.filter(({ ratio }) => ratio !== null && ratio < MIN_TEXT_CONTRAST);
-
-  const resetField = (key) => {
-    playClick();
-    const next = { ...customColors, [editMode]: { ...modeColors } };
-    delete next[editMode][key];
-    replaceCustomColors(next);
-  };
-
-  return (
-    <SectionCard title={<span className="flex items-center gap-2"><Palette size={18} aria-hidden /> Apariencia</span>}
-      subtitle="Los cambios se ven al instante y se guardan solos en tu cuenta (todos tus dispositivos)."
-      actions={
-        <button type="button" className="btn btn-ghost" onClick={() => { playClick(); toggleTheme(); setEditMode(theme === 'dark' ? 'light' : 'dark'); }}>
-          {theme === 'dark' ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />} Modo {theme === 'dark' ? 'claro' : 'oscuro'}
-        </button>
-      }>
-      <SegmentedControl label="Modo a personalizar" value={editMode} onChange={setEditMode}
-        options={[{ value: 'light', label: 'Modo claro' }, { value: 'dark', label: 'Modo oscuro' }]} />
-      {editMode !== theme && (
-        <p className="mt-2 text-xs text-muted">Estás editando el modo {editMode === 'dark' ? 'oscuro' : 'claro'}; cámbiate a ese modo para previsualizarlo.</p>
-      )}
-
-      <div className="mt-3 divide-y divide-[var(--border)]">
-        {CUSTOM_COLOR_FIELDS.map((field) => (
-          <ColorPicker
-            key={`${editMode}-${field.key}`}
-            label={field.label}
-            value={resolved[field.key]}
-            isCustom={Boolean(modeColors[field.key])}
-            recentColors={recentColors}
-            onChange={(hex) => setCustomColor(editMode, field.key, hex)}
-            onCommit={rememberColor}
-            onReset={() => resetField(field.key)}
-          />
-        ))}
-      </div>
-
-      {failingChecks.length > 0 && (
-        <div role="status" className="mt-3 flex gap-2 rounded-xl bg-[var(--accent-soft)] p-3 text-sm">
-          <AlertTriangle size={18} className="shrink-0 text-accent" aria-hidden />
-          <p>
-            Contraste bajo (mínimo recomendado {MIN_TEXT_CONTRAST}:1):{' '}
-            {failingChecks.map(({ label, ratio }) => `${label} ${ratio}:1`).join(', ')}
-          </p>
-        </div>
-      )}
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        <AutosaveStatus status={saveStatus} />
-        <button type="button" className="btn btn-ghost" onClick={() => { playClick(); resetCustomColors(editMode); }}>
-          <RotateCcw size={16} aria-hidden /> Restablecer modo {editMode === 'dark' ? 'oscuro' : 'claro'}
-        </button>
-      </div>
-    </SectionCard>
+    </CollapsibleSection>
   );
 };
 
@@ -310,28 +176,45 @@ const AppearanceSection = () => {
 const BodyStatsSection = () => {
   const { user } = useAppData();
   return (
-    <SectionCard title={<span className="flex items-center gap-2"><Scale size={18} aria-hidden /> Datos corporales</span>}
-      subtitle="Se usan para estimar calorías quemadas y la alimentación recomendada en Analíticas.">
+    <CollapsibleSection icon={Scale} title="Datos corporales"
+      subtitle="Solo los ves tú. Se usan para calcular calorías.">
       {/* key: si los datos cambian desde Analíticas u otro dispositivo, el formulario se reinicia con los nuevos. */}
       <BodyStatsForm key={JSON.stringify(user.bodyStats ?? null)} uid={user.id} stats={user.bodyStats} />
-    </SectionCard>
+    </CollapsibleSection>
+  );
+};
+
+// Cerrar sesión al final de Perfil (antes estaba en el encabezado, a un toque de distancia por error).
+const LogoutSection = () => {
+  const { confirm } = useFeedback();
+  const handleLogout = async () => {
+    playClick();
+    const accepted = await confirm({ title: '¿Cerrar sesión?', message: 'Tus datos quedan guardados en tu cuenta. Para volver, ingresa con tu correo o Google.', confirmLabel: 'Cerrar sesión', tone: 'danger' });
+    if (accepted) logout().catch((logoutError) => logError('auth:logout', logoutError));
+  };
+  return (
+    <button type="button" className="btn btn-danger w-full" onClick={handleLogout}>
+      <LogOut size={16} aria-hidden /> Cerrar sesión
+    </button>
   );
 };
 
 /*
- * Columnas con minmax(0, 1fr) y min-w-0: una columna `auto` crece hasta el min-content de sus hijos
- * (p. ej. los botones sin salto de línea del selector de modo) y estiraba la página más que la pantalla en el celular.
+ * Secciones plegadas por defecto (en el celular la pestaña era muy larga). Colores y sonido viven en la
+ * configuración (engranaje del encabezado).
  */
-export const ProfileTab = () => (
-  <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:gap-6 lg:grid-cols-[repeat(2,minmax(0,1fr))]">
-    <div className="min-w-0 space-y-4 md:space-y-6">
-      <ProfileDataSection />
-      <EmailSection />
-      <PasswordSection />
-      <BodyStatsSection />
-    </div>
-    <div className="min-w-0">
-      <AppearanceSection />
-    </div>
+export const ProfileTab = ({ onOpenSettings }) => (
+  <div className="mx-auto max-w-2xl space-y-3 md:space-y-4">
+    <ProfileDataSection />
+    <EmailSection />
+    <PasswordSection />
+    <BodyStatsSection />
+    {onOpenSettings && (
+      <button type="button" className="card flex w-full items-center gap-2 p-4 text-left font-bold md:px-5" onClick={onOpenSettings}>
+        <Settings size={18} aria-hidden /> Colores, tema y sonido
+        <span className="ml-auto text-xs font-normal text-muted">Configuración</span>
+      </button>
+    )}
+    <LogoutSection />
   </div>
 );

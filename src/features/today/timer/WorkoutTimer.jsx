@@ -1,40 +1,10 @@
-import { Check, ChevronsRight, ClipboardCheck, Minus, Pause, Play, Plus, RotateCcw, Square, Timer } from 'lucide-react';
-import { useEffect, useId, useMemo, useState } from 'react';
+import { Check, ChevronsRight, Minus, Pause, Play, Plus, RotateCcw, Square, Timer } from 'lucide-react';
+import { useId } from 'react';
 import { Dialog } from '../../../components/Dialog';
 import { IconButton } from '../../../components/ui';
 import { playClick } from '../../../utils/audio';
-import { logError } from '../../../utils/errors';
-import {
-  FIELD_LABELS,
-  formatClock,
-  PHASE_KIND,
-  phaseLabel,
-  sanitizeTimerConfig,
-  TIMER_MODE_BY_ID,
-  TIMER_MODES,
-  TIMER_STATUS,
-} from './timerEngine';
-import { useWorkoutTimer } from './useWorkoutTimer';
-
-const STORAGE_KEY = 'colossus:timer:v1';
-
-// Última configuración usada por modo (por dispositivo): los tiempos personalizados no se pierden.
-const readStoredTimer = () => {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
-    return parsed && typeof parsed === 'object' ? parsed : null;
-  } catch {
-    return null;
-  }
-};
-
-const writeStoredTimer = (value) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } catch (storageError) {
-    logError('timer:storage', storageError); // Modo privado: la configuración vive solo en memoria.
-  }
-};
+import { useTimer } from './TimerContext';
+import { FIELD_LABELS, formatClock, PHASE_KIND, phaseLabel, TIMER_MODE_BY_ID, TIMER_MODES, TIMER_STATUS } from './timerEngine';
 
 const RING_RADIUS = 54;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
@@ -72,82 +42,18 @@ const ConfigField = ({ id, field, value, disabled, onChange }) => {
   );
 };
 
-// Valores de la serie que se va a hacer ahora (series, reps y kg). Todos opcionales.
-const PlannedValues = ({ id, values, onChange, routineValues, disabled }) => (
-  <div className="rounded-xl surface-2 p-3">
-    <p className="mb-2 text-xs font-bold text-secondary">Lo que vas a hacer ahora</p>
-    <div className="grid grid-cols-3 gap-2">
-      {[
-        { key: 'sets', label: 'Series', step: '1' },
-        { key: 'reps', label: 'Reps', step: '1' },
-        { key: 'weight', label: 'Kg', step: '0.5' },
-      ].map((field) => (
-        <div key={field.key} className="min-w-0">
-          <label htmlFor={`${id}-plan-${field.key}`} className="mb-1 block text-[11px] font-bold text-muted">{field.label}</label>
-          <input id={`${id}-plan-${field.key}`} type="number" min="0" step={field.step} className="input" disabled={disabled}
-            inputMode={field.key === 'weight' ? 'decimal' : 'numeric'} placeholder="—"
-            value={values[field.key] ?? ''} onChange={(event) => onChange({ [field.key]: event.target.value })} />
-        </div>
-      ))}
-    </div>
-    {routineValues && (
-      <button type="button" className="btn btn-ghost mt-2 w-full text-xs" disabled={disabled} onClick={() => { playClick(); onChange(routineValues.values); }}>
-        <ClipboardCheck size={14} aria-hidden /> Valores de rutina: {routineValues.label}
-      </button>
-    )}
-  </div>
-);
-
 /**
- * Reloj de entrenamiento (Series + descanso, Tabata, EMOM, AMRAP, For Time e Intervalos), en una ventana.
- * Con `exercise` muestra qué serie se va a hacer y, al terminar, `onFinish` devuelve lo hecho para registrarlo.
- * Sin `exercise` funciona como reloj libre.
+ * Ventana del reloj (Series + descanso, Tabata, EMOM, AMRAP, For Time e Intervalos).
+ * Es solo una vista: el reloj vive en TimerProvider y sigue corriendo si cierras la ventana
+ * (queda un mini reloj flotante para volver).
  */
-export const WorkoutTimer = ({ exercise = null, initialValues = null, routineValues = null, onFinish, onClose }) => {
+export const WorkoutTimer = () => {
   const id = useId();
-  // Se lee una sola vez al abrir el reloj (inicializador perezoso de useState).
-  const [stored] = useState(readStoredTimer);
-  const [modeId, setModeId] = useState(() => (TIMER_MODE_BY_ID[stored?.mode] ? stored.mode : 'classic'));
-  const [rawConfigs, setRawConfigs] = useState(() => {
-    const base = Object.fromEntries(TIMER_MODES.map((mode) => [mode.id, { ...mode.defaults, ...(stored?.configs?.[mode.id] ?? {}) }]));
-    // Con un ejercicio, las series del reloj arrancan con las series planificadas.
-    const plannedSets = Number(initialValues?.sets);
-    if (Number.isInteger(plannedSets) && plannedSets > 0) base.classic = { ...base.classic, rounds: plannedSets };
-    return base;
-  });
-  const [values, setValues] = useState(() => ({ sets: initialValues?.sets ?? '', reps: initialValues?.reps ?? '', weight: initialValues?.weight ?? '' }));
-
-  const config = useMemo(() => sanitizeTimerConfig(modeId, rawConfigs[modeId]), [modeId, rawConfigs]);
-  const timer = useWorkoutTimer(config);
+  const { timer, modeId, rawConfigs, close, changeMode, changeField } = useTimer();
   const { status } = timer.state;
   const isIdle = status === TIMER_STATUS.IDLE;
   const isDone = status === TIMER_STATUS.DONE;
   const mode = TIMER_MODE_BY_ID[modeId];
-
-  // Se persiste la configuración elegida (modo y tiempos) para la próxima vez.
-  useEffect(() => {
-    writeStoredTimer({ mode: modeId, configs: rawConfigs });
-  }, [modeId, rawConfigs]);
-
-  const changeMode = (nextMode) => {
-    playClick();
-    timer.reset();
-    setModeId(nextMode);
-  };
-
-  const changeField = (field, value) => {
-    timer.reset();
-    setRawConfigs((previous) => ({ ...previous, [modeId]: { ...previous[modeId], [field]: value } }));
-  };
-
-  const changeValues = (patch) => {
-    setValues((previous) => ({ ...previous, ...patch }));
-    // Si cambian las series planificadas, el modo "Series + descanso" las acompaña.
-    const sets = Number(patch.sets);
-    if (Number.isInteger(sets) && sets > 0 && isIdle) {
-      setRawConfigs((previous) => ({ ...previous, classic: { ...previous.classic, rounds: sets } }));
-    }
-  };
 
   const { phase, nextPhase, displayMs, progress, totalElapsedMs } = timer.view;
   const phaseStyle = PHASE_STYLES[phase?.kind] ?? PHASE_STYLES[PHASE_KIND.WORK];
@@ -155,34 +61,12 @@ export const WorkoutTimer = ({ exercise = null, initialValues = null, routineVal
   const completed = countsManually ? timer.state.manualRounds : timer.state.completedWork;
   const isOpenPhase = phase && phase.duration === null && phase.kind === PHASE_KIND.WORK;
 
-  const handleRegister = () => {
-    playClick();
-    const doneSets = completed > 0 ? completed : Number(values.sets) || 1;
-    onFinish?.({
-      ...values,
-      // En "Series + descanso" se registran las series realmente hechas; en los demás modos, las rondas.
-      sets: String(doneSets),
-      durationSec: Math.round(totalElapsedMs / 1000),
-      mode: modeId,
-    });
-  };
-
   return (
-    // Con el reloj corriendo, Escape / atrás / tocar afuera no cierran (evita perder una serie por accidente):
-    // primero hay que pausar o terminar.
-    <Dialog title="Reloj" icon={Timer} subtitle={exercise ?? undefined} onClose={onClose} dismissible={isIdle || isDone || status === TIMER_STATUS.PAUSED}
-      closeLabel="Cerrar reloj" bodyClassName="px-4 pb-4 pt-3 md:px-5 md:pb-5">
-
-      {exercise && (
-        <div className="mb-3">
-          <PlannedValues id={id} values={values} onChange={changeValues} routineValues={routineValues} disabled={!isIdle && !isDone} />
-        </div>
-      )}
-
+    <Dialog title="Reloj" icon={Timer} onClose={close} closeLabel="Cerrar (el reloj sigue corriendo)" bodyClassName="px-4 pb-4 pt-3 md:px-5 md:pb-5">
       <div className="mb-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Tipo de reloj">
         {TIMER_MODES.map((option) => (
           <button key={option.id} type="button" role="radio" aria-checked={option.id === modeId} aria-pressed={option.id === modeId}
-            className="chip" disabled={!isIdle && !isDone} onClick={() => changeMode(option.id)}>
+            className="chip" disabled={!isIdle && !isDone} onClick={() => { playClick(); changeMode(option.id); }}>
             {option.short}
           </button>
         ))}
@@ -264,11 +148,6 @@ export const WorkoutTimer = ({ exercise = null, initialValues = null, routineVal
                 : `Tiempo: ${formatClock(totalElapsedMs)}.`}
             </p>
             <div className="flex gap-2">
-              {exercise && onFinish && (
-                <button type="button" className="btn btn-primary flex-1" onClick={handleRegister}>
-                  <Check size={16} aria-hidden /> Registrar
-                </button>
-              )}
               <button type="button" className="btn btn-ghost flex-1" onClick={() => { playClick(); timer.reset(); }}>
                 <RotateCcw size={16} aria-hidden /> Otra vez
               </button>
@@ -276,6 +155,9 @@ export const WorkoutTimer = ({ exercise = null, initialValues = null, routineVal
           </>
         )}
       </div>
+      {!isIdle && !isDone && (
+        <p className="mt-3 text-center text-[11px] text-muted">Puedes cerrar esta ventana: el reloj sigue y queda abajo a la derecha.</p>
+      )}
     </Dialog>
   );
 };

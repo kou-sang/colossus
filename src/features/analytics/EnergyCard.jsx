@@ -51,14 +51,14 @@ export const EnergyCard = ({ logs, rangeStart, rangeEnd, rangeDays, user, isSelf
   return (
     <SectionCard
       title="Calorías y alimentación"
-      subtitle={`${focusName} · gasto estimado del entrenamiento en el rango elegido`}
+      subtitle={`${focusName} · gasto al entrenar y cuánto comer`}
       actions={<ChartInfo info={CHART_INFO.energy} />}
     >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile icon={Flame} label="Gastadas" value={formatKcal(report.total)} hint="entrenando, en el rango" />
+        <StatTile icon={Flame} label="Gastadas" value={formatKcal(report.total)} hint="en el rango" />
         <StatTile icon={Flame} label="Por día entrenado" value={formatKcal(report.perActiveDay)} hint={`${report.activeDays} día(s) con registros`} />
-        <StatTile icon={Timer} label="Tiempo activo" value={`${Math.round(report.minutes / 60 * 10) / 10} h`} hint="estimado por series y minutos" />
-        <StatTile icon={Flame} label="Promedio diario" value={formatKcal(report.perDay)} hint="repartido en todos los días" />
+        <StatTile icon={Timer} label="Tiempo activo" value={`${Math.round(report.minutes / 60 * 10) / 10} h`} hint="estimado" />
+        <StatTile icon={Flame} label="Promedio diario" value={formatKcal(report.perDay)} hint="por día del rango" />
       </div>
       {!stats && (
         <p className="mt-2 text-xs text-muted">
@@ -108,7 +108,7 @@ export const EnergyCard = ({ logs, rangeStart, rangeEnd, rangeDays, user, isSelf
 
           {(!stats || isEditing) && (
             <>
-              {!stats && <p className="mb-3 text-sm text-secondary">Carga tu peso, altura, edad y objetivo para calcular calorías y macronutrientes diarios.</p>}
+              {!stats && <p className="mb-3 text-sm text-secondary">Completa tu peso, altura, edad y objetivo para ver cuánto comer cada día.</p>}
               <BodyStatsForm uid={user.id} stats={user.bodyStats} onSaved={() => setIsEditing(false)} />
             </>
           )}

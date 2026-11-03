@@ -1,6 +1,6 @@
-import { CalendarDays, Check, CloudOff, Flame, Plus, Timer, TrendingUp, Trophy, Undo2 } from 'lucide-react';
-import { Suspense, useMemo, useState } from 'react';
-import { EmptyState, IconButton, SectionCard, Spinner, StatTile } from '../../components/ui';
+import { CalendarDays, CalendarPlus, Check, CloudOff, Flame, Play, Plus, Timer, TrendingUp, Trophy, Undo2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { IconButton, SectionCard, Spinner, StatTile } from '../../components/ui';
 import { QUERY_LIMITS } from '../../constants/collections';
 import { CATALOG_EXERCISE_NAMES, canonicalExerciseName } from '../../constants/exercises';
 import { useAppData } from '../../context/AppDataContext';
@@ -14,13 +14,11 @@ import { addDays, formatLongDate, formatShortDate, getDayKey, parseDateKey, star
 import { logError, toUserMessage } from '../../utils/errors';
 import { formatSetDetails, hasSetDetails, suggestNextLoad } from '../../utils/sets';
 import { computeWeekStreak, countPlannedDays, countTrainingDays } from '../../utils/metrics';
+import { AddLogToRoutineDialog } from './AddLogToRoutineDialog';
+import { clearFormDraft, readOpenPanel, writeOpenPanel } from './logDrafts';
 import { LogEntryForm } from './LogEntryForm';
-import { lazyWithPrefetch } from '../../utils/lazyWithPrefetch';
-
-// El reloj (~15 KB) sale del bundle inicial: se descarga al tocar o pasar el puntero por "Hacer ahora" / "Reloj".
-const WORKOUT_TIMER = lazyWithPrefetch(() => import('./timer/WorkoutTimer'), 'WorkoutTimer');
-const WorkoutTimer = WORKOUT_TIMER.Component;
-const prefetchTimer = () => WORKOUT_TIMER.prefetch();
+import { useTimer } from './timer/TimerContext';
+import { formatClock } from './timer/timerEngine';
 
 const hasValue = (value) => value !== '' && value !== null && value !== undefined;
 
@@ -74,19 +72,15 @@ const formatSetSummary = (log) => {
   return log.reps ? `${weight} × ${log.reps}` : weight;
 };
 
-/*
- * Un ejercicio del plan del día. Dos acciones:
- *  - "Hacer ahora": abre el reloj con series/reps/kg editables para la serie actual.
- *  - "Hecho": pide confirmar series, reps y kg (prellenados con lo último que hiciste).
- */
-const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpenConfirm, onOpenTimer, onSubmit, onCancel }) => {
+// Un ejercicio del plan del día. "Hacer" abre el registro prellenado con lo último que hiciste.
+const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen, onSubmit, onCancel }) => {
   const routineValues = buildRoutineValues(item);
   const suggestion = isDone ? null : suggestNextLoad(previousLog, { topReps: topRepsOf(item.reps) });
-  const isConfirming = panel?.key === item.id;
+  const isOpen = panel?.key === item.id;
   return (
-    <li className={`py-3 first:pt-0 last:pb-0 ${isDone && !isConfirming ? 'opacity-60' : ''}`}>
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <div className="min-w-0 flex-1 basis-48">
+    <li className={`py-3 first:pt-0 last:pb-0 ${isDone && !isOpen ? 'opacity-60' : ''}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <h4 className="truncate font-bold">{item.exercise}</h4>
           <p className="text-sm text-secondary">
             {item.sets} series{item.reps && ` × ${item.reps} reps`}
@@ -99,32 +93,27 @@ const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen
           )}
           {(previousLog || best) && (
             <p className="mt-0.5 text-xs text-muted">
-              {previousLog && <>Última ({formatShortDate(previousLog.performedAt)}): {formatLogLine(previousLog)}</>}
+              {previousLog && <>Última vez ({formatShortDate(previousLog.performedAt)}): {formatLogLine(previousLog)}</>}
               {previousLog && best?.e1rm && ' · '}
-              {best?.e1rm && <>Mejor 1RM est.: {best.e1rm} kg</>}
+              {best?.e1rm && <>Récord: {best.e1rm} kg (1RM est.)</>}
             </p>
           )}
         </div>
         {isDone ? (
-          <span className="badge badge-good shrink-0"><Check size={14} aria-hidden /> Hecho</span>
+          <span className="badge badge-good mt-1 shrink-0"><Check size={14} aria-hidden /> Hecho</span>
         ) : (
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button type="button" className="btn btn-ghost px-3" onClick={() => onOpenTimer(item)} onPointerEnter={prefetchTimer} onTouchStart={prefetchTimer} onFocus={prefetchTimer}>
-              <Timer size={16} aria-hidden /> Hacer ahora
-            </button>
-            <button type="button" className="btn btn-outline px-3" aria-expanded={isConfirming} onClick={() => onOpenConfirm(item)}>
-              <Check size={16} aria-hidden /> Hecho
-            </button>
-          </div>
+          <button type="button" className="btn btn-outline shrink-0 px-4" aria-expanded={isOpen} onClick={() => onOpen(item)}>
+            <Play size={16} aria-hidden /> Hacer
+          </button>
         )}
       </div>
-      {isConfirming && (
+      {isOpen && (
         <LogEntryForm
-          key={panel.version}
-          heading={panel.fromTimer ? 'Confirma lo que hiciste' : latestLog ? 'Confirma los valores (prellenados con tu última vez)' : 'Confirma los valores'}
-          defaults={panel.values ?? buildConfirmDefaults(item, latestLog)}
+          draftKey={item.id}
+          heading={latestLog ? 'Lo de la última vez ya está cargado: ajusta y guarda.' : null}
+          defaults={buildConfirmDefaults(item, latestLog)}
           routineValues={routineValues}
-          submitLabel="Confirmar"
+          submitLabel="Guardar"
           onSubmit={onSubmit}
           onCancel={onCancel}
         />
@@ -133,14 +122,32 @@ const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen
   );
 };
 
+// Botones del plan: ejercicio fuera de la rutina y reloj libre (muestra el tiempo si está corriendo).
+const PlanActions = ({ isFreeOpen, onToggleFree }) => {
+  const { timer, isActive, open, prefetch } = useTimer();
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <button type="button" className="btn btn-ghost" aria-expanded={isFreeOpen} onClick={onToggleFree}>
+        <Plus size={16} aria-hidden /> Ejercicio libre
+      </button>
+      <button type="button" className={`btn ${isActive ? 'btn-outline' : 'btn-ghost'}`} onClick={open} onPointerEnter={prefetch} onTouchStart={prefetch} onFocus={prefetch}>
+        <Timer size={16} aria-hidden /> {isActive ? formatClock(timer.view.displayMs, { ceil: !timer.view.phase?.countUp }) : 'Reloj libre'}
+      </button>
+    </div>
+  );
+};
+
 export const TodayTab = ({ onCelebrate }) => {
   const { user, activeRoutine, myBests, routines } = useAppData();
   const { notify, confirm } = useFeedback();
   const todayKey = useToday();
-  // Panel abierto: { key: id del ítem | 'free', values?, fromTimer?, version } (version fuerza remontar el formulario).
-  const [panel, setPanel] = useState(null);
-  // Reloj abierto: { item } para un ejercicio del plan o { item: null } como reloj libre.
-  const [timerTarget, setTimerTarget] = useState(null);
+  // Formulario abierto: { key: id del ítem | 'free' }. Se recuerda al cambiar de pestaña (logDrafts).
+  const [panel, setPanelState] = useState(readOpenPanel);
+  const setPanel = (next) => {
+    setPanelState(next);
+    writeOpenPanel(next);
+  };
+  const [routineTarget, setRoutineTarget] = useState(null); // registro que se agrega a una rutina
 
   // 'since' depende solo del día → la suscripción no se recrea en cada render.
   const logsState = useSubscription(
@@ -200,8 +207,9 @@ export const TodayTab = ({ onCelebrate }) => {
         logError('log:commit', commitError);
         notify(toUserMessage(commitError, 'No se pudo sincronizar el registro.'), 'error');
       });
-      onCelebrate(isPr); // Festejo aleatorio (1 de 5) con su propio sonido; respeta el botón de silencio
+      onCelebrate(isPr); // Festejo aleatorio (1 de 5) con su propio sonido; respeta el volumen elegido
       notify(isPr ? '¡Nuevo récord personal!' : 'Ejercicio registrado', 'success');
+      clearFormDraft(panel?.key);
       setPanel(null);
     } catch (logErrorInstance) {
       logError('log:create', logErrorInstance);
@@ -209,22 +217,14 @@ export const TodayTab = ({ onCelebrate }) => {
     }
   };
 
-  const openConfirm = (item, values = null, fromTimer = false) => {
+  const togglePanel = (key) => {
     playClick();
-    setPanel((current) => (current?.key === item.id && !values ? null : { key: item.id, values, fromTimer, version: Date.now() }));
+    setPanel(panel?.key === key ? null : { key });
   };
 
-  const openTimer = (item) => {
-    playClick();
+  const cancelPanel = () => {
+    clearFormDraft(panel?.key);
     setPanel(null);
-    setTimerTarget({ item });
-  };
-
-  // Al terminar en el reloj: se abre la confirmación con lo realmente hecho (series del reloj, reps y kg editados).
-  const handleTimerFinish = (result) => {
-    const { item } = timerTarget;
-    setTimerTarget(null);
-    openConfirm(item, { exercise: item.exercise, muscle: item.muscle, sets: result.sets, reps: result.reps, weight: result.weight, fallbackSets: item.sets || 3 }, true);
   };
 
   const handleUndo = async (log) => {
@@ -244,53 +244,35 @@ export const TodayTab = ({ onCelebrate }) => {
     }
   };
 
-  const toggleFreeForm = () => {
-    playClick();
-    setPanel((current) => (current?.key === 'free' ? null : { key: 'free', version: Date.now() }));
-  };
-
-  const timerItem = timerTarget?.item ?? null;
-  const timerInitialValues = timerItem ? buildConfirmDefaults(timerItem, latestLogByExercise[canonicalExerciseName(timerItem.exercise)]) : null;
+  const planSubtitle = !activeRoutine
+    ? 'No tienes una rutina activa: puedes registrar ejercicios libres.'
+    : plannedItems.length === 0 ? 'Hoy toca descanso según tu rutina.' : `${activeRoutine.name} · ${doneCount} de ${plannedItems.length} hechos`;
 
   return (
     <div className="space-y-4 md:space-y-6">
       <header className="card p-4 md:p-6">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold capitalize text-secondary">{formatLongDate(parseDateKey(todayKey))}</p>
-            <h2 className="mt-1 text-xl font-black md:text-2xl">¡A entrenar, {user.username}!</h2>
-          </div>
-          <button type="button" className="btn btn-ghost shrink-0 px-3" onClick={() => { playClick(); setTimerTarget({ item: null }); }}
-            onPointerEnter={prefetchTimer} onTouchStart={prefetchTimer} onFocus={prefetchTimer}>
-            <Timer size={16} aria-hidden /> Reloj
-          </button>
-        </div>
+        <p className="text-sm font-semibold capitalize text-secondary">{formatLongDate(parseDateKey(todayKey))}</p>
+        <h2 className="mt-1 text-xl font-black md:text-2xl">¡A entrenar, {user.username}!</h2>
         {activeRoutine && plannedItems.length > 0 && (
-          <div className="mt-4">
-            <div className="mb-1.5 flex justify-between gap-2 text-sm font-semibold">
-              <span className="min-w-0 truncate text-secondary">{activeRoutine.name}</span>
-              <span className="shrink-0">{doneCount}/{plannedItems.length}</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full surface-2" role="progressbar" aria-valuemin={0} aria-valuemax={plannedItems.length} aria-valuenow={doneCount}>
-              <div className="h-full rounded-full bg-[var(--accent)] transition-all" style={{ width: `${(doneCount / plannedItems.length) * 100}%` }} />
-            </div>
+          <div className="mt-4 h-2 overflow-hidden rounded-full surface-2" role="progressbar" aria-label="Progreso del plan de hoy" aria-valuemin={0} aria-valuemax={plannedItems.length} aria-valuenow={doneCount}>
+            <div className="h-full rounded-full bg-[var(--accent)] transition-all" style={{ width: `${(doneCount / plannedItems.length) * 100}%` }} />
           </div>
         )}
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <StatTile icon={CalendarDays} label="Esta semana" value={plannedDays ? `${trainedDaysThisWeek}/${plannedDays}` : trainedDaysThisWeek} hint={plannedDays ? 'días entrenados / planificados' : 'días entrenados'} />
-        <StatTile icon={Flame} label="Racha" value={`${weekStreak} sem`} hint="semanas consecutivas activas" />
-        <StatTile icon={Trophy} label="PRs hoy" value={todayLogs.filter((log) => log.isPr).length} hint="récords de 1RM estimado" />
+      <div className="grid grid-cols-3 gap-2 md:gap-3">
+        <StatTile icon={CalendarDays} label="Semana" value={plannedDays ? `${trainedDaysThisWeek}/${plannedDays}` : trainedDaysThisWeek} hint={plannedDays ? 'días de tu plan' : 'días entrenados'} />
+        <StatTile icon={Flame} label="Racha" value={`${weekStreak} sem`} hint="seguidas" />
+        <StatTile icon={Trophy} label="Récords" value={todayLogs.filter((log) => log.isPr).length} hint="hoy" />
       </div>
 
-      {!activeRoutine ? (
-        <EmptyState icon={CalendarDays} title="Sin rutina activa" description="Activa una rutina en la pestaña Rutinas o registra ejercicios libres abajo." />
-      ) : plannedItems.length === 0 ? (
-        <EmptyState icon={CalendarDays} title="Día de descanso" description="La recuperación también construye músculo. Si entrenas igual, regístralo abajo." />
-      ) : (
-        <SectionCard title="Plan de hoy" subtitle="«Hacer ahora» abre el reloj; «Hecho» registra el ejercicio con tus últimos valores.">
-          <ul className="divide-y divide-[var(--border)]">
+      <SectionCard title="Plan de hoy" subtitle={planSubtitle}>
+        <PlanActions isFreeOpen={panel?.key === 'free'} onToggleFree={() => togglePanel('free')} />
+        {panel?.key === 'free' && (
+          <LogEntryForm draftKey="free" defaults={{ fallbackSets: 3 }} showExerciseField exerciseOptions={exerciseOptions} onSubmit={handleLog} onCancel={cancelPanel} />
+        )}
+        {activeRoutine && plannedItems.length > 0 && (
+          <ul className="mt-4 divide-y divide-[var(--border)] border-t divider pt-3">
             {plannedItems.map((item, index) => {
               const exerciseKey = canonicalExerciseName(item.exercise);
               return (
@@ -302,47 +284,42 @@ export const TodayTab = ({ onCelebrate }) => {
                   latestLog={latestLogByExercise[exerciseKey]}
                   best={myBests[exerciseKey]}
                   panel={panel}
-                  onOpenConfirm={openConfirm}
-                  onOpenTimer={openTimer}
+                  onOpen={(target) => togglePanel(target.id)}
                   onSubmit={handleLog}
-                  onCancel={() => setPanel(null)}
+                  onCancel={cancelPanel}
                 />
               );
             })}
           </ul>
-        </SectionCard>
-      )}
+        )}
+        {!activeRoutine && (
+          <p className="mt-3 text-xs text-muted">Activa una rutina en la pestaña Rutinas y acá verás los ejercicios de cada día.</p>
+        )}
+      </SectionCard>
 
       <SectionCard
         title="Registrado hoy"
-        subtitle={logsState.loading ? 'Sincronizando…' : todayLogs.length ? `${todayLogs.length} ejercicio(s)` : 'Aún no registraste nada hoy'}
-        actions={
-          <button type="button" className="btn btn-ghost" aria-expanded={panel?.key === 'free'} onClick={toggleFreeForm}>
-            <Plus size={16} aria-hidden /> Ejercicio libre
-          </button>
-        }
+        subtitle={logsState.loading ? 'Sincronizando…' : todayLogs.length ? `${todayLogs.length} ejercicio(s)` : 'Todavía nada. Lo que guardes aparece acá.'}
       >
-        {panel?.key === 'free' && (
-          <LogEntryForm key={panel.version} defaults={{ fallbackSets: 3 }} showExerciseField exerciseOptions={exerciseOptions} onSubmit={handleLog} onCancel={() => setPanel(null)} />
-        )}
         {logsState.loading && (
           <div className="py-4">
-            <Spinner size="sm" label="Cargando tu historial de los últimos 60 días…" hint="Lo usamos para marcar lo hecho hoy y sugerir tus últimos valores." />
+            <Spinner size="sm" label="Cargando tus últimos 60 días…" hint="Así marcamos lo hecho y te sugerimos los valores de la última vez." />
           </div>
         )}
         {todayLogs.length > 0 && (
-          <ul className="mt-2 divide-y divide-[var(--border)]">
+          <ul className="divide-y divide-[var(--border)]">
             {todayLogs.map((log) => (
-              <li key={log.id} className="flex items-center justify-between gap-2 py-2">
-                <div className="min-w-0">
+              <li key={log.id} className="flex items-center justify-between gap-1 py-2">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold">
-                    {log.exercise} {log.isPr && <span className="badge badge-accent ml-1"><Trophy size={12} aria-hidden /> PR</span>}
+                    {log.exercise} {log.isPr && <span className="badge badge-accent ml-1"><Trophy size={12} aria-hidden /> Récord</span>}
                   </p>
                   <p className="text-xs text-secondary">
                     {formatLogLine(log)}
-                    {log.isPending && <span className="ml-2 inline-flex items-center gap-1 text-muted"><CloudOff size={12} aria-hidden /> pendiente de sincronizar</span>}
+                    {log.isPending && <span className="ml-2 inline-flex items-center gap-1 text-muted"><CloudOff size={12} aria-hidden /> sin sincronizar</span>}
                   </p>
                 </div>
+                <IconButton label={`Agregar ${log.exercise} a una rutina`} icon={CalendarPlus} onClick={() => { playClick(); setRoutineTarget(log); }} />
                 <IconButton label={`Deshacer ${log.exercise}`} icon={Undo2} onClick={() => handleUndo(log)} />
               </li>
             ))}
@@ -351,17 +328,7 @@ export const TodayTab = ({ onCelebrate }) => {
         {logsState.error && <p className="mt-2 text-sm text-accent">{toUserMessage(logsState.error)}</p>}
       </SectionCard>
 
-      {timerTarget && (
-        <Suspense fallback={null}>
-          <WorkoutTimer
-            exercise={timerItem?.exercise ?? null}
-            initialValues={timerInitialValues}
-            routineValues={timerItem ? buildRoutineValues(timerItem) : null}
-            onFinish={timerItem ? handleTimerFinish : undefined}
-            onClose={() => setTimerTarget(null)}
-          />
-        </Suspense>
-      )}
+      {routineTarget && <AddLogToRoutineDialog log={routineTarget} onClose={() => setRoutineTarget(null)} />}
     </div>
   );
 };

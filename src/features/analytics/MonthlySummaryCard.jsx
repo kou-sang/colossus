@@ -58,7 +58,7 @@ export const MonthlySummaryCard = ({ userId, focusName, todayKey }) => {
       ) : logsState.error ? (
         <p className="text-sm text-accent">{toUserMessage(logsState.error)}</p>
       ) : report.isEmpty ? (
-        <p className="text-sm text-secondary">Sin registros en los últimos 30 días. Registra tus entrenamientos y aquí verás tu resumen y qué mejorar.</p>
+        <p className="text-sm text-secondary">No hay registros en los últimos 30 días. Cuando entrenes, acá verás tu resumen.</p>
       ) : (
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -103,7 +103,7 @@ export const MonthlySummaryCard = ({ userId, focusName, todayKey }) => {
                   })}
                 </ul>
               ) : (
-                <p className="text-sm text-secondary">Registra kg y repeticiones en al menos 2 sesiones de un ejercicio para ver su tendencia.</p>
+                <p className="text-sm text-secondary">Para ver cómo progresa un ejercicio, regístralo con kg y repeticiones en 2 sesiones o más.</p>
               )}
             </div>
           </div>
@@ -120,7 +120,7 @@ export const MonthlySummaryCard = ({ userId, focusName, todayKey }) => {
                 ))}
               </ol>
             ) : (
-              <p className="text-sm text-secondary">¡Mes muy completo! Mantén la constancia y sigue sumando de a poco peso o repeticiones.</p>
+              <p className="text-sm text-secondary">Buen mes, nada que corregir. Sigue sumando peso o repeticiones de a poco.</p>
             )}
           </div>
         </div>

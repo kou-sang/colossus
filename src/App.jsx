@@ -1,5 +1,5 @@
 import { AnimatePresence, domAnimation, LazyMotion, m } from 'framer-motion';
-import { Activity, BookOpen, CalendarDays, Home, LogOut, Moon, Sun, UserRound, Users, Volume2, VolumeX } from 'lucide-react';
+import { Activity, BookOpen, CalendarDays, Home, Moon, Settings, Sun, UserRound, Users, Volume2, VolumeX } from 'lucide-react';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { version as APP_VERSION } from '../package.json';
 import { CelebrationLayer } from './components/CelebrationLayer';
@@ -12,10 +12,12 @@ import { colorsKey, isOwnColorsEcho, useTheme } from './context/ThemeContext';
 import { ThemeProvider } from './context/ThemeProvider';
 import { useGroupJoinLink } from './features/groups/useGroupJoinLink';
 import { useRoutineImport } from './features/routines/useRoutineImport';
+import { TimerProvider } from './features/today/timer/TimerProvider';
+import { useTimer } from './features/today/timer/TimerContext';
 import { TodayTab } from './features/today/TodayTab';
 import { SESSION_STATUS, useAuthSession } from './hooks/useAuthSession';
 import { logout } from './services/authService';
-import { isSoundEnabled, playClick, setSoundEnabled } from './utils/audio';
+import { isSoundEnabled, playClick, setSoundEnabled, subscribeToSoundSettings } from './utils/audio';
 import { logError } from './utils/errors';
 import { lazyWithPrefetch, runWhenIdle } from './utils/lazyWithPrefetch';
 
@@ -44,6 +46,8 @@ const ProfileTab = TAB_MODULES.profile.Component;
 // Login y completar perfil solo los ve quien no tiene sesión: fuera del bundle de quien ya está logueado.
 const LoginScreen = lazyWithPrefetch(() => import('./features/auth/LoginScreen'), 'LoginScreen').Component;
 const ProfileSetup = lazyWithPrefetch(() => import('./features/auth/ProfileSetup'), 'ProfileSetup').Component;
+
+const SettingsDialog = lazyWithPrefetch(() => import('./features/settings/SettingsDialog'), 'SettingsDialog').Component;
 
 const prefetchTab = (tabId) => TAB_MODULES[tabId]?.prefetch();
 
@@ -89,34 +93,31 @@ const NavItem = ({ tab, isActive, onSelect, compact }) => {
   );
 };
 
-const HeaderActions = ({ username }) => {
+const HeaderActions = ({ username, onOpenSettings }) => {
   const { theme, toggleTheme } = useTheme();
+  // Silencio rápido (el ajuste fino de volúmenes está en la configuración); se sincroniza con ella.
   const [soundOn, setSoundOn] = useState(isSoundEnabled);
+  useEffect(() => subscribeToSoundSettings((settings) => setSoundOn(settings.enabled)), []);
 
   const handleToggleSound = () => {
-    const next = !soundOn;
-    setSoundEnabled(next);
-    setSoundOn(next);
-    if (next) playClick();
-  };
-
-  const handleLogout = () => {
-    playClick();
-    logout().catch((logoutError) => logError('auth:logout', logoutError));
+    setSoundEnabled(!soundOn);
+    if (!soundOn) playClick();
   };
 
   return (
     <div className="flex items-center gap-1">
       <span className="mr-1 hidden max-w-[140px] truncate text-sm font-bold xl:inline">{username}</span>
-      <IconButton label={soundOn ? 'Silenciar sonidos' : 'Activar sonidos'} icon={soundOn ? Volume2 : VolumeX} onClick={handleToggleSound} />
-      <IconButton label={theme === 'dark' ? 'Tema claro' : 'Tema oscuro'} icon={theme === 'dark' ? Sun : Moon} onClick={() => { playClick(); toggleTheme(); }} />
-      <IconButton label="Cerrar sesión" icon={LogOut} onClick={handleLogout} />
+      <IconButton label={soundOn ? 'Silenciar todo' : 'Activar sonido'} icon={soundOn ? Volume2 : VolumeX} onClick={handleToggleSound} />
+      <IconButton label={theme === 'dark' ? 'Pasar a modo claro' : 'Pasar a modo oscuro'} icon={theme === 'dark' ? Sun : Moon} onClick={() => { playClick(); toggleTheme(); }} />
+      <IconButton label="Configuración (sonido y colores)" icon={Settings} onClick={() => { playClick(); onOpenSettings(); }} />
     </div>
   );
 };
 
 const AuthenticatedApp = ({ user }) => {
   const [activeTab, setActiveTab] = useState('today');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const openSettings = useCallback(() => setIsSettingsOpen(true), []);
   const { celebrations, celebrate } = useCelebration();
   const { replaceCustomColors, replaceRecentColors } = useTheme();
 
@@ -159,6 +160,7 @@ const AuthenticatedApp = ({ user }) => {
 
   return (
     <AppDataProvider user={user}>
+      <TimerProvider>
       {/* Margen inferior = barra de navegación móvil + safe-area de iOS: el último elemento nunca queda tapado. */}
       <div className="min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-8">
         {/* Header único y responsive (antes había dos barras con marcas distintas: "Colossus" e "Incursores"). */}
@@ -168,7 +170,7 @@ const AuthenticatedApp = ({ user }) => {
             <nav className="hidden flex-1 justify-center gap-1 lg:flex" aria-label="Secciones">
               {TABS.map((tab) => <NavItem key={tab.id} tab={tab} isActive={activeTab === tab.id} onSelect={selectTab} />)}
             </nav>
-            <HeaderActions username={user.username} />
+            <HeaderActions username={user.username} onOpenSettings={openSettings} />
           </div>
         </header>
 
@@ -176,19 +178,20 @@ const AuthenticatedApp = ({ user }) => {
           <AnimatePresence mode="wait">
             <m.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
               <ErrorBoundary key={activeTab}>
-                <Suspense fallback={<div className="flex justify-center py-16"><Spinner label={TAB_LOADING_LABELS[activeTab] ?? 'Cargando módulo…'} hint="Solo se descarga la primera vez que abres esta sección." /></div>}>
+                <Suspense fallback={<div className="flex justify-center py-16"><Spinner label={TAB_LOADING_LABELS[activeTab] ?? 'Cargando módulo…'} hint={undefined} /></div>}>
                   {activeTab === 'today' && <TodayTab onCelebrate={celebrate} />}
                   {activeTab === 'routines' && <RoutinesTab />}
                   {activeTab === 'library' && <ExerciseLibraryTab />}
                   {activeTab === 'analytics' && <AnalyticsTab />}
                   {activeTab === 'groups' && <GroupsTab />}
-                  {activeTab === 'profile' && <ProfileTab />}
+                  {activeTab === 'profile' && <ProfileTab onOpenSettings={openSettings} />}
                 </Suspense>
               </ErrorBoundary>
             </m.div>
           </AnimatePresence>
           {/* Versión vigente al pie de TODAS las pestañas (fuente única: package.json, ver CHANGELOG.md). */}
           <p className="mt-8 text-center text-xs font-semibold text-muted" data-testid="app-version">Colossus v{APP_VERSION}</p>
+          <DockSpacer />
         </main>
 
         {/* Navegación inferior móvil con safe-area de iOS. */}
@@ -199,9 +202,17 @@ const AuthenticatedApp = ({ user }) => {
         </nav>
 
         <CelebrationLayer celebrations={celebrations} />
+        {isSettingsOpen && <Suspense fallback={null}><SettingsDialog onClose={() => setIsSettingsOpen(false)} /></Suspense>}
       </div>
+      </TimerProvider>
     </AppDataProvider>
   );
+};
+
+// Reserva espacio al final para que el reloj flotante no tape el último contenido.
+const DockSpacer = () => {
+  const { isActive, isOpen } = useTimer();
+  return isActive && !isOpen ? <div className="h-20" aria-hidden /> : null;
 };
 
 const SessionGate = () => {
@@ -223,7 +234,7 @@ const SessionGate = () => {
     case SESSION_STATUS.READY:
       return <AuthenticatedApp user={session.user} />;
     default:
-      return <FullScreenLoader label={session.loadingLabel ?? 'Cargando…'} hint="Conectando con el servidor; en segundos estarás dentro." />;
+      return <FullScreenLoader label={session.loadingLabel ?? 'Cargando…'} hint={undefined} />;
   }
 };
 

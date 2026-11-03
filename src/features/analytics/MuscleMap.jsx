@@ -104,7 +104,7 @@ const RecencyLegend = () => {
           <span key={days}>{days === 0 ? 'Hoy' : days >= CRITICAL_RECENCY_DAYS ? `${days}+ d / nunca` : `${days} d`}</span>
         ))}
       </div>
-      <p className="mt-0.5 text-center text-xs text-muted">Días desde el último entrenamiento (cuenta si el ejercicio lo trabaja ≥ 15%)</p>
+      <p className="mt-0.5 text-center text-xs text-muted">Días desde la última vez que lo entrenaste</p>
     </div>
   );
 };
