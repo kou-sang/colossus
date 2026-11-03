@@ -13,18 +13,21 @@ import { logError, toUserMessage, ValidationError } from '../../utils/errors';
 import { readRoutineDraft } from '../routines/routineDraftStorage';
 
 /*
- * Diálogo "Añadir a rutina": elige rutina, día, series y repeticiones (ambas opcionales: 3 × 10 por defecto).
- * No pide kilos: el peso se registra al entrenar.
+ * Diálogo "Añadir a rutina": elige rutina, día, series y repeticiones (opcionales: 3 × 10 por defecto).
+ * Por defecto propone tu rutina activa y el día de hoy. `initialValues` ({ sets, reps, weight }) prellena los
+ * campos (p. ej. al agregar algo que registraste hoy); el peso, si viene, se guarda como objetivo.
  */
-export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
+export const AddToRoutineDialog = ({ exerciseName, onClose, initialValues = null, title = 'Añadir a rutina' }) => {
   const { user, routines } = useAppData();
   const { notify } = useFeedback();
   const [form, setForm] = useState(() => ({
     routineId: routines.find((routine) => routine.id === user.activeRoutineId)?.id ?? routines[0]?.id ?? '',
     day: getDayKey(),
-    sets: '',
-    reps: '',
+    sets: initialValues?.sets ? String(initialValues.sets) : '',
+    reps: initialValues?.reps ? String(initialValues.reps) : '',
   }));
+  const selectedRoutine = routines.find((item) => item.id === form.routineId);
+  const alreadyThere = selectedRoutine?.days[form.day]?.some((item) => item.exercise === exerciseName);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (event) => {
@@ -38,7 +41,7 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
       if (readRoutineDraft(user.id)?.draft?.id === routine.id) {
         throw new ValidationError('Esa rutina está abierta en el editor de Rutinas. Guárdala o descártala primero.');
       }
-      await addExerciseToRoutine(routine, { day: form.day, exercise: exerciseName, sets: form.sets, reps: form.reps }, user);
+      await addExerciseToRoutine(routine, { day: form.day, exercise: exerciseName, sets: form.sets, reps: form.reps, weight: initialValues?.weight ?? '' }, user);
       notify(`${exerciseName} añadido a "${routine.name}" (${form.day})`, 'success');
       onClose();
     } catch (saveError) {
@@ -49,7 +52,7 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
   };
 
   return (
-    <Dialog title="Añadir a rutina" subtitle={exerciseName} size="sm" onClose={onClose} bodyClassName="px-5 pb-5 pt-3">
+    <Dialog title={title} subtitle={exerciseName} size="sm" onClose={onClose} bodyClassName="px-5 pb-5 pt-3">
 
         {routines.length === 0 ? (
           <p className="rounded-xl surface-2 p-3 text-sm text-secondary">Todavía no tienes rutinas. Crea una en la pestaña Rutinas y vuelve aquí.</p>
@@ -67,6 +70,9 @@ export const AddToRoutineDialog = ({ exerciseName, onClose }) => {
                 {WEEK_DAYS.map((day) => <option key={day} value={day}>{day}</option>)}
               </select>
             </div>
+            {alreadyThere && (
+              <p className="rounded-xl bg-[var(--accent-soft)] p-2.5 text-xs">Ese día ya tiene {exerciseName}. Si sigues, quedará dos veces.</p>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <FieldLabel htmlFor="add-sets">Series (opcional)</FieldLabel>

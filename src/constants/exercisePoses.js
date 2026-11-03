@@ -180,15 +180,15 @@ export const POSES = Object.freeze({
   pullUp: {
     gear: 'none',
     frames: [
-      { t: -4, a1: [178, 180], l1: [6, -28], ground: 'grip', grip: [104, -12], props: [{ type: 'bar' }] },
-      { t: -6, a1: [-24, 172], l1: [10, -30], ground: 'grip', grip: [104, -12], props: [{ type: 'bar' }] },
+      { t: -4, a1: [178, 180], l1: [6, -28], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
+      { t: -6, a1: [-24, 172], l1: [10, -30], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
     ],
   },
   chinUp: {
     gear: 'none',
     frames: [
-      { t: 0, a1: [180, 180], l1: [8, -40], ground: 'grip', grip: [104, -12], props: [{ type: 'bar' }] },
-      { t: -4, a1: [8, 178], l1: [12, -40], ground: 'grip', grip: [104, -12], props: [{ type: 'bar' }] },
+      { t: 0, a1: [180, 180], l1: [8, -40], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
+      { t: -4, a1: [8, 178], l1: [12, -40], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
     ],
   },
   bentRow: {
@@ -394,8 +394,8 @@ export const POSES = Object.freeze({
   deadHang: {
     gear: 'none',
     frames: [
-      { t: 0, a1: [180, 180], l1: [2, 0], ground: 'grip', grip: [100, -12], props: [{ type: 'bar' }] },
-      { t: -2, a1: [180, 180], l1: [4, -6], ground: 'grip', grip: [100, -12], props: [{ type: 'bar' }] },
+      { t: 0, a1: [180, 180], l1: [2, 0], ground: 'grip', grip: [100, -26], props: [{ type: 'bar', rig: true }] },
+      { t: -2, a1: [180, 180], l1: [4, -6], ground: 'grip', grip: [100, -26], props: [{ type: 'bar', rig: true }] },
     ],
   },
   farmerWalk: {
@@ -454,15 +454,15 @@ export const POSES = Object.freeze({
   hangingLegRaise: {
     gear: 'none',
     frames: [
-      { t: 0, a1: [180, 180], l1: [0, 0], ground: 'grip', grip: [100, -12], props: [{ type: 'bar' }] },
-      { t: -14, a1: [180, 180], l1: [96, 96], ground: 'grip', grip: [100, -12], props: [{ type: 'bar' }] },
+      { t: 0, a1: [180, 180], l1: [0, 0], ground: 'grip', grip: [100, -26], props: [{ type: 'bar', rig: true }] },
+      { t: -14, a1: [180, 180], l1: [96, 96], ground: 'grip', grip: [100, -26], props: [{ type: 'bar', rig: true }] },
     ],
   },
   kneeRaise: {
     gear: 'none',
     frames: [
-      { t: 0, a1: [-30, 90], l1: [0, 0], ground: 'none', hip: [100, 92], props: [{ type: 'pad', offset: 7, extend: [-6, 4] }] },
-      { t: -6, a1: [-30, 90], l1: [104, 0], ground: 'none', hip: [100, 92], props: [{ type: 'pad', offset: 7, extend: [-6, 4] }] },
+      { t: 0, a1: [-30, 90], l1: [0, 0], ground: 'none', hip: [100, 74], props: [{ type: 'pad', offset: 7, extend: [-6, 4] }] },
+      { t: -6, a1: [-30, 90], l1: [104, 0], ground: 'none', hip: [100, 74], props: [{ type: 'pad', offset: 7, extend: [-6, 4] }] },
     ],
   },
   abWheel: {
@@ -529,8 +529,8 @@ export const POSES = Object.freeze({
     view: 'front',
     gear: 'kettlebell',
     frames: [
-      { view: 'front', arms: [[4, 4], [4, 4]], legs: [[16, 16], [16, 16]], props: [] },
-      { view: 'front', arms: [[4, 4], [4, 4]], legs: [[62, 8], [62, 8]], props: [] },
+      { view: 'front', arms: [[4, 4], [4, 4]], legs: [[16, 16], [16, 16]], props: [G] },
+      { view: 'front', arms: [[4, 4], [4, 4]], legs: [[62, 8], [62, 8]], props: [G] },
     ],
   },
   hackSquat: {
@@ -579,7 +579,7 @@ export const POSES = Object.freeze({
     gear: 'none',
     frames: [
       { t: 0, a1: [30, 120], l1: [0, -90], ground: 'lowest' },
-      { t: 58, a1: [80, 100], l1: [58, -90], ground: 'lowest' },
+      { t: 72, a1: [84, 96], l1: [72, -90], ground: 'lowest' },
     ],
   },
   lunge: {
@@ -878,8 +878,8 @@ export const POSES = Object.freeze({
   toesToBar: {
     gear: 'none',
     frames: [
-      { t: 0, a1: [180, 180], l1: [0, 0], ground: 'grip', grip: [100, -12], props: [{ type: 'bar' }] },
-      { t: -40, a1: [176, 176], l1: [160, 166], ground: 'grip', grip: [100, -12], props: [{ type: 'bar' }] },
+      { t: 0, a1: [180, 180], l1: [0, 0], ground: 'grip', grip: [100, -26], props: [{ type: 'bar', rig: true }] },
+      { t: -40, a1: [176, 176], l1: [160, 166], ground: 'grip', grip: [100, -26], props: [{ type: 'bar', rig: true }] },
     ],
   },
   devilPress: {
@@ -930,9 +930,9 @@ export const POSES = Object.freeze({
   kippingPullUp: {
     gear: 'none',
     frames: [
-      { t: -22, a1: [176, 172], l1: [-30, -50], ground: 'grip', grip: [104, -12], props: [{ type: 'bar' }] },
-      { t: 12, a1: [190, 186], l1: [40, 30], ground: 'grip', grip: [104, -12], props: [{ type: 'bar' }] },
-      { t: -6, a1: [-24, 172], l1: [10, -20], ground: 'grip', grip: [104, -12], props: [{ type: 'bar' }] },
+      { t: -22, a1: [176, 172], l1: [-30, -50], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
+      { t: 12, a1: [190, 186], l1: [40, 30], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
+      { t: -6, a1: [-24, 172], l1: [10, -20], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
     ],
   },
 
@@ -1260,6 +1260,207 @@ export const POSES = Object.freeze({
       { t: 2, a1: [2, 2], a2: [0, 0], l1: [24, 0], l2: [-20, -20], props: [{ ...G, both: false }] },
       { t: 2, a1: [0, 0], l1: [0, 0], l2: [10, -40], props: [{ ...G, both: false }] },
       { t: 2, a1: [0, 0], a2: [2, 2], l1: [-20, -20], l2: [24, 0], props: [{ ...G, both: false }] },
+    ],
+  },
+  // ───────── Revisión de dibujos 4.5.0: patrones propios para ejercicios que antes reutilizaban uno parecido ─────────
+  lSit: {
+    gear: 'none',
+    frames: [
+      { t: 0, a1: [-4, 0], l1: [90, 0], ground: 'grip', grip: [104, 84], props: [{ type: 'bar' }, { type: 'post', pos: [104, 88], abs: true }] },
+      { t: -4, a1: [-4, 0], l1: [90, 90], ground: 'grip', grip: [104, 84], props: [{ type: 'bar' }, { type: 'post', pos: [104, 88], abs: true }] },
+    ],
+  },
+  machinePullover: {
+    gear: 'machine',
+    frames: [
+      { t: -6, a1: [172, 178], ...SEATED, props: [BENCH_PAD, SEAT] },
+      { t: -6, a1: [30, 40], ...SEATED, props: [BENCH_PAD, SEAT] },
+    ],
+  },
+  bayesianCurl: {
+    gear: 'cable',
+    cableTo: [-46, -24],
+    frames: [
+      { t: 6, a1: [-28, -26], l1: [16, 0], l2: [-16, -8], props: [{ ...G, both: false }] },
+      { t: 6, a1: [-28, 140], l1: [16, 0], l2: [-16, -8], props: [{ ...G, both: false }] },
+    ],
+  },
+  highCableCurl: {
+    view: 'front',
+    gear: 'cable',
+    frames: [
+      { view: 'front', arms: [[88, 92], [88, 92]], legs: [[5, 5], [5, 5]], props: [{ type: 'cable', anchors: [[-64, -48], [64, -48]] }] },
+      { view: 'front', arms: [[88, 172], [88, 172]], legs: [[5, 5], [5, 5]], props: [{ type: 'cable', anchors: [[-64, -48], [64, -48]] }] },
+    ],
+  },
+  spiderCurl: {
+    gear: 'dumbbell',
+    frames: [
+      { t: 52, a1: [0, 0], l1: [-8, 0], l2: [-14, -4], props: [{ type: 'pad', side: 'front', offset: 9, extend: [14, -4] }, G] },
+      { t: 52, a1: [0, 150], l1: [-8, 0], l2: [-14, -4], props: [{ type: 'pad', side: 'front', offset: 9, extend: [14, -4] }, G] },
+    ],
+  },
+  cableOverheadExtension: {
+    gear: 'cable',
+    cableTo: [-44, -40],
+    frames: [
+      { t: 26, a1: [160, -10], l1: [18, 0], l2: [-18, -10], props: [G] },
+      { t: 26, a1: [160, 160], l1: [18, 0], l2: [-18, -10], props: [G] },
+    ],
+  },
+  wristRoller: {
+    gear: 'none',
+    frames: [
+      { ...STAND, a1: [90, 90], props: [{ type: 'seg', rel: 'wrist', from: [0, 0], to: [0, 44], width: 1.5 }, { type: 'ball', rel: 'wrist', pos: [0, 49], r: 5 }] },
+      { ...STAND, a1: [90, 90], props: [{ type: 'seg', rel: 'wrist', from: [0, 0], to: [0, 16], width: 1.5 }, { type: 'ball', rel: 'wrist', pos: [0, 21], r: 5 }] },
+    ],
+  },
+  cableCrunch: {
+    gear: 'cable',
+    cableTo: [30, -118],
+    frames: [
+      { t: 14, a1: [168, -6], l1: [0, -90], ground: 'lowest', props: [G] },
+      { t: 76, a1: [110, -70], l1: [0, -90], ground: 'lowest', props: [G] },
+    ],
+  },
+  machineCrunch: {
+    gear: 'machine',
+    frames: [
+      { t: -8, a1: [40, 150], ...SEATED, props: [SEAT, BENCH_PAD] },
+      { t: 42, a1: [80, 190], ...SEATED, props: [SEAT] },
+    ],
+  },
+  seatedAbduction: {
+    gear: 'machine',
+    bestView: 'front',
+    frames: [
+      { t: -10, a1: [20, 40], ...SEATED, abd: { a1: 20, a2: 20, l1: 4, l2: 4 }, props: [BENCH_PAD, SEAT] },
+      { t: -10, a1: [20, 40], ...SEATED, abd: { a1: 20, a2: 20, l1: 38, l2: 38 }, props: [BENCH_PAD, SEAT] },
+    ],
+  },
+  seatedAdduction: {
+    gear: 'machine',
+    bestView: 'front',
+    frames: [
+      { t: -10, a1: [20, 40], ...SEATED, abd: { a1: 20, a2: 20, l1: 38, l2: 38 }, props: [BENCH_PAD, SEAT] },
+      { t: -10, a1: [20, 40], ...SEATED, abd: { a1: 20, a2: 20, l1: 2, l2: 2 }, props: [BENCH_PAD, SEAT] },
+    ],
+  },
+  seatedLateralRaise: {
+    gear: 'dumbbell',
+    bestView: 'front',
+    frames: [
+      { t: -4, a1: [0, 0], ...SEATED, abd: { a1: 12, a2: 12 }, props: [SEAT, G] },
+      { t: -4, a1: [0, 0], ...SEATED, abd: { a1: 88, a2: 88 }, props: [SEAT, G] },
+    ],
+  },
+  sideLyingClam: {
+    view: 'front',
+    gear: 'none',
+    frames: [
+      { view: 'front', rot: -90, arms: [[170, 170], [20, 60]], legs: [[-20, 60], [-20, 60]], ground: 'lowest' },
+      { view: 'front', rot: -90, arms: [[170, 170], [20, 60]], legs: [[-20, 60], [30, 70]], ground: 'lowest' },
+    ],
+  },
+  pressCalf: {
+    gear: 'machine',
+    frames: [
+      { t: -62, a1: [40, 70], l1: [128, 128, 228], ground: 'none', hip: [70, 112], props: [BENCH_PAD, { type: 'seg', from: [-6, -12], to: [10, 14], rel: 'toe', width: 5 }] },
+      { t: -62, a1: [40, 70], l1: [128, 128, 176], ground: 'none', hip: [70, 112], props: [BENCH_PAD, { type: 'seg', from: [-6, -12], to: [10, 14], rel: 'toe', width: 5 }] },
+    ],
+  },
+  airSquat: {
+    gear: 'none',
+    frames: [
+      { t: 0, a1: [90, 90], l1: [0, 0] },
+      { t: 24, a1: [90, 90], l1: [92, -32] },
+    ],
+  },
+  cablePress: {
+    gear: 'cable',
+    dualCable: true,
+    cableTo: [-34, -50],
+    frames: [
+      { t: 10, a1: [-60, 80], l1: [18, 0], l2: [-18, -10], props: [G] },
+      { t: 10, a1: [84, 84], l1: [18, 0], l2: [-18, -10], props: [G] },
+    ],
+  },
+  pikePushUp: {
+    gear: 'none',
+    frames: [
+      { t: 110, a1: [4, 4], l1: [-22, -22], ground: 'lowest', solve: { joint: 'wrist', range: [80, 160] } },
+      { t: 130, a1: [-34, 34], l1: [-22, -22], ground: 'lowest', solve: { joint: 'wrist', range: [80, 175] } },
+    ],
+  },
+  stoneLift: {
+    gear: 'none',
+    frames: [
+      { t: 58, a1: [0, 0], l1: [62, -24], solve: { joint: 'wrist', range: [30, 80], offset: 9 }, props: [{ type: 'ball', r: 12, dy: 4 }] },
+      { t: 24, a1: [20, 120], l1: [60, -20], props: [{ type: 'ball', r: 12, dx: 6, dy: 6 }] },
+      { t: -4, a1: [24, 150], l1: [0, 0], props: [{ type: 'ball', r: 12, dx: 4, dy: 8 }] },
+    ],
+  },
+  tireFlip: {
+    gear: 'none',
+    frames: [
+      { t: 62, a1: [10, 10], l1: [70, -30], solve: { joint: 'wrist', range: [30, 85], offset: 6 }, props: [{ type: 'seg', rel: 'wrist', from: [-2, 2], to: [46, 2], width: 12 }] },
+      { t: 30, a1: [40, 40], l1: [24, -10], props: [{ type: 'seg', rel: 'wrist', from: [0, 0], to: [30, 40], width: 12 }] },
+      { t: 14, a1: [90, 90], l1: [30, 0], l2: [-20, -10], props: [{ type: 'seg', rel: 'wrist', from: [0, 0], to: [10, 50], width: 12 }] },
+    ],
+  },
+  hangingBarMuscleUp: {
+    gear: 'none',
+    frames: [
+      { t: -10, a1: [176, 178], l1: [24, -30], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
+      { t: 12, a1: [-30, 150], l1: [30, -30], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
+      { t: 8, a1: [-14, 0], l1: [8, -10], ground: 'grip', grip: [104, -12], props: [{ type: 'bar', rig: true }] },
+    ],
+  },
+  cableRearFly: {
+    view: 'front',
+    gear: 'cable',
+    cableAnchors: [[30, -58], [-30, -58]],
+    frames: [
+      { view: 'front', arms: [[-12, -12], [-12, -12]], legs: [[5, 5], [5, 5]], props: [G] },
+      { view: 'front', arms: [[86, 90], [86, 90]], legs: [[5, 5], [5, 5]], props: [G] },
+    ],
+  },
+  seatedTricepsMachine: {
+    gear: 'machine',
+    frames: [
+      { t: -4, a1: [30, 160], ...SEATED, props: [BENCH_PAD, SEAT, { type: 'pad', side: 'front', offset: 9, extend: [-24, -10], legs: false }] },
+      { t: -4, a1: [30, 30], ...SEATED, props: [BENCH_PAD, SEAT, { type: 'pad', side: 'front', offset: 9, extend: [-24, -10], legs: false }] },
+    ],
+  },
+  leaningLateralRaise: {
+    view: 'front',
+    gear: 'dumbbell',
+    frames: [
+      { view: 'front', tilt: -12, arms: [[52, 52], [8, 8]], legs: [[2, 2], [8, 8]], props: [{ ...G, both: false }, { type: 'pole' }] },
+      { view: 'front', tilt: -12, arms: [[52, 52], [92, 96]], legs: [[2, 2], [8, 8]], props: [{ ...G, both: false }, { type: 'pole' }] },
+    ],
+  },
+  sumoDeadlift: {
+    gear: 'barbell',
+    bestView: 'front',
+    frames: [
+      { t: 42, a1: [0, 0], l1: [70, -10], abd: { l1: 34, l2: 34, a1: 4, a2: 4 }, solve: { joint: 'wrist', range: [20, 70], offset: 9 }, props: [G] },
+      { t: 20, a1: [0, 0], l1: [30, -4], abd: { l1: 24, l2: 24, a1: 4, a2: 4 }, props: [G] },
+      { t: 0, a1: [0, 0], l1: [0, 0], abd: { l1: 20, l2: 20, a1: 4, a2: 4 }, props: [G] },
+    ],
+  },
+  zercherSquat: {
+    gear: 'barbell',
+    frames: [
+      { t: 0, a1: [30, 160], l1: [0, 0], props: [{ ...G, at: 'elbow', offset: [2, -2] }] },
+      { t: 18, a1: [40, 168], l1: [92, -34], props: [{ ...G, at: 'elbow', offset: [2, -2] }] },
+    ],
+  },
+  cableKickback: {
+    gear: 'none',
+    frames: [
+      { t: 18, a1: [60, 70], l1: [-4, -4], l2: [6, 0], props: [{ type: 'post', pos: [44, -30] }, { type: 'cable', to: [40, 10], at: 'ankle' }] },
+      { t: 26, a1: [60, 70], l1: [-40, -30], l2: [6, 0], props: [{ type: 'post', pos: [44, -30] }, { type: 'cable', to: [40, 10], at: 'ankle' }] },
     ],
   },
 });

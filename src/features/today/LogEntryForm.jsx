@@ -1,10 +1,11 @@
 import { ClipboardCheck, Plus, Rows3, Trash2, X } from 'lucide-react';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { ExercisePicker } from '../../components/ExercisePicker';
 import { InlineSpinner } from '../../components/ui';
 import { playClick } from '../../utils/audio';
 import { logError } from '../../utils/errors';
 import { MAX_SET_DETAILS, pickBestSet, RIR_OPTIONS } from '../../utils/sets';
+import { readFormDraft, writeFormDraft } from './logDrafts';
 
 const FIELDS = Object.freeze([
   { key: 'sets', label: 'Series', inputMode: 'numeric', step: '1' },
@@ -59,7 +60,7 @@ const RirPicker = ({ value, onChange, idPrefix }) => (
       ))}
     </div>
     <p id={`${idPrefix}-rir-help`} className="mt-1 text-[11px] text-muted">
-      Repeticiones que te quedaban en la última serie (0 = al fallo). Ajusta la fatiga y las sugerencias de carga.
+      ¿Cuántas repeticiones más podías hacer? 0 = no podías ni una más. Es opcional y mejora las sugerencias.
     </p>
   </fieldset>
 );
@@ -113,19 +114,30 @@ export const LogEntryForm = ({
   routineValues = null,
   submitLabel = 'Guardar',
   heading = null,
+  draftKey = null,
 }) => {
   const formId = useId();
-  const [exercise, setExercise] = useState(defaults.exercise ?? '');
-  const [values, setValues] = useState({
+  // Borrador guardado (si saliste de la pestaña o abriste el reloj con el formulario a medio llenar).
+  const [draft] = useState(() => readFormDraft(draftKey));
+  const [exercise, setExercise] = useState(draft?.exercise ?? defaults.exercise ?? '');
+  const [values, setValues] = useState(() => draft?.values ?? {
     weight: toFieldValue(defaults.weight),
     reps: toFieldValue(defaults.reps),
     sets: toFieldValue(defaults.sets),
     rir: toRir(defaults.rir),
   });
-  const [isDetailed, setIsDetailed] = useState(() => Boolean(defaults.setDetails?.length) || readDetailPreference());
-  const [rows, setRows] = useState(() => (defaults.setDetails?.length
-    ? defaults.setDetails.slice(0, MAX_SET_DETAILS).map(newRow)
-    : rowsFromSummary({ sets: defaults.sets || defaults.fallbackSets, reps: defaults.reps, weight: defaults.weight, rir: defaults.rir })));
+  const [isDetailed, setIsDetailed] = useState(() => draft?.isDetailed ?? (Boolean(defaults.setDetails?.length) || readDetailPreference()));
+  const [rows, setRows] = useState(() => {
+    if (draft?.rows?.length) return draft.rows.map(newRow);
+    return defaults.setDetails?.length
+      ? defaults.setDetails.slice(0, MAX_SET_DETAILS).map(newRow)
+      : rowsFromSummary({ sets: defaults.sets || defaults.fallbackSets, reps: defaults.reps, weight: defaults.weight, rir: defaults.rir });
+  });
+
+  // Cada cambio se guarda como borrador (localStorage es un sistema externo: escribirlo en un efecto es correcto).
+  useEffect(() => {
+    writeFormDraft(draftKey, { exercise, values, isDetailed, rows: rows.map(({ reps, weight, rir }) => ({ reps, weight, rir })) });
+  }, [draftKey, exercise, values, isDetailed, rows]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const update = (field) => (event) => setValues((previous) => ({ ...previous, [field]: event.target.value }));

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useEffect, useId, useState } from 'react';
 import { playClick } from '../utils/audio';
 
 export const BRAND_NAME = 'Colossus';
@@ -108,12 +109,12 @@ export const IconButton = ({ label, icon: Icon, onClick, tone, disabled, size = 
 );
 
 export const StatTile = ({ label, value, hint, icon: Icon }) => (
-  <div className="card flex flex-col gap-1 p-4">
-    <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted">
-      {Icon && <Icon size={14} aria-hidden />}
-      {label}
+  <div className="card flex min-w-0 flex-col gap-1 p-3 md:p-4">
+    <span className="flex min-w-0 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted md:text-xs">
+      {Icon && <Icon size={14} className="shrink-0" aria-hidden />}
+      <span className="truncate">{label}</span>
     </span>
-    <span className="text-2xl font-black leading-tight">{value}</span>
+    <span className="text-xl font-black leading-tight md:text-2xl">{value}</span>
     {hint && <span className="text-xs text-secondary">{hint}</span>}
   </div>
 );
@@ -139,3 +140,27 @@ export const FieldLabel = ({ htmlFor, children }) => (
     {children}
   </label>
 );
+
+/*
+ * Tarjeta plegable (cerrada por defecto). El contenido se monta recién al abrir: los formularios de adentro
+ * arrancan con los datos actuales cada vez y la pestaña carga más liviana.
+ */
+export const CollapsibleSection = ({ title, icon: Icon, subtitle, children, defaultOpen = false, className = '' }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const panelId = useId();
+  return (
+    <section className={`card ${className}`}>
+      <h3>
+        <button type="button" className="flex w-full min-w-0 items-center justify-between gap-3 p-4 text-left md:px-5" aria-expanded={isOpen} aria-controls={panelId}
+          onClick={() => { playClick(); setIsOpen((open) => !open); }}>
+          <span className="min-w-0">
+            <span className="flex items-center gap-2 text-base font-bold md:text-lg">{Icon && <Icon size={18} aria-hidden />} {title}</span>
+            {subtitle && <span className="mt-0.5 block text-xs font-normal text-secondary md:text-sm">{subtitle}</span>}
+          </span>
+          {isOpen ? <ChevronUp size={20} className="shrink-0 text-muted" aria-hidden /> : <ChevronDown size={20} className="shrink-0 text-muted" aria-hidden />}
+        </button>
+      </h3>
+      {isOpen && <div id={panelId} className="px-4 pb-4 md:px-5 md:pb-5">{children}</div>}
+    </section>
+  );
+};

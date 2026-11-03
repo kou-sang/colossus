@@ -106,11 +106,11 @@ const ExerciseDetail = ({ exercise, onBack, onSelect }) => {
       </header>
       {isAdding && <AddToRoutineDialog exerciseName={exercise.name} onClose={() => setIsAdding(false)} />}
 
-      <SectionCard title={<span className="flex items-center gap-2"><Camera size={18} aria-hidden /> Ejecución</span>} subtitle="Inicio, mitad y final del recorrido en vista lateral, frontal y superior">
+      <SectionCard title={<span className="flex items-center gap-2"><Camera size={18} aria-hidden /> Ejecución</span>} subtitle="Inicio, mitad y final del movimiento">
         <ExerciseFigure key={exercise.name} exerciseName={exercise.name} />
       </SectionCard>
 
-      <SectionCard title={<span className="flex items-center gap-2"><Activity size={18} aria-hidden /> Músculos que trabaja</span>} subtitle="Porcentaje del estímulo de cada serie (el mismo que usan tus Analíticas)">
+      <SectionCard title={<span className="flex items-center gap-2"><Activity size={18} aria-hidden /> Músculos que trabaja</span>} subtitle="Cuánto trabaja cada músculo en este ejercicio">
         <div className="grid gap-4 lg:grid-cols-2">
           <ExerciseMuscleMap distribution={exercise.distribution} />
           <ul className="space-y-2">

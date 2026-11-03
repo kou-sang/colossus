@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { playCountdownTick, playRestStart, playTimerFinish, playWorkStart } from '../../../utils/audio';
+import { isVibrationEnabled, playCountdownTick, playRestStart, playTimerFinish, playWorkStart } from '../../../utils/audio';
 import { logError } from '../../../utils/errors';
 import { buildPhases, createTimerState, describeTimer, PHASE_KIND, timerReducer, TIMER_STATUS } from './timerEngine';
 
-const TICK_MS = 200;
+const TICK_MS = 100;
 const COUNTDOWN_SECONDS = 3;
 
 // Vibración corta en los cambios de fase (celular en el bolsillo o lejos). Silenciosa si no está soportada.
 const vibrate = (pattern) => {
+  if (!isVibrationEnabled()) return;
   try {
     navigator.vibrate?.(pattern);
   } catch {
@@ -45,16 +46,22 @@ const useWakeLock = (active) => {
 };
 
 /**
- * Estado del reloj + efectos (sonidos, vibración, pantalla encendida).
- * `config` ya sanitizada (ver sanitizeTimerConfig). Las fases se recalculan solo si cambia la configuración;
- * quien cambie la configuración debe llamar a `reset()` (la UI solo lo permite con el reloj detenido).
+ * Estado del reloj + efectos (sonidos, vibración, pantalla encendida). Lo usa SOLO el TimerProvider:
+ * el reloj vive a nivel de la app y sigue corriendo aunque se cierre la ventana o se cambie de pestaña.
+ * `config` ya sanitizada (ver sanitizeTimerConfig); `initialState` permite retomar un reloj guardado.
  */
-export const useWorkoutTimer = (config) => {
+export const useWorkoutTimer = (config, initialState) => {
   const phases = useMemo(() => buildPhases(config), [config]);
-  const [state, dispatch] = useReducer(timerReducer, undefined, createTimerState);
+  const [state, dispatch] = useReducer(timerReducer, initialState ?? null, (restored) => restored ?? createTimerState());
   const [now, setNow] = useState(() => Date.now());
 
-  const send = useCallback((type, extra = {}) => dispatch({ type, phases, now: Date.now(), ...extra }), [phases]);
+  // Cada acción usa la MISMA marca de tiempo para el reducer y para la pantalla. Antes la pantalla seguía con el
+  // último "tick" (hasta 200 ms viejo) y al pausar/reanudar el número saltaba un segundo.
+  const send = useCallback((type, extra = {}) => {
+    const current = Date.now();
+    setNow(current);
+    dispatch({ type, phases, now: current, ...extra });
+  }, [phases]);
 
   const isRunning = state.status === TIMER_STATUS.RUNNING;
   useEffect(() => {
@@ -114,10 +121,7 @@ export const useWorkoutTimer = (config) => {
     state,
     phases,
     view,
-    start: () => {
-      setNow(Date.now());
-      send('start');
-    },
+    start: () => send('start'),
     pause: () => send('pause'),
     resume: () => send('resume'),
     next: () => send('next'),

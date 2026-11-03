@@ -263,11 +263,11 @@ export const AnalyticsTab = () => {
             <p className="mt-3 text-xs text-muted">Crea o únete a un grupo en la pestaña Grupos para comparar tu progreso con amigos.</p>
           )}
           {isLongRange && (
-            <p className="mt-2 text-xs text-muted">Rangos largos descargan más registros (cuota gratuita de Firestore: 50.000 lecturas/día).</p>
+            <p className="mt-2 text-xs text-muted">Los rangos largos tardan más en cargar.</p>
           )}
         </div>
         {logsState.meta?.isTruncated && (
-          <p className="mt-2 text-xs text-muted">Se muestran los registros más recientes; acota el rango para ver el detalle completo.</p>
+          <p className="mt-2 text-xs text-muted">Solo se ven los registros más recientes. Acorta el rango para verlos todos.</p>
         )}
         {logsState.error && <p className="mt-2 text-sm text-accent">{toUserMessage(logsState.error)}</p>}
       </SectionCard>
@@ -281,7 +281,7 @@ export const AnalyticsTab = () => {
         <>
           <SectionCard
             title="Consistencia"
-            subtitle="Ejercicios acumulados por perfil en el período, con tus filtros de categoría y músculo"
+            subtitle="Ejercicios acumulados en el período"
             actions={<ChartInfo info={CHART_INFO.consistency} />}
           >
             <ConsistencyChart seriesList={consistencySeries} domain={consistencyDomain} unifyDays={unifyDays} />
@@ -304,13 +304,13 @@ export const AnalyticsTab = () => {
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile icon={CalendarDays} label="Días entrenados" value={focusMetrics.trainingDays} hint={`${focusName} · en el rango`} />
             <StatTile icon={Dumbbell} label="Tonelaje / semana" value={formatTonnage(focusMetrics.tonnagePerWeek)} hint="promedio en el rango" />
-            <StatTile icon={Trophy} label="Récords" value={focusMetrics.records} hint="PRs de 1RM estimado" />
+            <StatTile icon={Trophy} label="Récords" value={focusMetrics.records} hint="mejores marcas" />
             <StatTile icon={Flame} label="Racha" value={focusMetrics.streak === null ? '—' : `${focusMetrics.streak} sem`} hint={focusMetrics.streak === null ? 'solo por perfil individual' : 'semanas consecutivas'} />
           </div>
 
           <SectionCard
             title="Mapa muscular"
-            subtitle={`${focusName} · ${mapMode === 'stimulus' ? 'más verde = más series efectivas por semana' : 'verde = entrenado hace poco · rojo = un mes o más sin entrenar'}`}
+            subtitle={`${focusName} · ${mapMode === 'stimulus' ? 'más verde = más series por semana' : 'verde = entrenado hace poco · rojo = un mes o más'}`}
             actions={
               <div className="flex flex-wrap items-center gap-2">
                 <ChartInfo info={mapMode === 'stimulus' ? CHART_INFO.muscleMapStimulus : CHART_INFO.muscleMapRecency} />
@@ -359,7 +359,7 @@ export const AnalyticsTab = () => {
 
           <SectionCard
             title="Progresión de fuerza"
-            subtitle="Mejor 1RM estimado por sesión — la métrica más fiable de progreso real"
+            subtitle="Tu mejor 1RM estimado de cada sesión"
             actions={
               <div className="flex min-w-0 max-w-full items-center gap-1">
                 {exerciseOptions.length > 0 && (
@@ -374,7 +374,7 @@ export const AnalyticsTab = () => {
             <StrengthProgressChart seriesList={strengthSeries} unifyDays={unifyDays} />
           </SectionCard>
 
-          <SectionCard title="Tonelaje semanal" subtitle="Series × reps × kg por semana (ejercicios que pasan los filtros)" actions={<ChartInfo info={CHART_INFO.weeklyVolume} />}>
+          <SectionCard title="Tonelaje semanal" subtitle="Peso total movido por semana" actions={<ChartInfo info={CHART_INFO.weeklyVolume} />}>
             <WeeklyVolumeChart rows={weeklyRows} users={chartUsers} rangeStart={range.since} rangeEnd={rangeEnd} />
           </SectionCard>
 

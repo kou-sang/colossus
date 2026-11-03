@@ -37,26 +37,35 @@ export const ExercisePicker = ({ id, value, onChange, extraNames = [], placehold
       if (!rect) return;
       const spaceBelow = window.innerHeight - rect.bottom;
       const openUpwards = spaceBelow < 200 && rect.top > spaceBelow;
-      setPosition({
+      const next = {
         left: Math.min(rect.left, window.innerWidth - Math.max(rect.width, MIN_LIST_WIDTH) - 8),
         width: Math.max(rect.width, MIN_LIST_WIDTH),
         top: openUpwards ? undefined : rect.bottom + 4,
         bottom: openUpwards ? window.innerHeight - rect.top + 4 : undefined,
         maxHeight: Math.min(MAX_LIST_HEIGHT, (openUpwards ? rect.top : spaceBelow) - 16),
-      });
+      };
+      // Sin cambios → mismo objeto (evita renders y efectos en cada evento de scroll o resize).
+      setPosition((previous) => (previous && Object.keys(next).every((key) => previous[key] === next[key]) ? previous : next));
     };
     updatePosition();
-    window.addEventListener('scroll', updatePosition, true);
+    // Bug (celular): el scroll de la PROPIA lista también llegaba acá, recalculaba la posición y el efecto de
+    // "opción activa visible" devolvía la lista arriba → no se podía deslizar. Solo cuenta el scroll de afuera.
+    const handleScroll = (event) => {
+      if (listRef.current && (event.target === listRef.current || listRef.current.contains(event.target))) return;
+      updatePosition();
+    };
+    window.addEventListener('scroll', handleScroll, true);
     window.addEventListener('resize', updatePosition);
     return () => {
-      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', updatePosition);
     };
   }, [isOpen]);
 
-  // Mantiene visible la opción activa al navegar con flechas.
-  // Mantiene visible la opción activa. Se calcula sobre el scroll de la lista (no scrollIntoView,
-  // que dentro de un contenedor position: fixed puede no desplazar o mover la página entera).
+  // Mantiene visible la opción activa (al abrir y al navegar con flechas). Se calcula sobre el scroll de la lista
+  // (no scrollIntoView, que dentro de un contenedor position: fixed puede mover la página entera).
+  // Depende de `hasPosition` (no del objeto posición): mover la lista no debe resetear el scroll del usuario.
+  const hasPosition = Boolean(position);
   useLayoutEffect(() => {
     const list = listRef.current;
     const option = list?.querySelector(`[data-index="${activeIndex}"]`);
@@ -65,7 +74,7 @@ export const ExercisePicker = ({ id, value, onChange, extraNames = [], placehold
     const optionBottom = optionTop + option.offsetHeight;
     if (optionTop < list.scrollTop) list.scrollTop = optionTop;
     else if (optionBottom > list.scrollTop + list.clientHeight) list.scrollTop = optionBottom - list.clientHeight;
-  }, [activeIndex, position]);
+  }, [activeIndex, hasPosition]);
 
   const open = () => {
     if (isOpen) return;
@@ -73,6 +82,7 @@ export const ExercisePicker = ({ id, value, onChange, extraNames = [], placehold
     // Arranca posicionada en el ejercicio actual (si está en la lista) para no perder el contexto.
     const currentIndex = searchExercises('', extraNames).findIndex(({ entry }) => entry.name === normalizeExerciseName(value));
     setActiveIndex(Math.max(currentIndex, 0));
+    setPosition(null); // Se recalcula al abrir: así la lista nueva arranca mostrando la opción actual
     setIsOpen(true);
   };
 

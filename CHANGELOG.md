@@ -17,6 +17,31 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.5.0] - 2026-11-03
+
+### Added
+- **Agregar a una rutina desde "Registrado hoy":** cada ejercicio registrado tiene un botón para sumarlo a un día de una rutina. Por defecto propone la rutina activa y el día de hoy, con las series, repeticiones y kg que registraste.
+- **Configuración (ruedita del encabezado):** volumen general y por tipo de sonido (botones, reloj, festejos), silenciar todo y vibración del reloj. Los colores y el tema se mudaron aquí desde Perfil.
+- **Reloj en segundo plano:** el reloj sigue corriendo al cerrar la ventana, al cambiar de pestaña o al recargar la página (hasta 12 h). Mientras corre, aparece un reloj flotante abajo a la derecha con pausa/reanudar.
+- **52 ejercicios nuevos (313 en total):** máquinas (jalón, press declinado, curl Scott, tríceps, gemelos, patada de glúteo, sentadilla pendular), variantes por implemento (mancuernas, polea, barra, multipower, kettlebell, barra hexagonal), calistenia (L-sit, dragon flag, flexiones pike, en anillas y pseudo plancha, dominadas arqueras y lastradas, sentadilla cosaca y del patinador, fondos en barra recta) y no convencionales (volteo de neumático, golpes con maza, levantamiento de piedra, Jefferson curl). Todos con ficha, dibujo en 3 vistas y distribución muscular propia.
+- Las ventanas (i) de Analíticas muestran las fuentes de las cifras de referencia.
+- **Fichas propias para 27 ejercicios:** pasos, consejos y errores comunes escritos para cada uno (antes compartían el texto de otro parecido y a veces se contradecían, como "Crunch en máquina: acuéstate boca arriba"). Entre ellos: press de pecho en polea, pullover y crunch en máquina, crunch en polea, extensión de tríceps en máquina, L-sit, flexiones pike, curl bayesiano, en polea alta, araña y en TRX, tríceps tras nuca en polea, rodillo de muñeca, volteo de neumático, piedra, golpes con maza, Jefferson curl, dragon flag, limpiaparabrisas, almeja, gemelos en prensa, sentadilla cosaca, del patinador y española, press cubano, devil press y cruce posterior en polea.
+- **Revisión de los 313 dibujos:** 25 ejercicios tienen ahora su propio dibujo en lugar de reutilizar uno parecido: muscle up, L-sit, flexiones pike, curl bayesiano, curl en polea alta, curl araña, tríceps tras nuca en polea, extensión de tríceps en máquina, rodillo de muñeca, crunch en polea (de rodillas), crunch en máquina (sentado), aductor y abductor en máquina (sentado), vuelos laterales sentado, almeja (acostado de costado), gemelos en prensa, sentadilla sin peso (ya no muestra una pesa), press de pecho en polea, pullover en máquina (sentado), volteo de neumático, levantamiento de piedra, vuelo lateral inclinado (tomado de un poste), peso muerto sumo (piernas abiertas, se lee de frente), sentadilla Zercher (barra en los codos) y patada de glúteo en polea (de pie, con el cable al tobillo).
+
+### Changed
+- **Inicio:** "Ejercicio libre" y "Reloj libre" pasan a la sección *Plan de hoy*. Cada ejercicio planificado tiene un solo botón, **Hacer** (antes "Hacer ahora" y "Hecho"); para cronometrar se usa el reloj libre, que sigue corriendo mientras registras.
+- **Perfil:** cada sección es plegable y arranca cerrada. *Cerrar sesión* pasó al final de Perfil y pide confirmación (se quitó del encabezado).
+- **Textos explicativos reescritos:** las ventanas (i) de Analíticas ahora dicen primero qué muestra el gráfico, después cómo leerlo y un consejo; el cálculo queda plegado en "Cómo se calcula". También se acortaron subtítulos de Analíticas, ayudas del reloj, RIR, Perfil y biblioteca.
+- Indicadores de Inicio en una sola fila de tres en el celular.
+
+### Fixed
+- El reloj perdía el progreso al cerrarlo y volver a abrirlo.
+- El formulario de ejercicio (libre o planificado) se vaciaba al cambiar de pestaña o al usar el reloj: ahora conserva el borrador del día, incluidas las series cargadas.
+- Pausar y reanudar el reloj sumaba o saltaba un segundo.
+- La lista de ejercicios del selector (rutinas) no dejaba deslizar: volvía sola al elemento activo.
+- El reloj flotante ya no tapa el final de la página.
+- Dibujos: los ejercicios colgados (dominadas, toes to bar, elevaciones colgado, colgado en barra) muestran la barra fija con sus parantes en las 3 vistas y ya no apoyan los pies en el piso; elevación de rodillas en paralelas queda suspendida; los vuelos laterales en polea y el cruce posterior en polea muestran los cables; el curl nórdico baja con el cuerpo recto; la sentadilla sumo muestra la kettlebell; el curl en TRX muestra las correas.
+
 ## [4.4.1] - 2026-11-02
 
 ### Added
