@@ -14,10 +14,11 @@ export { CATEGORIES, CATEGORY_LABELS, MUSCLES, MUSCLE_LABELS } from './muscles';
  *   dan deltoides_anterior · dl deltoides_lateral · dp deltoides_posterior · mr manguito_rotador
  *   bi biceps · br braquial · tl triceps_largo · tla triceps_lateral
  *   brr braquiorradial · fx flexores del antebrazo (agarre) · ex extensores del antebrazo
- *   ab = "agarre genérico" (código compuesto): se reparte 65% flexores · 20% extensores · 15% braquiorradial
+ *   ab = "agarre genérico" (código compuesto): 55% flexores · 15% extensores · 10% braquiorradial · 12% palma · 8% dedos
  *   ra recto_abdominal · ob oblicuos · se serrato
  *   rf recto_femoral · vl vasto_lateral · vm vasto_medial · bf biceps_femoral · st semitendinoso · ad aductores
- *   gm gluteo_mayor · gme gluteo_medio · ge gemelos · so soleo · ti tibial
+ *   gm gluteo_mayor · gme gluteo_medio · ge gemelos · so soleo · ti tibial · pie pie (arco plantar)
+ *   pa palma de la mano · dd dedos de la mano
  */
 const CODE_TO_MUSCLE = Object.freeze({
   ps: 'pecho_superior', pm: 'pecho_medio', pi: 'pecho_inferior',
@@ -27,12 +28,14 @@ const CODE_TO_MUSCLE = Object.freeze({
   brr: 'braquiorradial', fx: 'antebrazo_flexores', ex: 'antebrazo_extensores',
   ra: 'recto_abdominal', ob: 'oblicuos', se: 'serrato',
   rf: 'recto_femoral', vl: 'vasto_lateral', vm: 'vasto_medial', bf: 'biceps_femoral', st: 'semitendinoso', ad: 'aductores',
-  gm: 'gluteo_mayor', gme: 'gluteo_medio', ge: 'gemelos', so: 'soleo', ti: 'tibial',
+  gm: 'gluteo_mayor', gme: 'gluteo_medio', ge: 'gemelos', so: 'soleo', ti: 'tibial', pie: 'pie',
+  pa: 'mano_palma', dd: 'mano_dedos',
 });
 
 // Códigos compuestos: un porcentaje que se reparte entre varios músculos (proporciones que suman 1).
 const COMPOSITE_CODES = Object.freeze({
-  ab: { antebrazo_flexores: 0.65, antebrazo_extensores: 0.2, braquiorradial: 0.15 },
+  // Agarrar involucra también los músculos propios de la mano (palma y dedos).
+  ab: { antebrazo_flexores: 0.55, antebrazo_extensores: 0.15, braquiorradial: 0.1, mano_palma: 0.12, mano_dedos: 0.08 },
 });
 
 const CATALOG_ENTRIES = [
@@ -161,15 +164,15 @@ const CATALOG_ENTRIES = [
   ['CURL DE MUÑECA', 'ANTEBRAZOS', { fx: 100 }, ['CURL DE MUNECAS', 'FLEXION DE MUNECA']],
   ['CURL DE MUÑECA INVERTIDO', 'ANTEBRAZOS', { ex: 90, brr: 10 }, ['EXTENSION DE MUNECA', 'EXTENSIONES DE MUNECA']],
   ['RODILLO DE MUÑECA', 'ANTEBRAZOS', { fx: 45, ex: 40, dan: 10, brr: 5 }, ['ENROLLADOR', 'WRIST ROLLER']],
-  ['COLGADO EN BARRA', 'ANTEBRAZOS', { fx: 55, da: 20, ra: 10, rm: 5, ex: 5, brr: 5 }, ['DEAD HANG', 'COLGARSE EN BARRA']],
+  ['COLGADO EN BARRA', 'ANTEBRAZOS', { fx: 43, pa: 7, dd: 5, da: 20, ra: 10, rm: 5, ex: 5, brr: 5 }, ['DEAD HANG', 'COLGARSE EN BARRA']],
   ['CURL DE MUÑECA TRAS LA ESPALDA', 'ANTEBRAZOS', { fx: 95, ts: 5 }, ['CURL DE MUNECA DETRAS DE LA ESPALDA', 'CURL DE MUÑECA DETRAS']],
   ['CURL INVERTIDO EN POLEA', 'ANTEBRAZOS', { brr: 38, br: 30, ex: 20, bi: 12 }, ['CURL PRONO EN POLEA', 'CURL REVERSO EN POLEA']],
   ['PRONOSUPINACION CON MANCUERNA', 'ANTEBRAZOS', { brr: 30, fx: 25, ex: 25, bi: 20 }, ['PRONACION Y SUPINACION', 'ROTACION DE ANTEBRAZO', 'MARTILLO ROTACION']],
   ['DESVIACION RADIAL CON MANCUERNA', 'ANTEBRAZOS', { ex: 45, fx: 40, brr: 15 }, ['DESVIACION RADIAL', 'PALANCA DE MUÑECA']],
-  ['PINZA CON DISCOS', 'ANTEBRAZOS', { fx: 75, ex: 15, brr: 5, ts: 5 }, ['PLATE PINCH', 'PELLIZCO DE DISCOS']],
-  ['HAND GRIP', 'ANTEBRAZOS', { fx: 90, ex: 10 }, ['HANDGRIP', 'HAND GRIPPER', 'APRETAR HANDGRIP']],
-  ['EXTENSION DE DEDOS CON BANDA', 'ANTEBRAZOS', { ex: 100 }, ['APERTURA DE DEDOS CON BANDA', 'FINGER EXTENSION']],
-  ['COLGADO CON TOALLA', 'ANTEBRAZOS', { fx: 62, ex: 6, brr: 7, da: 15, ra: 5, rm: 5 }, ['TOWEL HANG', 'COLGADO EN TOALLAS']],
+  ['PINZA CON DISCOS', 'ANTEBRAZOS', { fx: 45, pa: 25, dd: 15, ex: 10, ts: 5 }, ['PLATE PINCH', 'PELLIZCO DE DISCOS']],
+  ['HAND GRIP', 'ANTEBRAZOS', { fx: 60, pa: 25, dd: 10, ex: 5 }, ['HANDGRIP', 'HAND GRIPPER', 'APRETAR HANDGRIP']],
+  ['EXTENSION DE DEDOS CON BANDA', 'ANTEBRAZOS', { ex: 70, dd: 25, pa: 5 }, ['APERTURA DE DEDOS CON BANDA', 'FINGER EXTENSION']],
+  ['COLGADO CON TOALLA', 'ANTEBRAZOS', { fx: 48, pa: 8, dd: 6, ex: 6, brr: 7, da: 15, ra: 5, rm: 5 }, ['TOWEL HANG', 'COLGADO EN TOALLAS']],
 
   // ───────── CORE ─────────
   ['CRUNCH', 'CORE', { ra: 85, ob: 15 }, ['ABDOMINALES', 'CRUNCH ABDOMINAL', 'ABDOMINALES CORTOS']],
@@ -241,34 +244,34 @@ const CATALOG_ENTRIES = [
   ['FROG PUMP', 'GLUTEOS', { gm: 70, gme: 15, ad: 10, bf: 5 }, ['PUENTE RANA', 'FROG PUMPS']],
 
   // ───────── PANTORRILLAS ─────────
-  ['GEMELOS PARADO', 'PANTORRILLAS', { ge: 70, so: 30 }, ['GEMELOS DE PIE', 'PANTORRILLAS PARADO', 'ELEVACION DE TALONES', 'GEMELOS']],
-  ['GEMELOS EN PRENSA', 'PANTORRILLAS', { ge: 65, so: 35 }, ['PANTORRILLAS EN PRENSA']],
-  ['GEMELOS EN MULTIPOWER', 'PANTORRILLAS', { ge: 72, so: 28 }, ['GEMELOS EN SMITH']],
-  ['SOLEO SENTADO', 'PANTORRILLAS', { so: 75, ge: 25 }, ['SOLEO', 'GEMELOS SENTADO']],
-  ['ELEVACION DE PUNTAS', 'PANTORRILLAS', { ti: 100 }, ['TIBIAL', 'ELEVACION DE PUNTAS DE PIE']],
-  ['GEMELOS A UNA PIERNA', 'PANTORRILLAS', { ge: 68, so: 30, ti: 2 }, ['GEMELO UNILATERAL', 'GEMELOS UNILATERAL CON MANCUERNA']],
-  ['GEMELOS BURRO', 'PANTORRILLAS', { ge: 75, so: 25 }, ['DONKEY CALF RAISE', 'BURRO']],
+  ['GEMELOS PARADO', 'PANTORRILLAS', { ge: 62, so: 30, pie: 8 }, ['GEMELOS DE PIE', 'PANTORRILLAS PARADO', 'ELEVACION DE TALONES', 'GEMELOS']],
+  ['GEMELOS EN PRENSA', 'PANTORRILLAS', { ge: 59, so: 35, pie: 6 }, ['PANTORRILLAS EN PRENSA']],
+  ['GEMELOS EN MULTIPOWER', 'PANTORRILLAS', { ge: 64, so: 28, pie: 8 }, ['GEMELOS EN SMITH']],
+  ['SOLEO SENTADO', 'PANTORRILLAS', { so: 69, ge: 25, pie: 6 }, ['SOLEO', 'GEMELOS SENTADO']],
+  ['ELEVACION DE PUNTAS', 'PANTORRILLAS', { ti: 88, pie: 12 }, ['TIBIAL', 'ELEVACION DE PUNTAS DE PIE']],
+  ['GEMELOS A UNA PIERNA', 'PANTORRILLAS', { ge: 59, so: 30, ti: 2, pie: 9 }, ['GEMELO UNILATERAL', 'GEMELOS UNILATERAL CON MANCUERNA']],
+  ['GEMELOS BURRO', 'PANTORRILLAS', { ge: 68, so: 25, pie: 7 }, ['DONKEY CALF RAISE', 'BURRO']],
 
   // ───────── FUNCIONAL ─────────
-  ['BURPEES', 'FUNCIONAL', { pm: 15, dan: 10, tla: 10, vl: 15, vm: 10, rf: 10, gm: 15, ra: 10, ge: 5 }, ['BURPEE']],
+  ['BURPEES', 'FUNCIONAL', { pm: 15, dan: 10, tla: 10, vl: 15, vm: 10, rf: 10, gm: 15, ra: 10, ge: 2, pie: 3 }, ['BURPEE']],
   ['ESCALADORES', 'FUNCIONAL', { ra: 35, ob: 15, rf: 20, dan: 15, se: 5, gm: 10 }, ['MOUNTAIN CLIMBERS']],
-  ['SALTO AL CAJON', 'FUNCIONAL', { vl: 20, vm: 15, rf: 10, gm: 25, ge: 20, so: 10 }, ['BOX JUMP', 'SALTOS AL CAJON']],
+  ['SALTO AL CAJON', 'FUNCIONAL', { vl: 20, vm: 15, rf: 10, gm: 25, ge: 15, so: 10, pie: 5 }, ['BOX JUMP', 'SALTOS AL CAJON']],
   ['KETTLEBELL SWING', 'FUNCIONAL', { gm: 35, bf: 15, st: 15, lu: 15, ra: 5, ab: 10, dan: 5 }, ['SWING CON PESA RUSA', 'SWING']],
   ['THRUSTER', 'FUNCIONAL', { vl: 15, vm: 15, rf: 10, gm: 20, dan: 20, dl: 5, tla: 10, ra: 5 }, ['THRUSTERS']],
   ['CARGADA DE POTENCIA', 'FUNCIONAL', { ts: 20, gm: 20, bf: 10, st: 5, vl: 12, vm: 8, lu: 10, dan: 5, ab: 5, ge: 5 }, ['POWER CLEAN', 'CARGADA']],
   ['ARRANQUE', 'FUNCIONAL', { ts: 15, dl: 10, dan: 10, gm: 20, bf: 10, vl: 10, vm: 8, lu: 10, ab: 7 }, ['SNATCH']],
   ['WALL BALL', 'FUNCIONAL', { vl: 18, vm: 15, rf: 10, gm: 20, dan: 20, tla: 10, ra: 7 }, ['LANZAMIENTO A LA PARED', 'WALL BALLS']],
   ['BATTLE ROPES', 'FUNCIONAL', { dan: 25, dl: 20, ra: 15, ob: 10, ab: 15, tla: 5, bi: 5, ts: 5 }, ['SOGAS DE BATALLA', 'CUERDAS DE BATALLA']],
-  ['PASEO DEL GRANJERO', 'FUNCIONAL', { fx: 30, ex: 5, ts: 25, ra: 10, ob: 10, gm: 5, lu: 10, ge: 5 }, ['FARMER WALK', 'CAMINATA DEL GRANJERO']],
-  ['EMPUJE DE TRINEO', 'FUNCIONAL', { vl: 20, vm: 18, rf: 12, gm: 25, ge: 15, so: 10 }, ['TRINEO', 'SLED PUSH']],
+  ['PASEO DEL GRANJERO', 'FUNCIONAL', { fx: 22, pa: 5, dd: 3, ex: 5, ts: 25, ra: 10, ob: 10, gm: 5, lu: 10, ge: 5 }, ['FARMER WALK', 'CAMINATA DEL GRANJERO']],
+  ['EMPUJE DE TRINEO', 'FUNCIONAL', { vl: 20, vm: 18, rf: 12, gm: 25, ge: 10, so: 10, pie: 5 }, ['TRINEO', 'SLED PUSH']],
   ['CIRCUITO FUNCIONAL', 'FUNCIONAL', { vl: 12, vm: 10, rf: 8, gm: 16, bf: 6, st: 4, dan: 8, ra: 12, ob: 6, da: 6, pm: 6, ge: 6 }, ['CIRCUITO', 'ENTRENAMIENTO FUNCIONAL', 'FUNCIONAL', 'HIIT', 'TABATA', 'CIRCUITO HIIT']],
   ['SENTADILLA SIN PESO', 'FUNCIONAL', { vl: 24, vm: 22, rf: 12, gm: 28, ad: 8, ge: 3, lu: 3 }, ['AIR SQUAT', 'SENTADILLA CON PESO CORPORAL', 'SENTADILLAS']],
-  ['SENTADILLA CON SALTO', 'FUNCIONAL', { vl: 18, vm: 16, rf: 10, gm: 24, bf: 4, st: 3, ge: 15, so: 5, ra: 5 }, ['JUMP SQUAT', 'SENTADILLAS CON SALTO']],
-  ['ESTOCADAS CON SALTO', 'FUNCIONAL', { vl: 18, vm: 15, rf: 10, gm: 25, gme: 7, bf: 5, ge: 12, ra: 4, ad: 4 }, ['JUMP LUNGES', 'ZANCADAS CON SALTO']],
-  ['SENTADILLA A UNA PIERNA', 'FUNCIONAL', { vl: 20, vm: 20, rf: 10, gm: 28, gme: 8, ad: 4, ra: 5, ge: 5 }, ['PISTOL SQUAT', 'SENTADILLA PISTOL']],
-  ['SKIPPING', 'FUNCIONAL', { rf: 20, vl: 12, vm: 10, ra: 18, ob: 8, gm: 8, ge: 14, so: 5, ti: 5 }, ['RODILLAS ALTAS', 'HIGH KNEES', 'CORRER EN EL LUGAR']],
-  ['JUMPING JACKS', 'FUNCIONAL', { dl: 12, dan: 8, ts: 5, ad: 10, gme: 12, ge: 20, so: 8, vl: 8, vm: 6, ra: 6, ob: 5 }, ['TIJERAS', 'POLICHINELAS', 'SALTOS DE TIJERA']],
-  ['PATINADOR', 'FUNCIONAL', { gme: 22, gm: 18, vl: 14, vm: 10, ad: 10, ge: 14, so: 6, ob: 6 }, ['SALTOS LATERALES', 'SKATER JUMPS', 'SKATERS']],
+  ['SENTADILLA CON SALTO', 'FUNCIONAL', { vl: 18, vm: 16, rf: 10, gm: 24, bf: 4, st: 3, ge: 11, so: 5, ra: 5, pie: 4 }, ['JUMP SQUAT', 'SENTADILLAS CON SALTO']],
+  ['ESTOCADAS CON SALTO', 'FUNCIONAL', { vl: 18, vm: 15, rf: 10, gm: 25, gme: 7, bf: 5, ge: 8, ra: 4, ad: 4, pie: 4 }, ['JUMP LUNGES', 'ZANCADAS CON SALTO']],
+  ['SENTADILLA A UNA PIERNA', 'FUNCIONAL', { vl: 20, vm: 20, rf: 10, gm: 28, gme: 8, ad: 4, ra: 5, ge: 1, pie: 4 }, ['PISTOL SQUAT', 'SENTADILLA PISTOL']],
+  ['SKIPPING', 'FUNCIONAL', { rf: 20, vl: 12, vm: 10, ra: 18, ob: 8, gm: 8, ge: 8, so: 5, ti: 5, pie: 6 }, ['RODILLAS ALTAS', 'HIGH KNEES', 'CORRER EN EL LUGAR']],
+  ['JUMPING JACKS', 'FUNCIONAL', { dl: 12, dan: 8, ts: 5, ad: 10, gme: 12, ge: 14, so: 8, vl: 8, vm: 6, ra: 6, ob: 5, pie: 6 }, ['TIJERAS', 'POLICHINELAS', 'SALTOS DE TIJERA']],
+  ['PATINADOR', 'FUNCIONAL', { gme: 22, gm: 18, vl: 14, vm: 10, ad: 10, ge: 8, so: 6, ob: 6, pie: 6 }, ['SALTOS LATERALES', 'SKATER JUMPS', 'SKATERS']],
   ['CAMINATA DEL OSO', 'FUNCIONAL', { dan: 18, ra: 18, ob: 8, tla: 10, tl: 4, vl: 10, vm: 8, rf: 8, gm: 8, se: 8 }, ['BEAR CRAWL', 'GATEO']],
   ['PLANCHA CON TOQUE DE HOMBRO', 'FUNCIONAL', { ra: 25, ob: 20, dan: 18, se: 12, tla: 8, gm: 7, gme: 5, rf: 5 }, ['SHOULDER TAPS', 'PLANCHA TOCANDO HOMBROS']],
   ['REMO EN TRX', 'FUNCIONAL', { da: 28, tm: 22, dp: 12, rm: 8, bi: 14, br: 4, ra: 8, ab: 4 }, ['TRX REMO', 'REMO CON SUSPENSION']],
@@ -277,29 +280,29 @@ const CATALOG_ENTRIES = [
   ['PASEO DE MALETA', 'FUNCIONAL', { ob: 30, ab: 25, ts: 15, gme: 10, ra: 10, lu: 10 }, ['SUITCASE CARRY', 'CAMINATA CON UNA MANCUERNA']],
 
   // ───────── CARDIO ─────────
-  ['RUNNING', 'CARDIO', { vl: 12, vm: 10, rf: 12, gm: 14, bf: 12, st: 8, ge: 14, so: 8, ti: 4, ra: 3, ob: 3 }, ['CORRER', 'TROTE', 'SALIR A CORRER', 'CARRERA', 'TROTAR']],
-  ['SPRINTS', 'CARDIO', { gm: 20, bf: 15, st: 10, vl: 10, vm: 8, rf: 10, ge: 15, so: 5, ra: 4, ob: 3 }, ['SERIES DE VELOCIDAD', 'CARRERAS DE VELOCIDAD', 'SPRINT']],
-  ['CINTA', 'CARDIO', { vl: 10, vm: 10, rf: 10, gm: 15, bf: 15, st: 10, ge: 20, so: 10 }, ['CORRER EN CINTA', 'TROTE EN CINTA', 'CAMINADORA']],
-  ['CAMINATA', 'CARDIO', { gm: 20, bf: 12, st: 8, vl: 10, vm: 8, rf: 7, ge: 18, so: 12, ti: 5 }, ['CAMINAR', 'CAMINATA RAPIDA']],
-  ['CAMINATA EN PENDIENTE', 'CARDIO', { gm: 28, bf: 12, st: 10, vl: 8, vm: 7, rf: 5, ge: 15, so: 10, ti: 5 }, ['CINTA INCLINADA', 'CAMINATA INCLINADA', 'SUBIDA']],
+  ['RUNNING', 'CARDIO', { vl: 12, vm: 10, rf: 12, gm: 14, bf: 12, st: 8, ge: 8, so: 8, ti: 4, ra: 3, ob: 3, pie: 6 }, ['CORRER', 'TROTE', 'SALIR A CORRER', 'CARRERA', 'TROTAR']],
+  ['SPRINTS', 'CARDIO', { gm: 20, bf: 15, st: 10, vl: 10, vm: 8, rf: 10, ge: 9, so: 5, ra: 4, ob: 3, pie: 6 }, ['SERIES DE VELOCIDAD', 'CARRERAS DE VELOCIDAD', 'SPRINT']],
+  ['CINTA', 'CARDIO', { vl: 10, vm: 10, rf: 10, gm: 15, bf: 15, st: 10, ge: 15, so: 10, pie: 5 }, ['CORRER EN CINTA', 'TROTE EN CINTA', 'CAMINADORA']],
+  ['CAMINATA', 'CARDIO', { gm: 20, bf: 12, st: 8, vl: 10, vm: 8, rf: 7, ge: 12, so: 12, ti: 5, pie: 6 }, ['CAMINAR', 'CAMINATA RAPIDA']],
+  ['CAMINATA EN PENDIENTE', 'CARDIO', { gm: 28, bf: 12, st: 10, vl: 8, vm: 7, rf: 5, ge: 10, so: 10, ti: 5, pie: 5 }, ['CINTA INCLINADA', 'CAMINATA INCLINADA', 'SUBIDA']],
   ['CICLISMO', 'CARDIO', { vl: 20, vm: 18, rf: 16, gm: 12, bf: 8, st: 6, ge: 12, so: 5, lu: 3 }, ['SALIR EN BICI', 'BICI', 'MTB', 'BICICLETA EN RUTA']],
   ['BICICLETA FIJA', 'CARDIO', { vl: 25, vm: 20, rf: 20, gm: 10, bf: 10, st: 5, ge: 10 }, ['SPINNING', 'BICI FIJA']],
   ['NATACION', 'CARDIO', { da: 22, dp: 8, dan: 10, tla: 8, tl: 6, pm: 8, bi: 4, ra: 8, ob: 6, gm: 8, bf: 4, st: 3, ge: 5 }, ['NADAR', 'PILETA']],
   ['ELIPTICO', 'CARDIO', { vl: 14, vm: 12, rf: 12, gm: 18, bf: 10, st: 6, ge: 10, so: 4, da: 4, bi: 3, tla: 4, ra: 3 }, ['MAQUINA ELIPTICA', 'TRANSPORT']],
-  ['ESCALADORA', 'CARDIO', { gm: 30, vl: 14, vm: 12, rf: 8, bf: 10, st: 6, ge: 12, so: 8 }, ['STAIR MASTER', 'STAIRMASTER', 'ESCALERA', 'SUBIR ESCALERAS']],
+  ['ESCALADORA', 'CARDIO', { gm: 30, vl: 14, vm: 12, rf: 8, bf: 10, st: 6, ge: 8, so: 8, pie: 4 }, ['STAIR MASTER', 'STAIRMASTER', 'ESCALERA', 'SUBIR ESCALERAS']],
   ['REMO ERGOMETRO', 'CARDIO', { da: 20, tm: 10, bi: 5, vl: 15, vm: 10, rf: 5, gm: 15, bf: 5, st: 5, lu: 5, ra: 5 }, ['REMOERGOMETRO', 'ROWING']],
-  ['SOGA', 'CARDIO', { ge: 45, so: 25, ti: 10, ab: 10, dl: 5, ra: 5 }, ['SALTAR LA SOGA', 'SALTO A LA SOGA', 'COMBA']],
+  ['SOGA', 'CARDIO', { ge: 35, so: 25, ti: 10, ab: 10, dl: 5, ra: 5, pie: 10 }, ['SALTAR LA SOGA', 'SALTO A LA SOGA', 'COMBA']],
 
   // ───────── CROSSFIT ─────────
   ['MUSCLE UP', 'CROSSFIT', { da: 28, rm: 8, tm: 8, bi: 12, br: 4, pm: 8, pi: 6, tla: 10, tl: 6, ab: 5, ra: 5 }, ['MUSCLE-UP', 'MUSCLE UPS']],
   ['TOES TO BAR', 'CROSSFIT', { ra: 35, ob: 12, rf: 15, fx: 15, ex: 3, da: 10, ad: 5, rm: 5 }, ['T2B', 'PIES A LA BARRA']],
-  ['DOBLE SALTO DE SOGA', 'CROSSFIT', { ge: 40, so: 20, ti: 8, ab: 12, dan: 6, dl: 4, ra: 6, ob: 4 }, ['DOUBLE UNDERS', 'DU', 'DOBLES']],
+  ['DOBLE SALTO DE SOGA', 'CROSSFIT', { ge: 30, so: 20, ti: 8, ab: 12, dan: 6, dl: 4, ra: 6, ob: 4, pie: 10 }, ['DOUBLE UNDERS', 'DU', 'DOBLES']],
   ['BURPEE SOBRE LA BARRA', 'CROSSFIT', { pm: 12, dan: 10, tla: 8, vl: 12, vm: 8, rf: 8, gm: 14, ge: 8, ra: 12, ob: 4, ps: 4 }, ['BURPEE OVER BAR', 'BURPEES SOBRE BARRA']],
   ['DEVIL PRESS', 'CROSSFIT', { dan: 16, dl: 6, tla: 8, gm: 14, bf: 8, st: 4, lu: 8, vl: 8, vm: 6, ra: 8, ab: 7, ts: 7 }, ['DEVILS PRESS']],
   ['ENVION', 'CROSSFIT', { ts: 12, dan: 14, dl: 6, tla: 8, tl: 3, gm: 16, bf: 6, st: 4, vl: 8, vm: 6, lu: 7, ab: 4, ra: 3, ge: 3 }, ['CLEAN AND JERK', 'CLEAN & JERK', 'DOS TIEMPOS']],
   ['FLEXIONES EN VERTICAL', 'CROSSFIT', { dan: 38, dl: 10, tla: 22, tl: 8, ts: 10, se: 6, ra: 6 }, ['HSPU', 'HANDSTAND PUSH UP', 'FLEXIONES EN PARADA DE MANOS']],
   ['FONDOS EN ANILLAS', 'CROSSFIT', { tla: 38, tl: 14, pi: 18, pm: 6, dan: 14, ra: 10 }, ['RING DIPS', 'FONDOS EN ARGOLLAS']],
-  ['TREPADA DE SOGA', 'CROSSFIT', { da: 25, bi: 16, br: 6, fx: 18, brr: 4, rm: 8, tm: 6, ra: 10, rf: 7 }, ['ROPE CLIMB', 'TREPAR LA SOGA']],
+  ['TREPADA DE SOGA', 'CROSSFIT', { da: 25, bi: 16, br: 6, fx: 13, pa: 3, dd: 2, brr: 4, rm: 8, tm: 6, ra: 10, rf: 7 }, ['ROPE CLIMB', 'TREPAR LA SOGA']],
   ['PECHO A LA BARRA', 'CROSSFIT', { da: 42, rm: 10, tm: 14, bi: 14, br: 5, dp: 5, ab: 5, ra: 5 }, ['CHEST TO BAR', 'C2B', 'DOMINADAS PECHO A LA BARRA']],
   ['DOMINADAS KIPPING', 'CROSSFIT', { da: 40, rm: 10, tm: 10, bi: 12, br: 4, ab: 6, ra: 12, ob: 6 }, ['KIPPING PULL UP', 'KIPPING']],
   ['SENTADILLA OVERHEAD', 'CROSSFIT', { vl: 18, vm: 16, rf: 10, gm: 20, dan: 10, dl: 5, ts: 6, tm: 4, lu: 5, ra: 6 }, ['OVERHEAD SQUAT', 'OHS', 'SENTADILLA CON BARRA ARRIBA']],
@@ -308,12 +311,12 @@ const CATALOG_ENTRIES = [
 
 
   // ───────── BOXEO Y COMBATE ─────────
-  ['BOXEO', 'COMBATE', { dan: 18, dl: 10, tla: 14, tl: 4, pm: 10, se: 10, ra: 12, ob: 12, da: 6, ge: 4 }, ['BOLSA', 'PEGAR A LA BOLSA', 'SHADOW BOXING', 'BOX', 'GUANTES']],
-  ['KICKBOXING', 'COMBATE', { gm: 14, gme: 8, vl: 10, vm: 8, rf: 10, bf: 6, ob: 12, ra: 12, dan: 8, tla: 6, ge: 6 }, ['MUAY THAI', 'KICK BOXING', 'PATADAS A LA BOLSA']],
+  ['BOXEO', 'COMBATE', { dan: 17, dl: 10, tla: 14, tl: 4, pm: 10, se: 10, ra: 12, ob: 12, da: 6, ge: 1, pie: 4 }, ['BOLSA', 'PEGAR A LA BOLSA', 'SHADOW BOXING', 'BOX', 'GUANTES']],
+  ['KICKBOXING', 'COMBATE', { gm: 14, gme: 8, vl: 10, vm: 8, rf: 10, bf: 6, ob: 12, ra: 12, dan: 8, tla: 6, ge: 2, pie: 4 }, ['MUAY THAI', 'KICK BOXING', 'PATADAS A LA BOLSA']],
   ['ARTES MARCIALES', 'COMBATE', { da: 12, bi: 8, br: 4, ab: 10, tm: 6, ra: 12, ob: 10, lu: 6, gm: 10, vl: 6, vm: 4, ad: 6, dan: 6 }, ['JIU JITSU', 'BJJ', 'JUDO', 'GRAPPLING', 'LUCHA']],
 
   // ───────── YOGA Y PILATES ─────────
-  ['YOGA', 'MOVILIDAD', { ra: 12, ob: 10, lu: 8, gm: 10, bf: 8, st: 6, vl: 6, vm: 6, dan: 8, tla: 6, ts: 5, tm: 5, ad: 5, se: 5 }, ['VINYASA', 'HATHA', 'CLASE DE YOGA']],
+  ['YOGA', 'MOVILIDAD', { ra: 9, ob: 9, lu: 8, gm: 9, bf: 8, st: 6, vl: 6, vm: 6, dan: 8, tla: 6, ts: 5, tm: 5, ad: 5, se: 5, pie: 5 }, ['VINYASA', 'HATHA', 'CLASE DE YOGA']],
   ['PILATES', 'MOVILIDAD', { ra: 22, ob: 16, lu: 10, gm: 16, gme: 8, ad: 8, bf: 5, st: 4, dan: 4, se: 4, tm: 3 }, ['PILATES MAT', 'PILATES REFORMER', 'CLASE DE PILATES']],
 
 
@@ -369,8 +372,8 @@ const CATALOG_ENTRIES = [
   ['HIP THRUST EN MULTIPOWER', 'GLUTEOS', { gm: 58, gme: 8, bf: 12, st: 6, vl: 6, vm: 4, ad: 6 }, ['HIP THRUST EN SMITH']],
   ['PATADA DE GLUTEO EN MAQUINA', 'GLUTEOS', { gm: 64, gme: 10, bf: 12, st: 8, lu: 6 }, ['PATADA EN MAQUINA']],
   // Pantorrillas
-  ['GEMELOS EN MAQUINA', 'PANTORRILLAS', { ge: 66, so: 30, ti: 4 }, ['GEMELOS DE PIE EN MAQUINA']],
-  ['GEMELOS CON MANCUERNAS', 'PANTORRILLAS', { ge: 62, so: 28, ab: 6, ti: 4 }, []],
+  ['GEMELOS EN MAQUINA', 'PANTORRILLAS', { ge: 58, so: 30, ti: 4, pie: 8 }, ['GEMELOS DE PIE EN MAQUINA']],
+  ['GEMELOS CON MANCUERNAS', 'PANTORRILLAS', { ge: 54, so: 28, ab: 6, ti: 4, pie: 8 }, []],
   // Core (calistenia)
   ['L SIT', 'CORE', { ra: 38, rf: 18, ob: 10, tla: 12, ts: 6, se: 6, ad: 6, ab: 4 }, ['L-SIT', 'ESCUADRA']],
   ['DRAGON FLAG', 'CORE', { ra: 52, ob: 14, rf: 10, da: 10, se: 6, lu: 4, ab: 4 }, ['BANDERA DEL DRAGON']],
@@ -425,14 +428,14 @@ const CATALOG_ENTRIES = [
   ['CURL DE MUÑECA CON MANCUERNA', 'ANTEBRAZOS', { fx: 96, brr: 4 }, ['CURL DE MUÑECA UNILATERAL']],
   ['EXTENSION DE MUÑECA CON MANCUERNA', 'ANTEBRAZOS', { ex: 94, brr: 6 }, ['CURL DE MUÑECA INVERTIDO CON MANCUERNA']],
   ['CURL DE MUÑECA EN POLEA', 'ANTEBRAZOS', { fx: 92, ex: 4, brr: 4 }, ['FLEXION DE MUÑECA EN POLEA']],
-  ['CURL DE DEDOS CON BARRA', 'ANTEBRAZOS', { fx: 88, ex: 6, brr: 6 }, ['FINGER CURL', 'CURL DE DEDOS']],
+  ['CURL DE DEDOS CON BARRA', 'ANTEBRAZOS', { fx: 70, dd: 18, pa: 6, ex: 3, brr: 3 }, ['FINGER CURL', 'CURL DE DEDOS']],
   ['DESVIACION CUBITAL CON MANCUERNA', 'ANTEBRAZOS', { fx: 48, ex: 44, brr: 8 }, ['DESVIACION CUBITAL', 'ULNAR DEVIATION']],
-  ['AGARRE ESTATICO CON MANCUERNAS', 'ANTEBRAZOS', { fx: 66, ex: 10, brr: 6, ts: 12, tm: 6 }, ['FARMER HOLD', 'SOSTENER MANCUERNAS']],
-  ['COLGADO A UNA MANO', 'ANTEBRAZOS', { fx: 58, ex: 6, brr: 6, da: 16, ob: 6, ra: 4, rm: 4 }, ['DEAD HANG A UNA MANO']],
-  ['AGARRE DE BARRA GRUESA', 'ANTEBRAZOS', { fx: 74, ex: 14, brr: 8, ts: 4 }, ['FAT GRIP', 'AGARRE GRUESO']],
-  ['APRETAR PELOTA', 'ANTEBRAZOS', { fx: 86, ex: 14 }, ['PELOTA ANTIESTRES', 'SQUEEZE BALL']],
-  ['FLEXIONES SOBRE LOS DEDOS', 'ANTEBRAZOS', { fx: 30, ex: 10, pm: 22, dan: 12, tla: 14, ra: 6, se: 6 }, ['FINGERTIP PUSH UP', 'FLEXIONES CON LA PUNTA DE LOS DEDOS']],
-  ['CUBO DE ARROZ', 'ANTEBRAZOS', { fx: 50, ex: 36, brr: 14 }, ['RICE BUCKET', 'GARRAS EN ARROZ']],
+  ['AGARRE ESTATICO CON MANCUERNAS', 'ANTEBRAZOS', { fx: 52, pa: 9, dd: 5, ex: 10, brr: 6, ts: 12, tm: 6 }, ['FARMER HOLD', 'SOSTENER MANCUERNAS']],
+  ['COLGADO A UNA MANO', 'ANTEBRAZOS', { fx: 46, pa: 7, dd: 5, ex: 6, brr: 6, da: 16, ob: 6, ra: 4, rm: 4 }, ['DEAD HANG A UNA MANO']],
+  ['AGARRE DE BARRA GRUESA', 'ANTEBRAZOS', { fx: 54, pa: 16, dd: 8, ex: 10, brr: 8, ts: 4 }, ['FAT GRIP', 'AGARRE GRUESO']],
+  ['APRETAR PELOTA', 'ANTEBRAZOS', { fx: 56, pa: 26, dd: 10, ex: 8 }, ['PELOTA ANTIESTRES', 'SQUEEZE BALL']],
+  ['FLEXIONES SOBRE LOS DEDOS', 'ANTEBRAZOS', { fx: 18, dd: 12, pa: 6, ex: 4, pm: 22, dan: 12, tla: 14, ra: 6, se: 6 }, ['FINGERTIP PUSH UP', 'FLEXIONES CON LA PUNTA DE LOS DEDOS']],
+  ['CUBO DE ARROZ', 'ANTEBRAZOS', { fx: 34, ex: 28, brr: 10, pa: 14, dd: 14 }, ['RICE BUCKET', 'GARRAS EN ARROZ']],
   // Core
   ['SIT UP EN BANCO DECLINADO', 'CORE', { ra: 66, ob: 14, rf: 20 }, ['ABDOMINALES DECLINADOS', 'SIT UP DECLINADO']],
   ['CRUNCH OBLICUO', 'CORE', { ob: 62, ra: 38 }, ['ABDOMINALES OBLICUOS', 'CRUNCH CRUZADO']],
@@ -471,14 +474,14 @@ const CATALOG_ENTRIES = [
   ['HIDRANTE', 'GLUTEOS', { gme: 74, gm: 20, ob: 6 }, ['FIRE HYDRANT', 'PATADA DE PERRO']],
   ['PESO MUERTO CON KETTLEBELL', 'GLUTEOS', { gm: 32, bf: 18, st: 14, lu: 14, vl: 6, vm: 4, ab: 12 }, ['DEADLIFT CON PESA RUSA']],
   // Pantorrillas
-  ['GEMELOS EN HACK', 'PANTORRILLAS', { ge: 70, so: 26, ti: 4 }, ['GEMELOS EN MAQUINA HACK']],
-  ['SALTOS DE TOBILLO', 'PANTORRILLAS', { ge: 56, so: 24, ti: 10, rf: 4, vl: 3, vm: 3 }, ['POGO JUMPS', 'SALTOS POGO']],
-  ['CAMINATA EN PUNTAS DE PIE', 'PANTORRILLAS', { ge: 52, so: 34, ti: 6, ab: 8 }, ['CAMINATA EN PUNTAS', 'TIPTOE WALK']],
+  ['GEMELOS EN HACK', 'PANTORRILLAS', { ge: 63, so: 26, ti: 4, pie: 7 }, ['GEMELOS EN MAQUINA HACK']],
+  ['SALTOS DE TOBILLO', 'PANTORRILLAS', { ge: 46, so: 24, ti: 10, rf: 4, vl: 3, vm: 3, pie: 10 }, ['POGO JUMPS', 'SALTOS POGO']],
+  ['CAMINATA EN PUNTAS DE PIE', 'PANTORRILLAS', { ge: 40, so: 34, ti: 6, ab: 8, pie: 12 }, ['CAMINATA EN PUNTAS', 'TIPTOE WALK']],
   // Funcional
   ['PASEO DEL CAMARERO', 'FUNCIONAL', { dan: 22, dl: 14, ts: 16, se: 10, ob: 14, ra: 12, tla: 6, ab: 6 }, ['OVERHEAD CARRY', 'WAITER WALK']],
   ['LEVANTAMIENTO DE SANDBAG', 'FUNCIONAL', { gm: 22, lu: 14, bf: 8, vl: 12, vm: 8, bi: 10, ts: 8, ra: 8, ab: 10 }, ['SANDBAG', 'BOLSA DE ARENA']],
-  ['ARRASTRE DE TRINEO', 'FUNCIONAL', { vl: 22, vm: 20, rf: 14, gm: 14, ge: 12, ab: 10, da: 8 }, ['SLED PULL', 'TIRAR DEL TRINEO']],
-  ['SALTO HORIZONTAL', 'FUNCIONAL', { gm: 26, vl: 16, vm: 12, rf: 10, bf: 8, ge: 16, so: 6, ra: 6 }, ['BROAD JUMP', 'SALTO EN LARGO']],
+  ['ARRASTRE DE TRINEO', 'FUNCIONAL', { vl: 22, vm: 20, rf: 14, gm: 14, ge: 8, ab: 10, da: 8, pie: 4 }, ['SLED PULL', 'TIRAR DEL TRINEO']],
+  ['SALTO HORIZONTAL', 'FUNCIONAL', { gm: 26, vl: 16, vm: 12, rf: 10, bf: 8, ge: 11, so: 6, ra: 6, pie: 5 }, ['BROAD JUMP', 'SALTO EN LARGO']],
   ['LANZAMIENTO LATERAL DE BALON', 'FUNCIONAL', { ob: 40, ra: 14, gm: 14, dan: 10, pm: 8, gme: 8, se: 6 }, ['ROTATIONAL THROW', 'LANZAMIENTO ROTACIONAL']],
   ['SNATCH CON KETTLEBELL', 'FUNCIONAL', { gm: 24, bf: 12, st: 8, lu: 12, dan: 12, dl: 8, ts: 10, ab: 8, ra: 6 }, ['ARRANQUE CON KETTLEBELL', 'KB SNATCH']],
   ['HALO CON KETTLEBELL', 'FUNCIONAL', { dan: 24, dl: 20, dp: 10, tla: 10, ts: 10, ra: 10, ob: 10, ab: 6 }, ['HALO']],
@@ -486,7 +489,7 @@ const CATALOG_ENTRIES = [
   // Cardio
   ['SKI ERG', 'CARDIO', { da: 24, tl: 14, ra: 14, ob: 6, dan: 6, gm: 12, bf: 6, vl: 8, vm: 6, rm: 4 }, ['ESQUI ERGOMETRO', 'SKIERG']],
   ['BICICLETA RECLINADA', 'CARDIO', { vl: 24, vm: 22, rf: 16, gm: 14, bf: 10, st: 6, ge: 8 }, ['BICI RECLINADA', 'RECUMBENT']],
-  ['STEPPER', 'CARDIO', { gm: 26, vl: 18, vm: 16, rf: 10, bf: 8, st: 6, ge: 10, so: 6 }, ['MAQUINA DE STEP', 'ESCALADOR DE PEDALES']],
+  ['STEPPER', 'CARDIO', { gm: 26, vl: 18, vm: 16, rf: 10, bf: 8, st: 6, ge: 6, so: 6, pie: 4 }, ['MAQUINA DE STEP', 'ESCALADOR DE PEDALES']],
   // CrossFit
   ['MUSCLE UP EN ANILLAS', 'CROSSFIT', { da: 26, rm: 8, tm: 8, bi: 12, br: 4, pm: 8, pi: 8, tla: 10, tl: 6, ab: 6, ra: 4 }, ['RING MUSCLE UP']],
   ['GHD SIT UP', 'CROSSFIT', { ra: 50, rf: 30, ob: 14, ad: 6 }, ['SIT UP EN GHD']],

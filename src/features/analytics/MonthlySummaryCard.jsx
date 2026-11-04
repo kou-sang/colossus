@@ -52,7 +52,7 @@ export const MonthlySummaryCard = ({ userId, focusName, todayKey }) => {
       title="Resumen del mes"
       collapseKey="analytics:monthly"
       subtitle={`${focusName} · ${formatShortDate(report.start)} al ${formatShortDate(report.end)} (últimos 30 días)`}
-      actions={<ChartInfo info={CHART_INFO.monthly} />}
+      info={<ChartInfo info={CHART_INFO.monthly} />}
     >
       {logsState.loading ? (
         <div className="py-6"><Spinner size="sm" label="Armando tu resumen del mes…" hint="Comparamos los últimos 30 días con los 30 anteriores." /></div>
@@ -62,7 +62,7 @@ export const MonthlySummaryCard = ({ userId, focusName, todayKey }) => {
         <p className="text-sm text-secondary">No hay registros en los últimos 30 días. Cuando entrenes, acá verás tu resumen.</p>
       ) : (
         <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 [&>*]:min-w-0">
             <SummaryTile icon={CalendarCheck} label="Días" value={`${report.current.trainingDays} (${report.current.daysPerWeek}/sem)`} delta={report.deltas.trainingDays} />
             <SummaryTile icon={Dumbbell} label="Ejercicios" value={report.current.exercises} delta={report.deltas.exercises} />
             <SummaryTile icon={Layers} label="Series" value={report.current.sets} delta={report.deltas.sets} />
@@ -71,7 +71,7 @@ export const MonthlySummaryCard = ({ userId, focusName, todayKey }) => {
             <SummaryTile icon={HeartPulse} label="Cardio" value={`${report.current.cardioMinutes} min`} delta={report.deltas.cardioMinutes} />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
             <div className="min-w-0">
               <h4 className="mb-2 text-sm font-bold">Lo que más hiciste</h4>
               <ol className="list-decimal space-y-1 pl-5 text-sm">

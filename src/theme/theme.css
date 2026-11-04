@@ -168,7 +168,11 @@ body { -webkit-tap-highlight-color: transparent; font-feature-settings: 'tnum' 1
 
 /* Hover en paths SVG: transform-box evita que escalen desde el origen del <svg> (saltaban de lugar). */
 .muscle-path { transform-box: fill-box; transform-origin: center; transition: filter 0.15s, transform 0.15s; cursor: pointer; }
-.muscle-path:hover { filter: brightness(1.15); }
+/* El realce al pasar el puntero solo en dispositivos con hover real: en el celular quedaba "pegado" tras tocar. */
+@media (hover: hover) { .muscle-path:hover { filter: brightness(1.15); } }
+/* Sin anillo de foco al tocar con el dedo/mouse (quedaba un borde blanco al deseleccionar); con teclado sí. */
+.muscle-path:focus { outline: none; }
+.muscle-path:focus-visible { stroke: var(--accent); stroke-width: 2.6; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

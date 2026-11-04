@@ -84,7 +84,7 @@ const CreateOrJoinPanel = () => {
   return (
     <SectionCard
       title={mode === 'create' ? 'Nuevo grupo' : 'Unirme a un grupo'}
-      actions={<IconButton label="Cancelar" icon={X} onClick={close} />}
+      info={<IconButton label="Cancelar" icon={X} onClick={close} />}
     >
       {mode === 'create' ? (
         <form onSubmit={handleCreate} className="space-y-3">

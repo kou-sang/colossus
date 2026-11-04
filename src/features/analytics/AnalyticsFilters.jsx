@@ -130,7 +130,7 @@ export const AnalyticsFilters = ({
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 md:grid-cols-[minmax(0,240px)_1fr]">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,240px)_1fr] [&>*]:min-w-0">
         <div>
           <FieldLabel htmlFor="analytics-group">Grupo</FieldLabel>
           <select id="analytics-group" className="input" value={scopeId} onChange={(event) => onScopeChange(event.target.value)}>

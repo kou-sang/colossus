@@ -178,6 +178,9 @@ export const buildWeeklyTonnage = (logs, userIds, since, now = new Date()) => {
 
 // Umbral de participación para considerar que un ejercicio "estimuló" un músculo (recuperación/abandono).
 const MIN_SHARE_FOR_STIMULUS = 0.15;
+// Músculos chicos de manos y pies: rara vez superan el 15 % de un ejercicio, aunque el ejercicio sí los trabaje.
+const ACCESSORY_STIMULUS_SHARE = Object.freeze({ mano_palma: 0.05, mano_dedos: 0.05, pie: 0.05 });
+export const stimulusThreshold = (muscleId) => ACCESSORY_STIMULUS_SHARE[muscleId] ?? MIN_SHARE_FOR_STIMULUS;
 
 /**
  * Filtro central de analíticas. Se aplica en memoria (sin lecturas extra a Firestore).
@@ -268,12 +271,35 @@ export const buildExerciseContributions = (logs, muscleId, userIds = null) => {
     .sort((a, b) => b.effectiveSets - a.effectiveSets);
 };
 
+/**
+ * Historial de un músculo (detalle del mapa de Recuperación): cada registro que lo estimuló, del más reciente al
+ * más viejo, con el % del ejercicio que recae en ese músculo y sus series efectivas. Mismo umbral que la recuperación.
+ */
+export const buildMuscleTimeline = (logs, muscleId, userIds = null, limit = 12) => {
+  const userSet = userIds ? new Set(userIds) : null;
+  const threshold = stimulusThreshold(muscleId);
+  return logs
+    .filter((log) => !userSet || userSet.has(log.userId))
+    .map((log) => ({ log, share: resolveMuscleDistribution(log)[muscleId] ?? 0 }))
+    .filter(({ share }) => share >= threshold)
+    .sort((a, b) => b.log.performedAt - a.log.performedAt)
+    .slice(0, limit)
+    .map(({ log, share }) => ({
+      id: log.id ?? `${log.userId}-${log.performedAt.getTime()}-${log.exercise}`,
+      userId: log.userId,
+      exercise: log.exercise,
+      date: log.performedAt,
+      share,
+      effectiveSets: round1((Number.isFinite(log.sets) ? log.sets : 0) * share),
+    }));
+};
+
 export const buildMuscleLastTrained = (logs, userId) => {
   const lastByMuscle = {};
   logs.forEach((log) => {
     if (userId && log.userId !== userId) return;
     Object.entries(resolveMuscleDistribution(log)).forEach(([muscle, share]) => {
-      if (share < MIN_SHARE_FOR_STIMULUS) return;
+      if (share < stimulusThreshold(muscle)) return;
       const previous = lastByMuscle[muscle];
       if (!previous || log.performedAt > previous.date) {
         lastByMuscle[muscle] = { date: log.performedAt, exercise: log.exercise };
