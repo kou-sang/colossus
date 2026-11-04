@@ -1,5 +1,5 @@
 import { CalendarDays, CalendarPlus, Check, CloudOff, Flame, Play, Plus, Timer, TrendingUp, Trophy, Undo2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { IconButton, SectionCard, Spinner, StatTile } from '../../components/ui';
 import { QUERY_LIMITS } from '../../constants/collections';
 import { CATALOG_EXERCISE_NAMES, canonicalExerciseName } from '../../constants/exercises';
@@ -14,11 +14,30 @@ import { addDays, formatLongDate, formatShortDate, getDayKey, parseDateKey, star
 import { logError, toUserMessage } from '../../utils/errors';
 import { formatSetDetails, hasSetDetails, suggestNextLoad } from '../../utils/sets';
 import { computeWeekStreak, countPlannedDays, countTrainingDays } from '../../utils/metrics';
+import { lazyWithPrefetch } from '../../utils/lazyWithPrefetch';
 import { AddLogToRoutineDialog } from './AddLogToRoutineDialog';
 import { clearFormDraft, readOpenPanel, writeOpenPanel } from './logDrafts';
 import { LogEntryForm } from './LogEntryForm';
 import { useTimer } from './timer/TimerContext';
 import { formatClock } from './timer/timerEngine';
+
+// La ficha usa el motor de dibujo (pesado): se carga aparte, al pasar el puntero o al abrirla.
+const ExerciseSheet = lazyWithPrefetch(() => import('../library/ExerciseSheetDialog'), 'ExerciseSheetDialog');
+
+// Nombre de ejercicio que abre su ficha (la misma de la pestaña Ejercicios).
+const ExerciseNameButton = ({ name, onOpen, className = '' }) => (
+  <button
+    type="button"
+    className={`max-w-full truncate text-left underline decoration-dotted decoration-1 underline-offset-4 hover:text-accent ${className}`}
+    aria-label={`Ver ficha de ${name}`}
+    onClick={() => onOpen(name)}
+    onPointerEnter={ExerciseSheet.prefetch}
+    onTouchStart={ExerciseSheet.prefetch}
+    onFocus={ExerciseSheet.prefetch}
+  >
+    {name}
+  </button>
+);
 
 const hasValue = (value) => value !== '' && value !== null && value !== undefined;
 
@@ -73,7 +92,7 @@ const formatSetSummary = (log) => {
 };
 
 // Un ejercicio del plan del día. "Hacer" abre el registro prellenado con lo último que hiciste.
-const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen, onSubmit, onCancel }) => {
+const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen, onShowSheet, onSubmit, onCancel }) => {
   const routineValues = buildRoutineValues(item);
   const suggestion = isDone ? null : suggestNextLoad(previousLog, { topReps: topRepsOf(item.reps) });
   const isOpen = panel?.key === item.id;
@@ -81,7 +100,7 @@ const PlannedItem = ({ item, isDone, previousLog, latestLog, best, panel, onOpen
     <li className={`py-3 first:pt-0 last:pb-0 ${isDone && !isOpen ? 'opacity-60' : ''}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h4 className="truncate font-bold">{item.exercise}</h4>
+          <h4 className="flex min-w-0 font-bold"><ExerciseNameButton name={item.exercise} onOpen={onShowSheet} /></h4>
           <p className="text-sm text-secondary">
             {item.sets} series{item.reps && ` × ${item.reps} reps`}
             {hasValue(item.weight) && ` · ${item.weight} kg`}
@@ -148,6 +167,11 @@ export const TodayTab = ({ onCelebrate }) => {
     writeOpenPanel(next);
   };
   const [routineTarget, setRoutineTarget] = useState(null); // registro que se agrega a una rutina
+  const [sheetExercise, setSheetExercise] = useState(null); // ejercicio cuya ficha está abierta
+  const openSheet = (name) => {
+    playClick();
+    setSheetExercise(name);
+  };
 
   // 'since' depende solo del día → la suscripción no se recrea en cada render.
   const logsState = useSubscription(
@@ -285,6 +309,7 @@ export const TodayTab = ({ onCelebrate }) => {
                   best={myBests[exerciseKey]}
                   panel={panel}
                   onOpen={(target) => togglePanel(target.id)}
+                  onShowSheet={openSheet}
                   onSubmit={handleLog}
                   onCancel={cancelPanel}
                 />
@@ -311,8 +336,8 @@ export const TodayTab = ({ onCelebrate }) => {
             {todayLogs.map((log) => (
               <li key={log.id} className="flex items-center justify-between gap-1 py-2">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold">
-                    {log.exercise} {log.isPr && <span className="badge badge-accent ml-1"><Trophy size={12} aria-hidden /> Récord</span>}
+                  <p className="flex min-w-0 items-center text-sm font-bold">
+                    <ExerciseNameButton name={log.exercise} onOpen={openSheet} className="min-w-0" /> {log.isPr && <span className="badge badge-accent ml-1 shrink-0"><Trophy size={12} aria-hidden /> Récord</span>}
                   </p>
                   <p className="text-xs text-secondary">
                     {formatLogLine(log)}
@@ -329,6 +354,11 @@ export const TodayTab = ({ onCelebrate }) => {
       </SectionCard>
 
       {routineTarget && <AddLogToRoutineDialog log={routineTarget} onClose={() => setRoutineTarget(null)} />}
+      {sheetExercise && (
+        <Suspense fallback={null}>
+          <ExerciseSheet.Component exerciseName={sheetExercise} onClose={() => setSheetExercise(null)} />
+        </Suspense>
+      )}
     </div>
   );
 };

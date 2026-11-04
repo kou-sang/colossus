@@ -17,6 +17,14 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.7.0] - 2026-11-04
+
+### Added
+- **Ficha del ejercicio desde Inicio:** al tocar el nombre de un ejercicio en *Plan de hoy* o en *Registrado hoy* se abre la misma ficha de la pestaña Ejercicios (ejecución en 3 vistas, músculos, técnica, consejos, errores, claves y alternativas) en una ventana. Las alternativas se pueden recorrer dentro de la ventana con "Volver" al ejercicio anterior, y desde ahí también se puede añadir a una rutina. Los ejercicios con nombre propio (fuera de la biblioteca) muestran un aviso en lugar de una ficha vacía.
+
+### Changed
+- La ficha del ejercicio pasa a ser un componente propio (`ExerciseDetail`) compartido por la biblioteca y la ventana. El código de la ficha se descarga recién al pasar el puntero o tocar un ejercicio, así Inicio no carga el motor de dibujo.
+
 ## [4.6.0] - 2026-11-03
 
 ### Added
