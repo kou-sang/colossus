@@ -52,6 +52,61 @@ export const buildStrengthSeries = (logs, userId, exercise, { unifyDays = true }
 };
 
 /**
+ * Progresión de fuerza PROMEDIO de la selección (varios ejercicios en una sola línea).
+ * Los kg de ejercicios distintos no se pueden promediar (100 kg de banca vs 20 kg de curl), así que cada
+ * ejercicio se expresa como % de cambio sobre su primer 1RM estimado del rango y se promedian esos %.
+ *  - Cada ejercicio conserva su último valor conocido: un día que solo entrenaste curl no "borra" la banca.
+ *  - Con `muscleScope` (músculos elegidos en el filtro) cada ejercicio pesa según cuánto trabaja esos músculos.
+ *  - unifyDays=true: un punto por día con el mejor 1RM de cada ejercicio; false: un punto por registro.
+ * Devuelve [{ time, change (%), exercises (cuántos promedia), isPr }].
+ */
+export const buildStrengthIndexSeries = (logs, userId, { unifyDays = true, muscleScope = null } = {}) => {
+  const scope = muscleScope ? new Set(muscleScope) : null;
+  const weightOf = (log) => {
+    if (!scope) return 1;
+    return Object.entries(resolveMuscleDistribution(log)).reduce((sum, [muscleId, share]) => sum + (scope.has(muscleId) ? share : 0), 0);
+  };
+  const candidates = logs
+    .filter((log) => log.userId === userId && log.e1rm > 0)
+    .map((log) => ({ log, weight: weightOf(log) }))
+    .filter(({ weight }) => weight > 0)
+    .sort((a, b) => a.log.performedAt - b.log.performedAt);
+
+  // Pasos: un día (mejor 1RM por ejercicio) o cada registro por separado.
+  const steps = [];
+  const stepIndex = new Map();
+  candidates.forEach(({ log, weight }) => {
+    const key = unifyDays ? toDateKey(log.performedAt) : `${log.id ?? ''}|${log.performedAt.getTime()}|${steps.length}`;
+    let step = stepIndex.get(key);
+    if (!step) {
+      step = { time: 0, byExercise: new Map(), isPr: false };
+      stepIndex.set(key, step);
+      steps.push(step);
+    }
+    step.time = Math.max(step.time, log.performedAt.getTime());
+    step.isPr ||= Boolean(log.isPr);
+    const current = step.byExercise.get(log.exercise);
+    if (!current || log.e1rm > current.e1rm) step.byExercise.set(log.exercise, { e1rm: log.e1rm, weight });
+  });
+
+  const baseline = new Map();
+  const latest = new Map();
+  return steps.map((step) => {
+    step.byExercise.forEach(({ e1rm, weight }, exercise) => {
+      if (!baseline.has(exercise)) baseline.set(exercise, e1rm);
+      latest.set(exercise, { ratio: e1rm / baseline.get(exercise), weight });
+    });
+    let weighted = 0;
+    let totalWeight = 0;
+    latest.forEach(({ ratio, weight }) => {
+      weighted += ratio * weight;
+      totalWeight += weight;
+    });
+    return { time: step.time, change: round1((weighted / totalWeight - 1) * 100), exercises: latest.size, isPr: step.isPr };
+  });
+};
+
+/**
  * Consistencia de un usuario: ejercicios acumulados a lo largo del tiempo (cada registro = 1 ejercicio).
  * Una pendiente alta es constancia; una línea plana, días sin entrenar. Marca los momentos con mejora de PR.
  *  - unifyDays=true: un punto por día (hora del último ejercicio de ese día).
@@ -128,16 +183,23 @@ const MIN_SHARE_FOR_STIMULUS = 0.15;
  * Filtro central de analíticas. Se aplica en memoria (sin lecturas extra a Firestore).
  * `categories`/`muscles` = null significa "todos".
  */
-export const filterLogs = (logs, { userIds = null, categories = null, muscles = null, since = null, until = null } = {}) => {
+/*
+ * `categories` y `muscles` se combinan con Y (compatibilidad). `scope` es el filtro unificado de Analíticas:
+ * { categories, muscles } con O lógico → pasa si el ejercicio es de una categoría elegida o trabaja algún músculo elegido.
+ */
+export const filterLogs = (logs, { userIds = null, categories = null, muscles = null, scope = null, since = null, until = null } = {}) => {
   const userSet = userIds ? new Set(userIds) : null;
   const categorySet = categories ? new Set(categories) : null;
   const muscleSet = muscles ? new Set(muscles) : null;
+  const scopeCategories = scope ? new Set(scope.categories ?? []) : null;
+  const scopeMuscles = scope ? new Set(scope.muscles ?? []) : null;
   return logs.filter((log) => {
     if (userSet && !userSet.has(log.userId)) return false;
     if (since && log.performedAt < since) return false;
     if (until && log.performedAt > until) return false;
     if (categorySet && !categorySet.has(getExerciseCategory(log))) return false;
     if (muscleSet && !Object.keys(resolveMuscleDistribution(log)).some((muscleId) => muscleSet.has(muscleId))) return false;
+    if (scope && !scopeCategories.has(getExerciseCategory(log)) && !Object.keys(resolveMuscleDistribution(log)).some((muscleId) => scopeMuscles.has(muscleId))) return false;
     return true;
   });
 };

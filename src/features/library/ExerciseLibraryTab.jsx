@@ -1,12 +1,41 @@
 import { Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { EmptyState } from '../../components/ui';
 import { CATEGORIES, CATEGORY_LABELS, EXERCISE_CATALOG, searchExercises } from '../../constants/exercises';
 import { DESKTOP_QUERY, useMediaQuery } from '../../hooks/useMediaQuery';
+import { readPersisted, usePersistentState, writePersisted } from '../../hooks/usePersistentState';
 import { playClick } from '../../utils/audio';
 import { ExerciseDetail } from './ExerciseDetail';
 
+// Posición de la lista (página en el celular, lista con scroll propio en escritorio): se recuerda entre visitas.
+const SCROLL_KEY = 'library:scroll';
+const SAVE_DELAY_MS = 400;
+const isScrollState = (value) => Number.isFinite(value?.page) && Number.isFinite(value?.list);
+
+/*
+ * Guarda una posición con retardo. El retardo es a propósito: al cambiar de pestaña la app sube la página a 0
+ * mientras esta pestaña todavía está montada; la limpieza del desmontaje cancela ese guardado y no se pierde la posición.
+ */
+const useDelayedScrollSaver = () => {
+  const timerRef = useRef(null);
+  const cancel = useCallback(() => window.clearTimeout(timerRef.current), []);
+  const save = useCallback((patch) => {
+    window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => {
+      writePersisted(SCROLL_KEY, { ...readPersisted(SCROLL_KEY, { page: 0, list: 0 }, isScrollState), ...patch });
+    }, SAVE_DELAY_MS);
+  }, []);
+  useEffect(() => cancel, [cancel]);
+  return { save, cancel };
+};
+
 const ExerciseList = ({ query, onQueryChange, category, onCategoryChange, selectedName, onSelect }) => {
+  const listRef = useRef(null);
+  const { save: saveScroll } = useDelayedScrollSaver();
+  // Escritorio: la lista tiene scroll propio; se restaura donde quedó.
+  useLayoutEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = readPersisted(SCROLL_KEY, { page: 0, list: 0 }, isScrollState).list;
+  }, []);
   const results = useMemo(
     () => searchExercises(query).filter(({ entry }) => !category || entry.category === category),
     [query, category],
@@ -29,7 +58,8 @@ const ExerciseList = ({ query, onQueryChange, category, onCategoryChange, select
         </select>
       </div>
       <p className="text-xs text-muted">{results.length} ejercicio(s)</p>
-            <ul className="rounded-xl border divider lg:max-h-[calc(100dvh-20rem)] lg:overflow-y-auto lg:overscroll-contain" aria-label="Ejercicios">
+            <ul ref={listRef} className="rounded-xl border divider lg:max-h-[calc(100dvh-20rem)] lg:overflow-y-auto lg:overscroll-contain" aria-label="Ejercicios"
+        onScroll={(event) => saveScroll({ list: event.currentTarget.scrollTop })}>
         {results.map(({ entry, matchedAlias }) => {
           const isSelected = entry.name === selectedName;
           return (
@@ -57,15 +87,39 @@ const ExerciseList = ({ query, onQueryChange, category, onCategoryChange, select
  */
 export const ExerciseLibraryTab = () => {
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('');
-  const [selectedName, setSelectedName] = useState(null);
+  // Búsqueda, categoría y ejercicio abierto se recuerdan: al volver se sigue en el mismo lugar de la lista.
+  const [query, setQuery] = usePersistentState('library:query', '', (value) => typeof value === 'string');
+  const [category, setCategory] = usePersistentState('library:category', '', (value) => typeof value === 'string');
+  const [selectedName, setSelectedName] = usePersistentState('library:selected', null, (value) => value === null || Boolean(EXERCISE_CATALOG[value]));
   const selected = selectedName ? EXERCISE_CATALOG[selectedName] : null;
+  const isListVisible = isDesktop || !selected;
+  const { save: saveScroll, cancel: cancelScrollSave } = useDelayedScrollSaver();
+
+  // Celular: la lista se desplaza con la página → se guarda el scroll de la página mientras la lista está a la vista.
+  useEffect(() => {
+    if (isDesktop || selected) return undefined;
+    const handleScroll = () => saveScroll({ page: window.scrollY });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Al abrir una ficha se descarta el guardado pendiente (el salto al inicio de la ficha no es tu posición).
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelScrollSave();
+    };
+  }, [isDesktop, selected, saveScroll, cancelScrollSave]);
+
+  // Al volver de la ficha (o al entrar a la pestaña) la lista aparece donde la dejaste.
+  useLayoutEffect(() => {
+    if (!isDesktop && isListVisible) window.scrollTo({ top: readPersisted(SCROLL_KEY, { page: 0, list: 0 }, isScrollState).page });
+  }, [isDesktop, isListVisible]);
 
   const select = (name) => {
     playClick();
+    if (!isDesktop) {
+      // Desde la lista se guarda la posición al instante; desde una alternativa dentro de la ficha no se toca.
+      if (!selected) writePersisted(SCROLL_KEY, { ...readPersisted(SCROLL_KEY, { page: 0, list: 0 }, isScrollState), page: window.scrollY });
+      window.scrollTo({ top: 0 });
+    }
     setSelectedName(name);
-    if (!isDesktop) window.scrollTo({ top: 0 });
   };
 
   const list = (
