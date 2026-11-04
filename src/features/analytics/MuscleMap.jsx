@@ -51,7 +51,11 @@ const BodyFigure = ({ figure, title, colorFor, selectedMuscle, enabledMuscles, d
               aria-hidden={isPrimary ? undefined : true}
               aria-pressed={isSelected}
               aria-label={describe(shape.id)}
-              onClick={toggle}
+              onClick={(event) => {
+                // Con puntero se quita el foco: si no, el músculo deseleccionado seguía marcado por el anillo de foco.
+                if (event.detail > 0) event.currentTarget.blur();
+                toggle();
+              }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();

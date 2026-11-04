@@ -40,12 +40,16 @@ const FRONT_MUSCLES = [
   // Antebrazo (cara anterior): braquiorradial en el borde externo, flexores de muñeca/dedos hacia adentro.
   { id: 'braquiorradial', part: 'arm', points: [[48, 172], [55, 168], [56, 186], [54, 210], [51, 226], [47, 208], [46, 188]] },
   { id: 'antebrazo_flexores', part: 'arm', points: [[58, 169], [64, 174], [63, 200], [59, 232], [53, 234], [54, 222], [57, 204], [59, 186]] },
+  // Mano (palma hacia adelante): palma arriba, dedos abajo.
+  { id: 'mano_palma', part: 'arm', points: [[49, 239], [60, 239], [61, 250], [57, 256], [50, 255], [47, 248]] },
+  { id: 'mano_dedos', part: 'arm', points: [[48, 258], [56, 258], [60, 262], [58, 268], [53, 271], [49, 268], [47, 262]] },
   { id: 'gluteo_medio', part: 'leg', points: [[71, 202], [78, 206], [77, 218], [70, 222], [69, 212]] },
   { id: 'vasto_lateral', part: 'leg', points: [[70, 224], [76, 222], [79, 254], [80, 290], [79, 306], [75, 300], [71, 268], [69, 244]] },
   { id: 'recto_femoral', part: 'leg', points: [[79, 214], [86, 220], [89, 250], [88, 284], [84, 300], [81, 292], [80, 252]] },
   { id: 'vasto_medial', part: 'leg', points: [[90, 272], [94, 280], [95, 300], [90, 312], [85, 306], [88, 292]] },
   { id: 'aductores', part: 'leg', points: [[88, 222], [98, 244], [96, 262], [91, 268], [89, 248]] },
   { id: 'tibial', part: 'leg', points: [[80, 324], [87, 324], [88, 350], [87, 378], [84, 386], [80, 360], [78, 340]] },
+  { id: 'pie', part: 'leg', points: [[82, 395], [95, 394], [96, 405], [86, 407], [80, 405]] },
   { id: 'gemelos', part: 'leg', points: [[90, 324], [96, 326], [97, 344], [94, 364], [90, 352]] },
   { id: 'soleo', part: 'leg', points: [[77, 348], [79, 344], [82, 372], [82, 386], [79, 376]] },
 ];
@@ -71,6 +75,8 @@ const BACK_MUSCLES = [
   // Antebrazo (cara posterior): extensores de muñeca/dedos; el braquiorradial asoma en el borde externo.
   { id: 'braquiorradial', part: 'arm', points: [[48, 172], [53, 169], [53, 188], [50, 206], [46, 190]] },
   { id: 'antebrazo_extensores', part: 'arm', points: [[55, 168], [64, 174], [63, 200], [59, 232], [53, 234], [50, 216], [54, 192]] },
+  // Dorso de la mano: interóseos y extensores propios de los dedos.
+  { id: 'mano_dedos', part: 'arm', points: [[49, 240], [60, 240], [61, 254], [59, 266], [53, 271], [48, 266], [47, 250]] },
   { id: 'gluteo_medio', part: 'leg', points: [[73, 198], [88, 196], [86, 208], [76, 216], [70, 214]] },
   { id: 'gluteo_mayor', part: 'leg', points: [[71, 218], [80, 212], [90, 210], [98, 214], [98, 248], [88, 254], [76, 250], [70, 236]] },
   { id: 'biceps_femoral', part: 'leg', points: [[71, 256], [81, 258], [84, 284], [83, 306], [79, 314], [74, 296], [70, 272]] },
@@ -78,6 +84,7 @@ const BACK_MUSCLES = [
   { id: 'aductores', part: 'leg', points: [[95, 252], [98, 254], [97, 276], [95, 280]] },
   { id: 'gemelos', part: 'leg', points: [[78, 324], [87, 322], [88, 352], [83, 362], [77, 350], [75, 336]] },
   { id: 'gemelos', part: 'leg', points: [[89, 322], [96, 324], [98, 340], [96, 360], [90, 356]] },
+  { id: 'pie', part: 'leg', points: [[83, 394], [95, 394], [96, 405], [88, 407], [82, 405]] },
   { id: 'soleo', part: 'leg', points: [[79, 364], [87, 362], [95, 362], [94, 384], [84, 388]] },
 ];
 

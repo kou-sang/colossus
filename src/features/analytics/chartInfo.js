@@ -47,9 +47,9 @@ export const CHART_INFO = Object.freeze({
       'Amarillo o naranja: buen momento para volver a entrenarlo.',
       'Rojo: hace 30 días o más (o nunca). Si sigue rojo semana tras semana, a tu rutina le falta un ejercicio para ese músculo.',
     ],
-    tip: 'Toca un músculo rojo para ver con qué lo trabajaste la última vez y busca alternativas en Ejercicios.',
+    tip: 'Toca un músculo para ver cuándo y con qué ejercicios lo entrenaste, y qué % de cada ejercicio recayó en él.',
     how: [
-      'Cuenta solo ejercicios donde ese músculo participa al menos un 15% (según la ficha del ejercicio).',
+      'Cuenta solo ejercicios donde ese músculo participa al menos un 15% (según la ficha del ejercicio); para manos y pies alcanza con 5%, porque son músculos chicos que rara vez llevan más carga.',
       'Escala de color: verde = hoy, amarillo ≈ 14 días, rojo = 30 días o más.',
       'Siempre mira como mínimo los últimos 30 días, aunque elijas un rango más corto, para no marcar como "nunca" algo que entrenaste hace 10 días.',
     ],
@@ -67,22 +67,22 @@ export const CHART_INFO = Object.freeze({
       'Cada serie se reparte entre los músculos según la ficha del ejercicio. Ejemplo: 3 series de press banca, con 40% de pecho medio, suman 1,2 series al pecho medio.',
       'Se suma todo el rango y se divide por la cantidad de semanas.',
       'Escalones de color: 0, menos de 3, 3–6, 6–10, 10–20 y más de 20 series por semana.',
+      'Toca un músculo para ver sus series semanales y qué ejercicios lo trabajaron en el rango.',
     ],
     sources: ['Schoenfeld y cols. (2017), J Sports Sci: relación dosis-respuesta entre series semanales e hipertrofia.'],
   },
-  muscleSets: {
-    title: 'Series efectivas por músculo',
-    summary: 'Las mismas series semanales del mapa de Estímulo, pero en barras para comparar músculos.',
+  muscleRecoveryDetail: {
+    title: 'Historial del músculo',
+    summary: 'Cada vez que este músculo recibió estímulo: cuándo, con qué ejercicio y qué parte del ejercicio recayó en él.',
     read: [
-      'La franja verde marca 10–20 series por semana: barras dentro de ella van bien para crecer.',
-      'Barras cortas en músculos grandes (dorsal, glúteo, cuádriceps) suelen ser la mejora más fácil.',
-      'Los músculos chicos (braquial, manguito rotador, tibial) trabajan mucho de forma indirecta. Es normal que queden bajos.',
+      'Arriba está lo más reciente: es lo que define el color del mapa de Recuperación.',
+      'El % es la participación del músculo en ese ejercicio (por ejemplo, el press banca carga ~40 % en el pectoral medio).',
+      'Series ef. = series del registro × ese %.',
     ],
-    tip: 'Toca una barra para ver semana a semana qué ejercicios le aportan a ese músculo.',
+    tip: 'Si el último estímulo fue hace más de una semana y es un músculo que quieres desarrollar, súmalo a tu próxima sesión.',
     how: [
-      'Series × porcentaje de participación del músculo en cada ejercicio, promediado por semana.',
-      'Solo aparecen los músculos que pasan el filtro de músculos.',
-      'Con "Promedio de la selección" se divide por la cantidad de perfiles.',
+      'Usa los mismos filtros de perfiles, músculos y categorías, pero no el rango de fechas: mira al menos los últimos 30 días.',
+      'Cuenta solo ejercicios donde el músculo participa con al menos 15 % (5 % para manos y pies, que son músculos chicos).',
     ],
   },
   muscleDetail: {
@@ -132,23 +132,6 @@ export const CHART_INFO = Object.freeze({
     how: [
       'Semanas de lunes a domingo. Lo que no tiene peso o repeticiones (peso corporal, cardio) no suma.',
       'La primera y la última semana pueden estar incompletas: no las compares con semanas enteras.',
-    ],
-  },
-  fatigue: {
-    title: 'Mapa de fatiga muscular',
-    summary: 'Una estimación de cuánto cansancio le queda a cada músculo por lo que entrenaste en los últimos 7 días.',
-    read: [
-      'Verde: fresco, listo para una sesión fuerte.',
-      'Amarillo o naranja: todavía recuperándose; sirve para trabajo liviano o técnica.',
-      'Rojo: muy cargado. Entrenarlo fuerte hoy rinde menos.',
-      'Es orientativo: no sabe cómo dormiste ni cómo comiste, y sin RIR no sabe qué tan cerca del fallo llegaste.',
-    ],
-    tip: 'Organiza la semana para que cada músculo vuelva a verde antes de su próxima sesión fuerte (en general 48–72 h).',
-    how: [
-      'Cada registro suma series al músculo según la ficha del ejercicio, y ese cansancio baja a la mitad cada ~30 h en músculos grandes, ~24 h en medianos y ~18 h en chicos.',
-      '100% equivale a una sesión exigente para ese músculo: unas 4 series en músculos grandes, 3,5 en medianos y 3 en chicos.',
-      'El tiempo de recuperación es lo que falta para bajar del 25%.',
-      'Si registras RIR, las series más cerca del fallo cuentan más: al fallo ×1,15, a 1 ×1,05, a 2 ×1, a 3 ×0,85 y a 4 o más ×0,7.',
     ],
   },
   energy: {

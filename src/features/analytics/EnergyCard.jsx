@@ -53,9 +53,9 @@ export const EnergyCard = ({ logs, rangeStart, rangeEnd, rangeDays, user, isSelf
       title="Calorías y alimentación"
       collapseKey="analytics:energy"
       subtitle={`${focusName} · gasto al entrenar y cuánto comer`}
-      actions={<ChartInfo info={CHART_INFO.energy} />}
+      info={<ChartInfo info={CHART_INFO.energy} />}
     >
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 [&>*]:min-w-0">
         <StatTile icon={Flame} label="Gastadas" value={formatKcal(report.total)} hint="en el rango" />
         <StatTile icon={Flame} label="Por día entrenado" value={formatKcal(report.perActiveDay)} hint={`${report.activeDays} día(s) con registros`} />
         <StatTile icon={Timer} label="Tiempo activo" value={`${Math.round(report.minutes / 60 * 10) / 10} h`} hint="estimado" />
@@ -68,7 +68,7 @@ export const EnergyCard = ({ logs, rangeStart, rangeEnd, rangeDays, user, isSelf
       )}
 
       {report.total > 0 && (
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-4 grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
           <div className="min-w-0">
             <h4 className="mb-2 text-sm font-bold">Por categoría</h4>
             <ul className="space-y-2">
@@ -116,7 +116,7 @@ export const EnergyCard = ({ logs, rangeStart, rangeEnd, rangeDays, user, isSelf
 
           {plan && !isEditing && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 [&>*]:min-w-0">
                 <StatTile icon={Utensils} label={`Objetivo · ${plan.goal.label}`} value={formatKcal(plan.target)} hint="por día" />
                 <StatTile icon={Flame} label="Mantenimiento" value={formatKcal(plan.maintenance)} hint={`basal ${plan.bmr} + actividad + entrenamiento`} />
                 <StatTile icon={Droplets} label="Agua" value={`${(plan.waterMl / 1000).toLocaleString('es-AR')} L`} hint="por día (+ lo que transpires)" />

@@ -17,6 +17,26 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.9.0] - 2026-11-04
+
+### Added
+- **Músculos de manos y pies:** palma de la mano (tenar, hipotenar y lumbricales), dedos de la mano (falanges e interóseos) y pie (arco plantar y dedos). Se dibujan en los mapas musculares (de frente y de espaldas) y en la ficha de cada ejercicio. Los ejercicios de agarre (hand grip, pelota, pinza con discos, barra gruesa, colgados, cubo de arroz…), las elevaciones de talones y la carrera, la soga y los saltos ahora cargan una parte en estos músculos, y todo lo que usa agarre suma un poco a la palma y a los dedos. Las categorías pasan a llamarse "Antebrazos y manos" y "Pantorrillas y pies".
+- **Detalle de Recuperación:** al tocar un músculo en el mapa de Recuperación se ve su historial: cuándo lo entrenaste, con qué ejercicio, qué % del ejercicio recayó en él y cuántas series efectivas sumó.
+
+### Changed
+- **Encabezado de los gráficos:** nombre, botón de información y botón de plegar en la misma fila; los selectores (Recuperación/Estímulo, ejercicio de Progresión de fuerza) van en una fila debajo.
+- En el mapa de Recuperación, manos y pies cuentan como entrenados desde el 5 % de participación (el resto de los músculos sigue desde el 15 %), porque son músculos chicos que rara vez reciben más carga. El análisis de rutinas no los reporta como "sin trabajar".
+- En el detalle de Estímulo, cada ejercicio muestra sus series efectivas y debajo el % del ejercicio y el % del total del músculo (los nombres ya no quedan cortados por la cifra).
+
+### Removed
+- **Mapa de fatiga muscular** (lo reemplaza el mapa de Recuperación).
+- **Gráfico "Series efectivas por músculo"** (el mapa de Estímulo muestra lo mismo).
+- Botón "Filtrar solo este músculo" del detalle del mapa: no hacía nada visible y dejaba los demás gráficos filtrados sin forma clara de deshacerlo.
+
+### Fixed
+- Seleccionar Semitendinoso (y otros músculos de nombre largo) ensanchaba el mapa más que la pantalla en el celular. Los nombres se cortan en varias líneas y ninguna columna de Analíticas puede ensancharse más que su contenedor.
+- Al volver a tocar un músculo para deseleccionarlo quedaba un borde blanco (el anillo de foco). Ahora solo se marca el foco al navegar con teclado y el realce de hover no queda "pegado" en pantallas táctiles.
+
 ## [4.8.0] - 2026-11-04
 
 ### Added

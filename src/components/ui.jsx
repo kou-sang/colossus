@@ -121,18 +121,26 @@ export const StatTile = ({ label, value, hint, icon: Icon }) => (
 );
 
 // Título con base mínima de 10rem: un botón (i) chico queda a la derecha; acciones anchas (selectores) bajan de línea.
-const SectionHeader = ({ title, subtitle, actions, className = 'mb-4' }) => (
-  <header className={`flex flex-wrap items-start justify-between gap-2 ${className}`}>
-    <div className="min-w-0 flex-1 basis-40">
-      {title && <h3 className="text-base font-bold md:text-lg">{title}</h3>}
-      {subtitle && <p className="mt-0.5 text-xs text-secondary md:text-sm">{subtitle}</p>}
+/*
+ * Encabezado de tarjeta: título (y subtítulo) a la izquierda; a la derecha, en la MISMA fila del título, el botón de
+ * información y el de plegar. Los controles del gráfico (selector de submapa, de ejercicio…) van en una fila debajo,
+ * así en el celular no se apilan desordenados al lado del título.
+ */
+const SectionHeader = ({ title, subtitle, info, toggle, actions, isCollapsed = false }) => (
+  <header className={isCollapsed ? '' : 'mb-4'}>
+    <div className="flex items-start justify-between gap-2">
+      <div className="min-w-0 flex-1">
+        {title && <h3 className="break-words text-base font-bold md:text-lg">{title}</h3>}
+        {subtitle && <p className="mt-0.5 break-words text-xs text-secondary md:text-sm">{subtitle}</p>}
+      </div>
+      {(info || toggle) && <div className="-mr-1 -mt-1 flex shrink-0 items-center">{info}{toggle}</div>}
     </div>
-    {actions}
+    {actions && !isCollapsed && <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2">{actions}</div>}
   </header>
 );
 
 // Tarjeta plegable que recuerda si quedó plegada (por dispositivo). Plegada no monta el contenido (gráficos livianos).
-const CollapsibleCard = ({ title, subtitle, actions, children, className, collapseKey, collapseLabel }) => {
+const CollapsibleCard = ({ title, subtitle, info, actions, children, className, collapseKey, collapseLabel }) => {
   const [isCollapsed, setIsCollapsed] = usePersistentState(`collapsed:${collapseKey}`, false, (value) => typeof value === 'boolean');
   const panelId = useId();
   const name = collapseLabel ?? (typeof title === 'string' ? title : 'sección');
@@ -144,25 +152,25 @@ const CollapsibleCard = ({ title, subtitle, actions, children, className, collap
     </button>
   );
   return (
-    <section className={`card p-4 md:p-5 ${className}`}>
-      <SectionHeader title={title} subtitle={subtitle} className={isCollapsed ? '' : 'mb-4'}
-        actions={<div className="flex min-w-0 max-w-full items-center gap-1">{!isCollapsed && actions}{toggle}</div>} />
-      {!isCollapsed && <div id={panelId}>{children}</div>}
+    <section className={`card min-w-0 p-4 md:p-5 ${className}`}>
+      <SectionHeader title={title} subtitle={subtitle} info={info} toggle={toggle} actions={actions} isCollapsed={isCollapsed} />
+      {!isCollapsed && <div id={panelId} className="min-w-0">{children}</div>}
     </section>
   );
 };
 
 /**
- * Tarjeta de sección. Con `collapseKey` se puede plegar y el estado se recuerda la próxima vez
+ * Tarjeta de sección. `info` (botón de ayuda) va junto al título; `actions` (controles) en una fila debajo.
+ * Con `collapseKey` se puede plegar y el estado se recuerda la próxima vez
  * (`collapseLabel` nombra la sección en el botón cuando el título no es texto).
  */
-export const SectionCard = ({ title, subtitle, actions, children, className = '', collapseKey, collapseLabel }) => {
+export const SectionCard = ({ title, subtitle, info, actions, children, className = '', collapseKey, collapseLabel }) => {
   if (collapseKey) {
-    return <CollapsibleCard title={title} subtitle={subtitle} actions={actions} className={className} collapseKey={collapseKey} collapseLabel={collapseLabel}>{children}</CollapsibleCard>;
+    return <CollapsibleCard title={title} subtitle={subtitle} info={info} actions={actions} className={className} collapseKey={collapseKey} collapseLabel={collapseLabel}>{children}</CollapsibleCard>;
   }
   return (
-    <section className={`card p-4 md:p-5 ${className}`}>
-      {(title || actions) && <SectionHeader title={title} subtitle={subtitle} actions={actions} />}
+    <section className={`card min-w-0 p-4 md:p-5 ${className}`}>
+      {(title || actions || info) && <SectionHeader title={title} subtitle={subtitle} info={info} actions={actions} />}
       {children}
     </section>
   );

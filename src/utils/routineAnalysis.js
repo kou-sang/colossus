@@ -17,7 +17,10 @@ export const MIN_SHARE_TO_COUNT = 0.15;
 // Rango orientativo de series efectivas semanales para hipertrofia (Schoenfeld y col., 2017; Israetel/RP).
 export const WEEKLY_TARGET = Object.freeze({ min: 10, max: 20 });
 // Músculos chicos que reciben mucho trabajo indirecto: no se exige el rango completo.
-const SMALL_MUSCLES = new Set(['braquial', 'manguito_rotador', 'tibial', 'serrato', 'redondo_mayor', 'braquiorradial', 'antebrazo_extensores', 'antebrazo_flexores', 'soleo']);
+const SMALL_MUSCLES = new Set(['mano_palma', 'mano_dedos', 'pie', 'braquial', 'manguito_rotador', 'tibial', 'serrato', 'redondo_mayor', 'braquiorradial', 'antebrazo_extensores', 'antebrazo_flexores', 'soleo']);
+
+// Músculos propios de manos y pies: casi siempre reciben trabajo indirecto; no se reportan como "sin trabajar".
+const ACCESSORY_MUSCLES = new Set(['mano_palma', 'mano_dedos', 'pie']);
 
 const PUSH = ['pecho_superior', 'pecho_medio', 'pecho_inferior', 'deltoides_anterior', 'triceps_largo', 'triceps_lateral'];
 const PULL = ['dorsal_ancho', 'redondo_mayor', 'trapecio_medio', 'deltoides_posterior', 'biceps', 'braquial'];
@@ -65,7 +68,7 @@ export const analyzeRoutine = (routine) => {
     return { id: categoryId, label: CATEGORY_LABELS[categoryId] ?? categoryId, sets: round1(sets), percent: percentOf(sets), isWorked };
   }).sort((a, b) => b.sets - a.sets);
 
-  const untrained = byMuscle.filter((muscle) => !muscle.isWorked);
+  const untrained = byMuscle.filter((muscle) => !muscle.isWorked && !ACCESSORY_MUSCLES.has(muscle.id));
   const undertrained = byMuscle.filter((muscle) => muscle.isWorked && !SMALL_MUSCLES.has(muscle.id) && muscle.sets < WEEKLY_TARGET.min / 2);
   const overtrained = byMuscle.filter((muscle) => muscle.sets > WEEKLY_TARGET.max * 1.25);
   const untrainedCategories = byCategory.filter((category) => !category.isWorked);
