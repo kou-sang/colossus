@@ -50,6 +50,7 @@ export const MonthlySummaryCard = ({ userId, focusName, todayKey }) => {
   return (
     <SectionCard
       title="Resumen del mes"
+      collapseKey="analytics:monthly"
       subtitle={`${focusName} · ${formatShortDate(report.start)} al ${formatShortDate(report.end)} (últimos 30 días)`}
       actions={<ChartInfo info={CHART_INFO.monthly} />}
     >

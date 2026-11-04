@@ -100,7 +100,7 @@ export const CHART_INFO = Object.freeze({
   },
   strength: {
     title: 'Progresión de fuerza',
-    summary: 'Tu 1RM estimado en el tiempo: cuánto podrías levantar a una repetición, calculado a partir de tus series.',
+    summary: 'Cuánto ganaste de fuerza en los músculos y categorías elegidos (o en un ejercicio puntual): tu 1RM estimado en el tiempo.',
     read: [
       'Si la tendencia sube, estás ganando fuerza, aunque haya días peores.',
       'Si lleva 3–4 semanas plana, cambia algo: más series, otro rango de repeticiones o una semana más liviana.',
@@ -111,6 +111,9 @@ export const CHART_INFO = Object.freeze({
     how: [
       'Fórmula de Epley: kg × (1 + repeticiones ÷ 30). Pasadas las 12 repeticiones se usa 12 porque la fórmula pierde precisión.',
       'Así se comparan series distintas: 80 kg × 5 y 70 kg × 10 dan casi lo mismo (≈ 93 kg).',
+      'Promedio de la selección: cada ejercicio se mide como % de cambio respecto de su primer registro del rango (así 100 kg de banca y 20 kg de curl pesan igual) y se promedian. Cada ejercicio mantiene su último valor hasta que lo vuelves a hacer.',
+      'Si elegiste músculos en el filtro, cada ejercicio pesa según cuánto trabaja esos músculos (una sentadilla pesa más que un hip thrust si elegiste cuádriceps).',
+      'Elige un ejercicio en el selector para ver su 1RM estimado en kg.',
       'Con "Unificar ejercicios del día" se grafica el mejor valor de cada día.',
       'El eje es tiempo real: dos semanas sin entrenar ocupan más espacio que dos días.',
     ],

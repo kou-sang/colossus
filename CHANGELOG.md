@@ -17,6 +17,17 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.8.0] - 2026-11-04
+
+### Added
+- **Analíticas — filtro único de músculos y categorías:** un solo bloque con selección múltiple que reemplaza a los filtros separados de categorías y músculos. Incluye "Todo", un "Todos" para cada categoría muscular, cada músculo suelto y las actividades sin músculos propios (Funcional, Cardio, CrossFit, Combate, Yoga y Pilates, Otros). Un registro entra si es de una categoría elegida o si trabaja algún músculo elegido. Si eliges uno por uno todos los músculos de una categoría, se marca su "Todos".
+- **Analíticas — gráficos plegables:** Consistencia, Mapa muscular, Mapa de fatiga, Series efectivas, Progresión de fuerza, Tonelaje semanal, Calorías y alimentación y Resumen del mes se pueden plegar con la flecha. Plegados no se dibujan, así la pestaña carga más rápido.
+- **Progresión de fuerza — "Promedio de la selección"** (opción por defecto): una línea por perfil con el cambio promedio (%) del 1RM estimado de todos los ejercicios que entran en el filtro. Cada ejercicio se mide respecto de su primer registro del rango, mantiene su último valor hasta que lo vuelves a hacer y pesa según cuánto trabaja los músculos elegidos. Los ejercicios sueltos siguen disponibles en el selector, en kg.
+- **Memoria por dispositivo:** se recuerda qué gráficos y bloques de filtros quedaron plegados y si los filtros estaban ocultos. En la pestaña Ejercicios también se recuerdan la búsqueda, la categoría, el ejercicio abierto y la posición de la lista: al tocar "Volver a la lista" (o al regresar a la pestaña) sigues donde estabas.
+
+### Changed
+- `SectionCard` acepta `collapseKey` para volverse plegable y recordar su estado (nuevo hook `usePersistentState`).
+
 ## [4.7.0] - 2026-11-04
 
 ### Added

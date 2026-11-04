@@ -21,14 +21,25 @@ const RecordAwareDot = ({ cx, cy, payload, stroke, surface }) => {
   return <circle cx={cx} cy={cy} r={4} fill={stroke} stroke={surface} strokeWidth={2} />;
 };
 
-export const StrengthProgressChart = ({ seriesList, unifyDays = true }) => {
+const formatChange = (value) => `${value > 0 ? '+' : ''}${value} %`;
+
+/**
+ * mode 'exercise': 1RM estimado (kg) de un ejercicio. mode 'average': % de cambio promedio de los ejercicios
+ * de la selección (buildStrengthIndexSeries); 0 % = el nivel con el que empezaste el rango.
+ */
+export const StrengthProgressChart = ({ seriesList, unifyDays = true, mode = 'exercise' }) => {
+  const isAverage = mode === 'average';
   const { chart } = useTheme();
   const { grid, axis } = useAxisProps();
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const hasData = seriesList.some((series) => series.points.length > 0);
 
   if (!hasData) {
-    return <p className="py-12 text-center text-sm text-muted">Sin registros con peso para este ejercicio en el rango.</p>;
+    return (
+      <p className="py-12 text-center text-sm text-muted">
+        {isAverage ? 'Sin registros con peso para los músculos y categorías elegidos en el rango.' : 'Sin registros con peso para este ejercicio en el rango.'}
+      </p>
+    );
   }
 
   const times = seriesList.flatMap((series) => series.points.map((point) => point.time));
@@ -45,12 +56,16 @@ export const StrengthProgressChart = ({ seriesList, unifyDays = true }) => {
             <CartesianGrid {...grid} />
             <XAxis {...axis} dataKey="time" type="number" scale="time" domain={[start, end]} ticks={buildTimeTicks(start, end, isDesktop ? 6 : 4)}
               height={showTime ? 44 : 30} tick={<TimeAxisTick showTime={showTime} />} interval={0} />
-            <YAxis {...axis} width={44} domain={['auto', 'auto']} unit=" kg" />
+            <YAxis {...axis} width={44} domain={['auto', 'auto']} unit={isAverage ? ' %' : ' kg'} />
             <Tooltip
               content={
                 <ChartTooltip
                   labelFormatter={(label) => (unifyDays ? formatShortDate(label) : formatDayTime(label))}
                   valueFormatter={(value, entry) => {
+                    if (isAverage) {
+                      const { exercises, isPr: hasPr } = entry.payload;
+                      return `${formatChange(value)} · ${exercises} ejercicio${exercises === 1 ? '' : 's'}${hasPr ? ' · PR' : ''}`;
+                    }
                     const { weight, reps, isPr } = entry.payload;
                     const detail = weight ? ` (${weight}×${reps ?? '?'})` : '';
                     return `${value} kg${detail}${isPr ? ' · PR' : ''}`;
@@ -62,7 +77,7 @@ export const StrengthProgressChart = ({ seriesList, unifyDays = true }) => {
               <Line
                 key={series.userId}
                 data={series.points}
-                dataKey="e1rm"
+                dataKey={isAverage ? 'change' : 'e1rm'}
                 name={series.name}
                 stroke={series.color}
                 strokeWidth={2}
@@ -74,18 +89,23 @@ export const StrengthProgressChart = ({ seriesList, unifyDays = true }) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-2 text-xs text-muted">Punto con anillo = récord personal. Valor = {unifyDays ? 'mejor 1RM estimado del día' : '1RM estimado de cada registro'} (Epley).</p>
+      <p className="mt-2 text-xs text-muted">
+        Punto con anillo = récord personal.{' '}
+        {isAverage
+          ? 'Valor = cambio promedio del 1RM estimado (Epley) de cada ejercicio respecto de su primer registro del rango, ponderado por los músculos elegidos.'
+          : `Valor = ${unifyDays ? 'mejor 1RM estimado del día' : '1RM estimado de cada registro'} (Epley).`}
+      </p>
       <details className="mt-2 text-sm">
         <summary className="cursor-pointer font-semibold text-secondary">Ver datos en tabla</summary>
         <table className="mt-2 w-full text-left text-xs">
-          <thead className="text-muted"><tr><th className="py-1">{unifyDays ? 'Fecha' : 'Fecha y hora'}</th><th>Perfil</th><th>Serie</th><th className="text-right">1RM est.</th></tr></thead>
+          <thead className="text-muted"><tr><th className="py-1">{unifyDays ? 'Fecha' : 'Fecha y hora'}</th><th>Perfil</th><th>{isAverage ? 'Ejercicios' : 'Serie'}</th><th className="text-right">{isAverage ? 'Cambio' : '1RM est.'}</th></tr></thead>
           <tbody>
             {seriesList.flatMap((series) => series.points.map((point) => (
               <tr key={`${series.userId}-${point.time}`} className="border-t divider">
                 <td className="py-1">{unifyDays ? formatShortDate(point.time) : formatDayTime(point.time)}</td>
                 <td>{series.name}</td>
-                <td>{point.weight} kg × {point.reps ?? '?'}</td>
-                <td className="text-right font-bold">{point.e1rm} kg{point.isPr ? ' 🏆' : ''}</td>
+                <td>{isAverage ? point.exercises : `${point.weight} kg × ${point.reps ?? '?'}`}</td>
+                <td className="text-right font-bold">{isAverage ? formatChange(point.change) : `${point.e1rm} kg`}{point.isPr ? ' 🏆' : ''}</td>
               </tr>
             )))}
           </tbody>

@@ -2,9 +2,9 @@ import { CalendarDays, ChevronDown, ChevronUp, Dumbbell, Flame, Trophy } from 'l
 import { useMemo, useState } from 'react';
 import { ChartInfo } from '../../components/ChartInfo';
 import { IconButton, LoadingState, SectionCard, SegmentedControl, StatTile } from '../../components/ui';
-import { MUSCLE_IDS } from '../../constants/muscles';
 import { useAppData } from '../../context/AppDataContext';
 import { useTheme } from '../../context/ThemeContext';
+import { usePersistentState } from '../../hooks/usePersistentState';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useToday } from '../../hooks/useToday';
 import { subscribeToLogs } from '../../services/logService';
@@ -15,6 +15,7 @@ import {
   buildConsistencySeries,
   buildEffectiveSetsByMuscle,
   buildMuscleLastTrained,
+  buildStrengthIndexSeries,
   buildStrengthSeries,
   buildWeeklyTonnage,
   computeTonnage,
@@ -24,6 +25,7 @@ import {
 } from '../../utils/metrics';
 import { AnalyticsFilters } from './AnalyticsFilters';
 import { CRITICAL_RECENCY_DAYS, DATE_PRESETS, MAP_MODES } from './analyticsConstants';
+import { isOnlyMuscle, selectionMuscles, selectionScope, summarizeSelection } from './bodySelection';
 import { CHART_INFO } from './chartInfo';
 import { ConsistencyChart } from './ConsistencyChart';
 import { EnergyCard } from './EnergyCard';
@@ -39,6 +41,8 @@ import { WeeklyVolumeChart } from './WeeklyVolumeChart';
 const MAX_COMPARED_USERS = 8;
 const AGGREGATE_FOCUS = 'aggregate';
 const LONG_RANGE_DAYS = 120;
+// Opción del selector de Progresión de fuerza que promedia todos los ejercicios de la selección.
+const STRENGTH_AVERAGE = '__average__';
 
 const formatTonnage = (value) => (value >= 1000 ? `${(value / 1000).toFixed(1)} t` : `${Math.round(value)} kg`);
 
@@ -68,15 +72,15 @@ export const AnalyticsTab = () => {
   // ───────── Estado de filtros ─────────
   const [scopeChoice, setScopeChoice] = useState(null); // null = automático (primer grupo o "Solo yo")
   const [userSelection, setUserSelection] = useState({ scopeId: null, ids: null });
-  const [categories, setCategories] = useState(null);
-  const [muscles, setMuscles] = useState(null);
+  const [bodySelection, setBodySelection] = useState(null); // músculos y categorías (null = todo)
   const [datePreset, setDatePreset] = useState('30d');
   const [customRange, setCustomRange] = useState(() => ({ from: toDateKey(addDays(new Date(), -29)), to: toDateKey() }));
   const [focusChoice, setFocusChoice] = useState(null);
   const [mapMode, setMapMode] = useState('recency');
   const [selectedMuscle, setSelectedMuscle] = useState(null);
-  const [selectedExercise, setSelectedExercise] = useState('');
-  const [filtersOpen, setFiltersOpen] = useState(true); // Siempre visibles al entrar; se pueden ocultar con la flecha
+  const [selectedExercise, setSelectedExercise] = useState(STRENGTH_AVERAGE);
+  // Se recuerda si los filtros quedaron ocultos (por dispositivo).
+  const [filtersOpen, setFiltersOpen] = usePersistentState('analytics:filters-open', true, (value) => typeof value === 'boolean');
   const [unifyDays, setUnifyDays] = useState(true); // false → gráficos temporales con hora y minuto
 
   const activeGroup = scopeChoice === 'self' ? null : groups.find((group) => group.id === scopeChoice) ?? (scopeChoice ? null : groups[0] ?? null);
@@ -125,10 +129,13 @@ export const AnalyticsTab = () => {
     [],
   );
 
+  // Filtro unificado: `scope` decide qué registros entran; `muscles` recorta los gráficos por músculo.
+  const scope = useMemo(() => selectionScope(bodySelection), [bodySelection]);
+  const muscles = useMemo(() => selectionMuscles(bodySelection), [bodySelection]);
   const enabledMuscles = useMemo(() => (muscles ? new Set(muscles) : null), [muscles]);
   const filteredLogs = useMemo(
-    () => filterLogs(logsState.data, { userIds: effectiveUserIds, categories, muscles, since: range.since }),
-    [logsState.data, effectiveUserIds, categories, muscles, range.since],
+    () => filterLogs(logsState.data, { userIds: effectiveUserIds, scope, since: range.since }),
+    [logsState.data, effectiveUserIds, scope, range.since],
   );
 
   // ───────── Perfil foco (mapa y KPIs) ─────────
@@ -158,14 +165,14 @@ export const AnalyticsTab = () => {
 
   // Recuperación: mismos filtros salvo la fecha de inicio (usa toda la historia descargada, ≥ 30 días).
   const lastTrainedByMuscle = useMemo(
-    () => buildMuscleLastTrained(filterLogs(logsState.data, { userIds: focusIds, categories, muscles }), null),
-    [logsState.data, focusIds, categories, muscles],
+    () => buildMuscleLastTrained(filterLogs(logsState.data, { userIds: focusIds, scope }), null),
+    [logsState.data, focusIds, scope],
   );
 
   // Fatiga "de hoy": mismos filtros de categoría/músculo, sin la fecha de inicio (usa los últimos 7 días descargados).
   const fatigueLogs = useMemo(
-    () => filterLogs(logsState.data, { userIds: focusIds, categories, muscles }),
-    [logsState.data, focusIds, categories, muscles],
+    () => filterLogs(logsState.data, { userIds: focusIds, scope }),
+    [logsState.data, focusIds, scope],
   );
   // Resumen mensual y plan de alimentación son individuales: con "Promedio de la selección" se muestran los tuyos.
   const personalId = focusId === AGGREGATE_FOCUS ? user.id : focusId;
@@ -185,11 +192,18 @@ export const AnalyticsTab = () => {
     });
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([exercise]) => exercise);
   }, [filteredLogs]);
-  const activeExercise = exerciseOptions.includes(selectedExercise) ? selectedExercise : exerciseOptions[0] ?? '';
+  const activeExercise = selectedExercise === STRENGTH_AVERAGE || exerciseOptions.includes(selectedExercise) ? selectedExercise : STRENGTH_AVERAGE;
+  const isStrengthAverage = activeExercise === STRENGTH_AVERAGE;
 
+  // Promedio de la selección: % de cambio de cada ejercicio, ponderado por los músculos elegidos en el filtro.
   const strengthSeries = useMemo(
-    () => chartUsers.map((selected) => ({ ...selected, points: buildStrengthSeries(filteredLogs, selected.userId, activeExercise, { unifyDays }) })),
-    [chartUsers, filteredLogs, activeExercise, unifyDays],
+    () => chartUsers.map((selected) => ({
+      ...selected,
+      points: isStrengthAverage
+        ? buildStrengthIndexSeries(filteredLogs, selected.userId, { unifyDays, muscleScope: muscles })
+        : buildStrengthSeries(filteredLogs, selected.userId, activeExercise, { unifyDays }),
+    })),
+    [chartUsers, filteredLogs, activeExercise, isStrengthAverage, unifyDays, muscles],
   );
   const consistencySeries = useMemo(
     () => chartUsers.map((selected) => ({ ...selected, ...buildConsistencySeries(filteredLogs, selected.userId, { unifyDays }) })),
@@ -218,11 +232,10 @@ export const AnalyticsTab = () => {
     activeGroup?.name ?? 'Solo yo',
     selectedIds?.length ? `${selectedIds.length} de ${memberIds.length} perfiles` : `${memberIds.length} ${memberIds.length === 1 ? 'perfil' : 'perfiles'}`,
     DATE_PRESETS.find((preset) => preset.value === datePreset)?.label,
-    categories ? `${categories.length} categorías` : null,
-    muscles ? `${muscles.length} músculos` : null,
+    bodySelection ? summarizeSelection(bodySelection) : null,
   ].filter(Boolean).join(', ');
 
-  const selectedMuscleIsFilteredOnly = muscles?.length === 1 && muscles[0] === selectedMuscle;
+  const selectedMuscleIsFilteredOnly = isOnlyMuscle(bodySelection, selectedMuscle);
   const isLongRange = rangeDays > LONG_RANGE_DAYS;
 
   return (
@@ -247,10 +260,8 @@ export const AnalyticsTab = () => {
             memberOptions={memberOptions}
             selectedUserIds={selectedIds?.length ? selectedIds : null}
             onUsersChange={(ids) => setUserSelection({ scopeId, ids })}
-            categories={categories}
-            onCategoriesChange={setCategories}
-            muscles={muscles}
-            onMusclesChange={(next) => setMuscles(next && next.every((id) => MUSCLE_IDS.includes(id)) ? next : null)}
+            bodySelection={bodySelection}
+            onBodySelectionChange={setBodySelection}
             datePreset={datePreset}
             onDatePresetChange={setDatePreset}
             customRange={customRange}
@@ -281,6 +292,7 @@ export const AnalyticsTab = () => {
         <>
           <SectionCard
             title="Consistencia"
+            collapseKey="analytics:consistency"
             subtitle="Ejercicios acumulados en el período"
             actions={<ChartInfo info={CHART_INFO.consistency} />}
           >
@@ -310,6 +322,7 @@ export const AnalyticsTab = () => {
 
           <SectionCard
             title="Mapa muscular"
+            collapseKey="analytics:muscle-map"
             subtitle={`${focusName} · ${mapMode === 'stimulus' ? 'más verde = más series por semana' : 'verde = entrenado hace poco · rojo = un mes o más'}`}
             actions={
               <div className="flex flex-wrap items-center gap-2">
@@ -338,7 +351,7 @@ export const AnalyticsTab = () => {
                   weeklyAverage={focusMetrics.weeklySetsByMuscle[selectedMuscle] ?? 0}
                   lastTrained={lastTrainedByMuscle[selectedMuscle]}
                   isFilteredOnly={selectedMuscleIsFilteredOnly}
-                  onFilterOnly={() => setMuscles([selectedMuscle])}
+                  onFilterOnly={() => setBodySelection({ categories: [], muscles: [selectedMuscle] })}
                   onClose={() => setSelectedMuscle(null)}
                 />
               )}
@@ -347,7 +360,7 @@ export const AnalyticsTab = () => {
 
           <FatigueMapCard logs={fatigueLogs} userIds={focusIds} gender={mapGender} focusName={focusName} enabledMuscles={enabledMuscles} />
 
-          <SectionCard title="Series efectivas por músculo" subtitle={`Promedio semanal de ${focusName}`} actions={<ChartInfo info={CHART_INFO.muscleSets} />}>
+          <SectionCard title="Series efectivas por músculo" collapseKey="analytics:muscle-sets" subtitle={`Promedio semanal de ${focusName}`} actions={<ChartInfo info={CHART_INFO.muscleSets} />}>
             <MuscleSetsChart weeklySetsByMuscle={focusMetrics.weeklySetsByMuscle} highlightMuscle={selectedMuscle} enabledMuscles={enabledMuscles} onSelect={setSelectedMuscle} />
           </SectionCard>
 
@@ -359,11 +372,13 @@ export const AnalyticsTab = () => {
 
           <SectionCard
             title="Progresión de fuerza"
-            subtitle="Tu mejor 1RM estimado de cada sesión"
+            collapseKey="analytics:strength"
+            subtitle={isStrengthAverage ? 'Cambio promedio de tu 1RM estimado en los ejercicios de la selección' : 'Tu mejor 1RM estimado de cada sesión'}
             actions={
               <div className="flex min-w-0 max-w-full items-center gap-1">
                 {exerciseOptions.length > 0 && (
                   <select aria-label="Ejercicio" className="input w-auto min-w-0 max-w-[240px]" value={activeExercise} onChange={(event) => setSelectedExercise(event.target.value)}>
+                    <option value={STRENGTH_AVERAGE}>Promedio de la selección ({exerciseOptions.length})</option>
                     {exerciseOptions.map((exercise) => <option key={exercise} value={exercise}>{exercise}</option>)}
                   </select>
                 )}
@@ -371,10 +386,10 @@ export const AnalyticsTab = () => {
               </div>
             }
           >
-            <StrengthProgressChart seriesList={strengthSeries} unifyDays={unifyDays} />
+            <StrengthProgressChart seriesList={strengthSeries} unifyDays={unifyDays} mode={isStrengthAverage ? 'average' : 'exercise'} />
           </SectionCard>
 
-          <SectionCard title="Tonelaje semanal" subtitle="Peso total movido por semana" actions={<ChartInfo info={CHART_INFO.weeklyVolume} />}>
+          <SectionCard title="Tonelaje semanal" collapseKey="analytics:weekly-volume" subtitle="Peso total movido por semana" actions={<ChartInfo info={CHART_INFO.weeklyVolume} />}>
             <WeeklyVolumeChart rows={weeklyRows} users={chartUsers} rangeStart={range.since} rangeEnd={rangeEnd} />
           </SectionCard>
 

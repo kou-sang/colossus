@@ -1,8 +1,10 @@
 import { ChevronDown } from 'lucide-react';
 import { FieldLabel, SegmentedControl } from '../../components/ui';
-import { CATEGORIES, musclesOfCategory } from '../../constants/muscles';
+import { musclesOfCategory } from '../../constants/muscles';
+import { usePersistentState } from '../../hooks/usePersistentState';
 import { playClick } from '../../utils/audio';
 import { DATE_PRESETS } from './analyticsConstants';
+import { ACTIVITY_CATEGORIES, isCategorySelected, isMuscleSelected, MUSCLE_CATEGORIES, summarizeSelection, toggleCategory, toggleMuscle } from './bodySelection';
 
 /*
  * Multiselección con chip "Todos". `value === null` significa todos.
@@ -37,21 +39,73 @@ const ChipGroup = ({ label, options, value, onChange, allLabel = 'Todos', showAl
   </div>
 );
 
-const FilterBlock = ({ title, summary, children, collapsible = false }) =>
-  collapsible ? (
-    <details className="group rounded-xl border divider px-3 py-2">
+// Bloque de filtro. Plegable (`collapseKey`): recuerda si quedó abierto o cerrado la próxima vez.
+const CollapsibleFilterBlock = ({ title, summary, children, collapseKey, defaultOpen }) => {
+  const [isOpen, setIsOpen] = usePersistentState(`filters:${collapseKey}`, defaultOpen, (value) => typeof value === 'boolean');
+  return (
+    <details className="group rounded-xl border divider px-3 py-2" open={isOpen} onToggle={(event) => setIsOpen(event.currentTarget.open)}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-bold text-secondary">
         <span>{title} <span className="font-semibold text-muted">· {summary}</span></span>
         <ChevronDown size={16} className="transition-transform group-open:rotate-180" aria-hidden />
       </summary>
       <div className="mt-2">{children}</div>
     </details>
+  );
+};
+
+const FilterBlock = ({ title, summary, children, collapseKey, defaultOpen = false }) =>
+  collapseKey ? (
+    <CollapsibleFilterBlock title={title} summary={summary} collapseKey={collapseKey} defaultOpen={defaultOpen}>{children}</CollapsibleFilterBlock>
   ) : (
     <div>
       <p className="mb-1.5 text-xs font-bold text-secondary">{title} <span className="font-semibold text-muted">· {summary}</span></p>
       {children}
     </div>
   );
+
+// Chip de selección múltiple (aria-pressed refleja si está elegido).
+const SelectChip = ({ isSelected, onClick, children, title }) => (
+  <button type="button" className="chip" aria-pressed={isSelected} title={title} onClick={() => { playClick(); onClick(); }}>
+    {children}
+  </button>
+);
+
+/*
+ * Filtro único de músculos y categorías: "Todo", un "Todos" por categoría y cada músculo suelto (selección múltiple).
+ * Las actividades sin músculos propios (Cardio, CrossFit…) se eligen como categoría completa.
+ */
+const BodyFilter = ({ selection, onChange }) => (
+  <div className="space-y-2.5">
+    <SelectChip isSelected={selection === null} onClick={() => onChange(null)}>Todo</SelectChip>
+    {MUSCLE_CATEGORIES.map((category) => (
+      <div key={category.id} role="group" aria-label={category.label}>
+        <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-muted">{category.label}</p>
+        <div className="flex flex-wrap gap-1.5">
+          <SelectChip isSelected={isCategorySelected(selection, category.id)} title={`Todos los músculos de ${category.label}`}
+            onClick={() => onChange(toggleCategory(selection, category.id))}>
+            Todos
+          </SelectChip>
+          {musclesOfCategory(category.id).map((muscle) => (
+            <SelectChip key={muscle.id} isSelected={isMuscleSelected(selection, muscle.id)} title={muscle.label}
+              onClick={() => onChange(toggleMuscle(selection, muscle.id))}>
+              {muscle.short}
+            </SelectChip>
+          ))}
+        </div>
+      </div>
+    ))}
+    <div role="group" aria-label="Actividades">
+      <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-muted">Actividades</p>
+      <div className="flex flex-wrap gap-1.5">
+        {ACTIVITY_CATEGORIES.map((category) => (
+          <SelectChip key={category.id} isSelected={isCategorySelected(selection, category.id)} onClick={() => onChange(toggleCategory(selection, category.id))}>
+            {category.label}
+          </SelectChip>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 const summarize = (value, total, noun) => (value === null ? `todos (${total})` : `${value.length} de ${total} ${noun}`);
 
@@ -62,10 +116,8 @@ export const AnalyticsFilters = ({
   memberOptions,
   selectedUserIds,
   onUsersChange,
-  categories,
-  onCategoriesChange,
-  muscles,
-  onMusclesChange,
+  bodySelection,
+  onBodySelectionChange,
   datePreset,
   onDatePresetChange,
   customRange,
@@ -74,7 +126,6 @@ export const AnalyticsFilters = ({
   unifyDays,
   onUnifyDaysChange,
 }) => {
-  const muscleCount = CATEGORIES.reduce((sum, category) => sum + musclesOfCategory(category.id).length, 0);
   const customInvalid = datePreset === 'custom' && customRange.from && customRange.to && customRange.from > customRange.to;
 
   return (
@@ -92,7 +143,7 @@ export const AnalyticsFilters = ({
         </FilterBlock>
       </div>
 
-      <FilterBlock title="Fechas" summary={DATE_PRESETS.find((preset) => preset.value === datePreset)?.label}>
+      <FilterBlock title="Fechas" collapseKey="dates" defaultOpen summary={DATE_PRESETS.find((preset) => preset.value === datePreset)?.label}>
         <SegmentedControl label="Rango de fechas" options={DATE_PRESETS} value={datePreset} onChange={onDatePresetChange} />
         {datePreset === 'custom' && (
           // Selector de calendario nativo: en móvil abre el calendario del sistema (mejor UX que uno propio).
@@ -123,23 +174,8 @@ export const AnalyticsFilters = ({
         </label>
       </FilterBlock>
 
-      <FilterBlock title="Categorías" summary={summarize(categories, CATEGORIES.length, 'categorías')} collapsible>
-        <ChipGroup label="Categorías" allLabel="Todas" options={CATEGORIES.map(({ id, label }) => ({ value: id, label }))}
-          value={categories} onChange={onCategoriesChange} />
-      </FilterBlock>
-
-      <FilterBlock title="Músculos individuales" summary={summarize(muscles, muscleCount, 'músculos')} collapsible>
-        <div className="space-y-2">
-          <ChipGroup label="Todos los músculos" allLabel="Todos los músculos" options={[]} value={muscles} onChange={onMusclesChange} />
-          {CATEGORIES.filter(({ id }) => musclesOfCategory(id).length > 0).map((category) => (
-            <div key={category.id}>
-              <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-muted">{category.label}</p>
-              <ChipGroup label={category.label} showAll={false}
-                options={musclesOfCategory(category.id).map((muscle) => ({ value: muscle.id, label: muscle.short, title: muscle.label }))}
-                value={muscles} onChange={onMusclesChange} />
-            </div>
-          ))}
-        </div>
+      <FilterBlock title="Músculos y categorías" summary={summarizeSelection(bodySelection)} collapseKey="body">
+        <BodyFilter selection={bodySelection} onChange={onBodySelectionChange} />
       </FilterBlock>
     </div>
   );

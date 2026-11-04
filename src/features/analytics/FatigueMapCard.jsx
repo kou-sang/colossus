@@ -50,6 +50,7 @@ export const FatigueMapCard = ({ logs, userIds, gender, focusName, enabledMuscle
   return (
     <SectionCard
       title="Mapa de fatiga muscular"
+      collapseKey="analytics:fatigue"
       subtitle={`${focusName} · cómo están tus músculos hoy`}
       actions={<ChartInfo info={CHART_INFO.fatigue} />}
     >

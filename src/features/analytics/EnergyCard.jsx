@@ -51,6 +51,7 @@ export const EnergyCard = ({ logs, rangeStart, rangeEnd, rangeDays, user, isSelf
   return (
     <SectionCard
       title="Calorías y alimentación"
+      collapseKey="analytics:energy"
       subtitle={`${focusName} · gasto al entrenar y cuánto comer`}
       actions={<ChartInfo info={CHART_INFO.energy} />}
     >

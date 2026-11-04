@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
+import { usePersistentState } from '../hooks/usePersistentState';
 import { playClick } from '../utils/audio';
 
 export const BRAND_NAME = 'Colossus';
@@ -120,20 +121,52 @@ export const StatTile = ({ label, value, hint, icon: Icon }) => (
 );
 
 // Título con base mínima de 10rem: un botón (i) chico queda a la derecha; acciones anchas (selectores) bajan de línea.
-export const SectionCard = ({ title, subtitle, actions, children, className = '' }) => (
-  <section className={`card p-4 md:p-5 ${className}`}>
-    {(title || actions) && (
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0 flex-1 basis-40">
-          {title && <h3 className="text-base font-bold md:text-lg">{title}</h3>}
-          {subtitle && <p className="mt-0.5 text-xs text-secondary md:text-sm">{subtitle}</p>}
-        </div>
-        {actions}
-      </header>
-    )}
-    {children}
-  </section>
+const SectionHeader = ({ title, subtitle, actions, className = 'mb-4' }) => (
+  <header className={`flex flex-wrap items-start justify-between gap-2 ${className}`}>
+    <div className="min-w-0 flex-1 basis-40">
+      {title && <h3 className="text-base font-bold md:text-lg">{title}</h3>}
+      {subtitle && <p className="mt-0.5 text-xs text-secondary md:text-sm">{subtitle}</p>}
+    </div>
+    {actions}
+  </header>
 );
+
+// Tarjeta plegable que recuerda si quedó plegada (por dispositivo). Plegada no monta el contenido (gráficos livianos).
+const CollapsibleCard = ({ title, subtitle, actions, children, className, collapseKey, collapseLabel }) => {
+  const [isCollapsed, setIsCollapsed] = usePersistentState(`collapsed:${collapseKey}`, false, (value) => typeof value === 'boolean');
+  const panelId = useId();
+  const name = collapseLabel ?? (typeof title === 'string' ? title : 'sección');
+  const toggle = (
+    <button type="button" className="icon-btn" aria-expanded={!isCollapsed} aria-controls={panelId}
+      aria-label={isCollapsed ? `Desplegar ${name}` : `Plegar ${name}`} title={isCollapsed ? 'Desplegar' : 'Plegar'}
+      onClick={() => { playClick(); setIsCollapsed((collapsed) => !collapsed); }}>
+      {isCollapsed ? <ChevronDown size={18} aria-hidden /> : <ChevronUp size={18} aria-hidden />}
+    </button>
+  );
+  return (
+    <section className={`card p-4 md:p-5 ${className}`}>
+      <SectionHeader title={title} subtitle={subtitle} className={isCollapsed ? '' : 'mb-4'}
+        actions={<div className="flex min-w-0 max-w-full items-center gap-1">{!isCollapsed && actions}{toggle}</div>} />
+      {!isCollapsed && <div id={panelId}>{children}</div>}
+    </section>
+  );
+};
+
+/**
+ * Tarjeta de sección. Con `collapseKey` se puede plegar y el estado se recuerda la próxima vez
+ * (`collapseLabel` nombra la sección en el botón cuando el título no es texto).
+ */
+export const SectionCard = ({ title, subtitle, actions, children, className = '', collapseKey, collapseLabel }) => {
+  if (collapseKey) {
+    return <CollapsibleCard title={title} subtitle={subtitle} actions={actions} className={className} collapseKey={collapseKey} collapseLabel={collapseLabel}>{children}</CollapsibleCard>;
+  }
+  return (
+    <section className={`card p-4 md:p-5 ${className}`}>
+      {(title || actions) && <SectionHeader title={title} subtitle={subtitle} actions={actions} />}
+      {children}
+    </section>
+  );
+};
 
 export const FieldLabel = ({ htmlFor, children }) => (
   <label htmlFor={htmlFor} className="mb-1 block text-xs font-bold text-secondary">
