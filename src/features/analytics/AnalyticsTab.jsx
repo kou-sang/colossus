@@ -11,9 +11,11 @@ import { subscribeToLogs } from '../../services/logService';
 import { addDays, diffInCalendarDays, endOfDay, parseDateKey, toDateKey } from '../../utils/dates';
 import { playClick } from '../../utils/audio';
 import { toUserMessage } from '../../utils/errors';
+import { buildMuscleRecovery } from '../../utils/recovery';
 import {
   buildConsistencySeries,
   buildEffectiveSetsByMuscle,
+  activeWeeks,
   buildMuscleLastTrained,
   buildStrengthIndexSeries,
   buildStrengthSeries,
@@ -108,7 +110,6 @@ export const AnalyticsTab = () => {
   // Rango abierto → fin del día actual (estable durante el día, a diferencia de new Date()).
   const rangeEnd = useMemo(() => range.until ?? endOfDay(parseDateKey(todayKey)), [range.until, todayKey]);
   const rangeDays = diffInCalendarDays(rangeEnd, range.since) + 1;
-  const weeksInRange = Math.max(1, rangeDays / 7);
 
   // El mapa de recuperación necesita ≥ 30 días de historia aunque el rango elegido sea más corto
   // (si no, un músculo entrenado hace 10 días figuraría como "nunca"). Solo agrega lecturas en rangos < 30 días.
@@ -148,18 +149,26 @@ export const AnalyticsTab = () => {
   const focusLogs = useMemo(() => filteredLogs.filter((log) => focusIds.includes(log.userId)), [filteredLogs, focusIds]);
   const focusMetrics = useMemo(() => {
     const divisor = focusIds.length;
-    const totals = buildEffectiveSetsByMuscle(focusLogs, { muscles });
-    const weeklySetsByMuscle = Object.fromEntries(Object.entries(totals).map(([id, value]) => [id, value / weeksInRange / divisor]));
+    // Promedio semanal por perfil (cada uno desde que empezó a registrar dentro del rango) y luego entre perfiles.
+    const weeklySetsByMuscle = {};
+    let tonnagePerWeek = 0;
+    focusIds.forEach((id) => {
+      const weeks = activeWeeks(logsState.data, id, range.since, rangeEnd);
+      const ownLogs = focusLogs.filter((log) => log.userId === id);
+      Object.entries(buildEffectiveSetsByMuscle(ownLogs, { muscles })).forEach(([muscleId, value]) => {
+        weeklySetsByMuscle[muscleId] = (weeklySetsByMuscle[muscleId] ?? 0) + value / weeks / divisor;
+      });
+      tonnagePerWeek += ownLogs.reduce((sum, log) => sum + (computeTonnage(log) ?? 0), 0) / weeks / divisor;
+    });
     const trainingDays = focusIds.reduce((sum, id) => sum + countTrainingDays(focusLogs, id, range.since), 0) / divisor;
-    const tonnage = focusLogs.reduce((sum, log) => sum + (computeTonnage(log) ?? 0), 0) / divisor;
     return {
       weeklySetsByMuscle,
       trainingDays: Math.round(trainingDays * 10) / 10,
-      tonnagePerWeek: tonnage / weeksInRange,
+      tonnagePerWeek,
       records: focusLogs.filter((log) => log.isPr).length,
       streak: divisor === 1 ? computeWeekStreak(logsState.data, focusIds[0]) : null,
     };
-  }, [focusLogs, focusIds, muscles, weeksInRange, range.since, logsState.data]);
+  }, [focusLogs, focusIds, muscles, range.since, rangeEnd, logsState.data]);
 
   // Recuperación: mismos filtros salvo la fecha de inicio (usa toda la historia descargada, ≥ 30 días).
   const recencyLogs = useMemo(
@@ -167,6 +176,8 @@ export const AnalyticsTab = () => {
     [logsState.data, focusIds, scope],
   );
   const lastTrainedByMuscle = useMemo(() => buildMuscleLastTrained(recencyLogs, null), [recencyLogs]);
+  // Estado de recuperación "ahora" (créditos de serie + esfuerzo + carga semanal; ver utils/recovery.js).
+  const recoveryByMuscle = useMemo(() => buildMuscleRecovery(recencyLogs, { userIds: focusIds }), [recencyLogs, focusIds]);
 
   // Resumen mensual y plan de alimentación son individuales: con "Promedio de la selección" se muestran los tuyos.
   const personalId = focusId === AGGREGATE_FOCUS ? user.id : focusId;
@@ -316,7 +327,7 @@ export const AnalyticsTab = () => {
           <SectionCard
             title="Mapa muscular"
             collapseKey="analytics:muscle-map"
-            subtitle={`${focusName} · ${mapMode === 'stimulus' ? 'más verde = más series por semana' : 'verde = entrenado hace poco · rojo = un mes o más'}`}
+            subtitle={`${focusName} · ${mapMode === 'stimulus' ? 'más verde = más series por semana' : 'verde = recuperado · rojo = muy fatigado (hoy)'}`}
             info={<ChartInfo info={mapMode === 'stimulus' ? CHART_INFO.muscleMapStimulus : CHART_INFO.muscleMapRecency} />}
             actions={<SegmentedControl label="Modo del mapa" options={MAP_MODES} value={mapMode} onChange={setMapMode} />}
           >
@@ -326,7 +337,7 @@ export const AnalyticsTab = () => {
                 gender={mapGender}
                 mode={mapMode}
                 weeklySetsByMuscle={focusMetrics.weeklySetsByMuscle}
-                lastTrainedByMuscle={lastTrainedByMuscle}
+                recoveryByMuscle={recoveryByMuscle}
                 selectedMuscle={selectedMuscle}
                 enabledMuscles={enabledMuscles}
                 onSelect={setSelectedMuscle}
@@ -342,6 +353,7 @@ export const AnalyticsTab = () => {
                   rangeEnd={rangeEnd}
                   weeklyAverage={focusMetrics.weeklySetsByMuscle[selectedMuscle] ?? 0}
                   lastTrained={lastTrainedByMuscle[selectedMuscle]}
+                  recovery={recoveryByMuscle[selectedMuscle]}
                   onClose={() => setSelectedMuscle(null)}
                 />
               )}

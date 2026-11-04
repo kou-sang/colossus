@@ -1,7 +1,7 @@
 import { getExerciseCategory } from '../constants/exercises';
 import { estimateMinutes } from './energy';
 import { addDays, toDateKey } from './dates';
-import { buildEffectiveSetsByMuscle, computeTonnage, round1 } from './metrics';
+import { activeWeeks, buildEffectiveSetsByMuscle, computeTonnage, round1 } from './metrics';
 
 /*
  * Resumen mensual (últimos 30 días contra los 30 anteriores) y recomendaciones automáticas.
@@ -101,7 +101,9 @@ export const buildMonthlyReport = (logs, userId, now = new Date()) => {
   const current = summarize(currentLogs);
   const previous = summarize(previousLogs);
   const totals = buildEffectiveSetsByMuscle(currentLogs);
-  const weeklyByMuscle = Object.fromEntries(Object.entries(totals).map(([id, value]) => [id, value / WEEKS]));
+  // Si el perfil empezó a registrar dentro del mes, se promedia desde su primer registro (no desde hace 30 días).
+  const activeReportWeeks = Math.min(WEEKS, activeWeeks(userLogs, userId, start, end));
+  const weeklyByMuscle = Object.fromEntries(Object.entries(totals).map(([id, value]) => [id, value / activeReportWeeks]));
   const trends = buildExerciseTrends(currentLogs);
   const recommendations = [];
   const add = (kind, title, detail, priority = 2) => recommendations.push({ kind, title, detail, priority });

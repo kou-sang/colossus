@@ -1,17 +1,21 @@
 import { BODY_FIGURES, VIEWBOX } from '../../constants/anatomy';
 import { MUSCLE_BY_ID } from '../../constants/muscles';
 import { useTheme } from '../../context/ThemeContext';
-import { formatRelativeDays } from '../../utils/dates';
 import { interpolateColorStops } from '../../utils/colors';
-import { classifyRecency, classifyStimulus, round1, STIMULUS_BINS } from '../../utils/metrics';
+import { classifyStimulus, round1, STIMULUS_BINS } from '../../utils/metrics';
+import { classifyRecovery, formatRecoveryTime, RECOVERY_LEVELS } from '../../utils/recovery';
 import { CRITICAL_RECENCY_DAYS } from './analyticsConstants';
 
-// Días sin estímulo → color del degradado. "Nunca" se trata como crítico.
-const recencyDays = (recency) => (recency.days === null ? CRITICAL_RECENCY_DAYS : recency.days);
+// % de fatiga → color de la misma escala verde→rojo (0 % = verde, 100 % = rojo).
+const fatigueToScale = (percent) => ((percent ?? 0) / 100) * CRITICAL_RECENCY_DAYS;
 
-const describeMuscle = (muscleId, { mode, weeklySets, recency }) => {
+const describeMuscle = (muscleId, { mode, weeklySets, recovery }) => {
   const label = MUSCLE_BY_ID[muscleId]?.label ?? muscleId;
-  if (mode === 'recency') return `${label}: último estímulo ${formatRelativeDays(recency.days).toLowerCase()}`;
+  if (mode === 'recency') {
+    const level = classifyRecovery(recovery?.percent ?? 0);
+    const wait = recovery?.hoursToRecover ? ` · recuperado en ${formatRecoveryTime(recovery.hoursToRecover)}` : '';
+    return `${label}: ${level.label.toLowerCase()} (${recovery?.percent ?? 0}% de fatiga)${wait}`;
+  }
   return `${label}: ${round1(weeklySets ?? 0)} series efectivas por semana`;
 };
 
@@ -89,26 +93,24 @@ const StimulusLegend = () => {
           </li>
         ))}
       </ul>
-      <p className="text-xs text-muted">Series efectivas por semana (series × % de participación del músculo)</p>
+      <p className="text-xs text-muted">Series efectivas por semana (entera si el músculo es principal, media si ayuda)</p>
     </div>
   );
 };
 
-// Barra de degradado con marcas en días: la misma escala que pinta los músculos.
-const RecencyLegend = () => {
+// Barra de degradado de fatiga: la misma escala que pinta los músculos.
+const RecoveryLegend = () => {
   const { chart } = useTheme();
   const gradient = chart.recencyStops
     .map(([days, color]) => `${color} ${(days / CRITICAL_RECENCY_DAYS) * 100}%`)
     .join(', ');
   return (
-    <div className="mx-auto w-full max-w-xs" aria-label="Escala: verde = entrenado hoy, rojo = 30 días o más sin entrenar">
+    <div className="mx-auto w-full max-w-xs" aria-label="Escala: verde = recuperado, rojo = muy fatigado">
       <div className="h-2.5 rounded-full" style={{ background: `linear-gradient(90deg, ${gradient})` }} />
       <div className="mt-1 flex justify-between text-[11px] font-semibold text-secondary">
-        {chart.recencyStops.map(([days]) => (
-          <span key={days}>{days === 0 ? 'Hoy' : days >= CRITICAL_RECENCY_DAYS ? `${days}+ d / nunca` : `${days} d`}</span>
-        ))}
+        {RECOVERY_LEVELS.map((level) => <span key={level.key}>{level.label}</span>)}
       </div>
-      <p className="mt-0.5 text-center text-xs text-muted">Días desde la última vez que lo entrenaste</p>
+      <p className="mt-0.5 text-center text-xs text-muted">Fatiga estimada hoy según lo que entrenaste en los últimos días</p>
     </div>
   );
 };
@@ -122,25 +124,24 @@ const RecencyLegend = () => {
  * (p. ej. la ficha de un ejercicio pinta el % de estímulo de cada músculo).
  */
 export const MuscleMap = ({
-  gender, mode, weeklySetsByMuscle = {}, lastTrainedByMuscle = {}, selectedMuscle, enabledMuscles, onSelect,
+  gender, mode, weeklySetsByMuscle = {}, recoveryByMuscle = {}, selectedMuscle, enabledMuscles, onSelect,
   colorFor: customColorFor, describe: customDescribe, legend, hint = 'Toca un músculo para generar su gráfico detallado.',
 }) => {
   const { chart } = useTheme();
   const figures = BODY_FIGURES[gender] ?? BODY_FIGURES.masculino;
 
-  const recencyFor = (muscleId) => classifyRecency(lastTrainedByMuscle[muscleId]?.date);
   const colorFor = customColorFor ?? ((muscleId) =>
     mode === 'recency'
-      ? interpolateColorStops(chart.recencyStops, recencyDays(recencyFor(muscleId)))
+      ? interpolateColorStops(chart.recencyStops, fatigueToScale(recoveryByMuscle[muscleId]?.percent))
       : chart.stimulus[classifyStimulus(weeklySetsByMuscle[muscleId]).level]);
   const describe = customDescribe ?? ((muscleId) =>
-    describeMuscle(muscleId, { mode, weeklySets: weeklySetsByMuscle[muscleId], recency: recencyFor(muscleId) }));
+    describeMuscle(muscleId, { mode, weeklySets: weeklySetsByMuscle[muscleId], recovery: recoveryByMuscle[muscleId] }));
 
   const figureProps = { colorFor, selectedMuscle, enabledMuscles, describe, onSelect };
 
   return (
     <div>
-      <div className="mb-3">{legend ?? (mode === 'recency' ? <RecencyLegend /> : <StimulusLegend />)}</div>
+      <div className="mb-3">{legend ?? (mode === 'recency' ? <RecoveryLegend /> : <StimulusLegend />)}</div>
       <div className="flex justify-center gap-2 md:gap-6">
         <BodyFigure figure={figures.frente} title="Frente" {...figureProps} />
         <BodyFigure figure={figures.espalda} title="Espalda" {...figureProps} />

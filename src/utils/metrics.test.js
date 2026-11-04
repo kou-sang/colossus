@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMuscleLastTrained, buildMuscleTimeline, buildStrengthIndexSeries, filterLogs, stimulusThreshold } from './metrics';
+import { activeWeeks, buildEffectiveSetsByMuscle, buildMuscleLastTrained, buildMuscleTimeline, buildStrengthIndexSeries, filterLogs, stimulusThreshold } from './metrics';
 
 const day = (n, hour = 10) => new Date(2026, 9, n, hour);
 const log = (exercise, n, e1rm, extra = {}) => ({ id: `${exercise}-${n}`, userId: 'u1', exercise, performedAt: day(n), e1rm, sets: 3, ...extra });
@@ -47,7 +47,8 @@ describe('historial de un músculo (detalle de Recuperación)', () => {
     const entries = buildMuscleTimeline(logs, 'semitendinoso', ['u1']);
     expect(entries.map((entry) => entry.exercise)).toEqual(['CURL FEMORAL SENTADO', 'PESO MUERTO RUMANO']);
     expect(entries[0].share).toBeGreaterThan(0.15);
-    expect(entries[0].effectiveSets).toBeCloseTo(3 * entries[0].share, 1);
+    // Músculo directo del curl femoral: cada serie cuenta entera.
+    expect(entries[0].effectiveSets).toBe(3);
   });
 
   it('manos y pies cuentan desde 5 % (son músculos chicos)', () => {
@@ -56,5 +57,25 @@ describe('historial de un músculo (detalle de Recuperación)', () => {
     const last = buildMuscleLastTrained([log('RUNNING', 2, null), log('HAND GRIP', 3, null)], null);
     expect(last.pie.exercise).toBe('RUNNING');
     expect(last.mano_palma.exercise).toBe('HAND GRIP');
+  });
+});
+
+describe('series efectivas por músculo (conteo fraccional)', () => {
+  it('el músculo directo recibe la serie entera y el sinergista media', () => {
+    const totals = buildEffectiveSetsByMuscle([log('PRESS BANCA', 1, 100, { sets: 4 })]);
+    expect(totals.pecho_medio).toBe(4);
+    expect(totals.deltoides_anterior).toBe(2);
+    expect(totals.serrato).toBeLessThan(1);
+  });
+});
+
+describe('semanas para promediar', () => {
+  it('cuenta desde el primer registro si empezaste después del inicio del rango', () => {
+    const since = new Date(2026, 9, 1);
+    const end = new Date(2026, 9, 31, 23, 59);
+    expect(activeWeeks([log('PRESS BANCA', 24, 100)], 'u1', since, end)).toBeCloseTo(1.14, 1);
+    expect(activeWeeks([log('PRESS BANCA', 1, 100)], 'u1', since, end)).toBeCloseTo(4.4, 1);
+    expect(activeWeeks([], 'u1', since, end)).toBeCloseTo(4.4, 1);
+    expect(activeWeeks([log('PRESS BANCA', 31, 100)], 'u1', since, end)).toBe(1);
   });
 });

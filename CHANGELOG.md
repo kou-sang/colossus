@@ -17,6 +17,18 @@ Cada versión se etiqueta en git como `vX.Y.Z` y la versión vigente se toma de 
 
 ## [Unreleased]
 
+## [4.10.0] - 2026-11-04
+
+### Changed
+- **Mapa de Recuperación: ahora estima la fatiga de hoy** (verde = recuperado, amarillo = recuperándose, naranja/rojo = fatigado) en lugar de pintar los días desde el último estímulo, que mostraba en verde un músculo recién entrenado y podía leerse como "listo". El modelo corrige lo que hacía fallar al viejo mapa de fatiga, que mostraba músculos "recuperados" en personas agotadas:
+  - cuenta la carga real de cada serie para el músculo (ver abajo) en lugar de diluirla entre todos los músculos;
+  - recupera más lento: la fatiga se reduce a la mitad cada ~36 h en músculos grandes, ~30 h en medianos y ~24 h en chicos (una sesión exigente necesita 2 a 4 días), antes 18–30 h;
+  - con mucho volumen en la semana (más de 20 series efectivas) la recuperación se estira hasta el doble;
+  - pondera cada serie por el esfuerzo registrado (RIR).
+  Al tocar un músculo se ve su estado, en cuánto tiempo se recupera, la carga de los últimos 7 días y las sesiones que la generaron.
+- **Series efectivas con conteo fraccional** (mapa de Estímulo, detalle del músculo, resumen mensual y análisis de rutinas): la serie cuenta entera para los músculos principales del ejercicio, media para los sinergistas y poco para los estabilizadores. Antes cada serie se repartía según el % de la ficha (3 series de press banca = 1,2 series de pecho), así que ningún músculo llegaba a las 10–20 series semanales de referencia aunque entrenaras mucho. Correr, boxeo o yoga suman como máximo media serie por músculo.
+- **Promedio semanal desde tu primer registro:** si empezaste a registrar después del inicio del rango, el mapa de Estímulo, el tonelaje por semana y el resumen mensual promedian desde ese día y no dividen por semanas en las que todavía no usabas la app.
+
 ## [4.9.0] - 2026-11-04
 
 ### Added
