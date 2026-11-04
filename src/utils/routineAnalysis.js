@@ -1,11 +1,12 @@
 import { resolveMuscleDistribution } from '../constants/exercises';
+import { muscleCreditsOf } from './setCredits';
 import { CATEGORY_LABELS, MUSCLE_BY_ID, MUSCLES } from '../constants/muscles';
 import { WEEK_DAYS } from './dates';
 
 /*
  * Análisis de una rutina semanal (función pura): cómo se reparten las series entre categorías y músculos,
  * qué músculos no se trabajan y desequilibrios típicos (empuje/tirón, cuádriceps/isquiotibiales).
- * Usa la misma "serie efectiva" que Analíticas: series × % de participación del músculo en el ejercicio.
+ * Usa la misma "serie efectiva" que Analíticas: entera para los músculos principales, media para los sinergistas (utils/setCredits.js).
  */
 
 // Categorías anatómicas (las de deporte/estilo no tienen músculos propios).
@@ -45,9 +46,11 @@ export const analyzeRoutine = (routine) => {
       const sets = Number(item.sets) || 0;
       exerciseCount += 1;
       totalSets += sets;
+      // Series efectivas con el mismo conteo que Analíticas (directo = 1, sinergista = 0,5): comparables con 10–20/semana.
+      const credits = muscleCreditsOf(item);
       Object.entries(resolveMuscleDistribution(item)).forEach(([muscleId, share]) => {
         if (!MUSCLE_BY_ID[muscleId]) return;
-        byMuscleTotals[muscleId] = (byMuscleTotals[muscleId] ?? 0) + sets * share;
+        byMuscleTotals[muscleId] = (byMuscleTotals[muscleId] ?? 0) + sets * (credits[muscleId] ?? 0);
         maxShareByMuscle[muscleId] = Math.max(maxShareByMuscle[muscleId] ?? 0, share);
       });
     });

@@ -8,6 +8,7 @@ import { IconButton } from '../../components/ui';
 import { CATEGORY_LABELS, MUSCLE_BY_ID } from '../../constants/muscles';
 import { useTheme } from '../../context/ThemeContext';
 import { describeWeek, formatRelativeDays, formatShortDate } from '../../utils/dates';
+import { classifyRecovery, formatRecoveryTime } from '../../utils/recovery';
 import { buildExerciseContributions, buildMuscleTimeline, buildWeeklyMuscleSeries, classifyRecency, round1 } from '../../utils/metrics';
 import { WEEKLY_SET_TARGET } from './analyticsConstants';
 import { CHART_INFO } from './chartInfo';
@@ -60,7 +61,7 @@ const RecoveryTimeline = ({ entries, users, color }) => {
  *  - Modo Estímulo: series efectivas semanales por perfil + qué ejercicios lo trabajaron en el rango.
  *  - Modo Recuperación: historial de estímulos (fecha, ejercicio y % del ejercicio sobre ese músculo).
  */
-export const MuscleDetailPanel = ({ mode = 'stimulus', muscleId, logs, recencyLogs = [], users, rangeStart, rangeEnd, weeklyAverage, lastTrained, onClose }) => {
+export const MuscleDetailPanel = ({ mode = 'stimulus', muscleId, logs, recencyLogs = [], users, rangeStart, rangeEnd, weeklyAverage, lastTrained, recovery, onClose }) => {
   const { chart } = useTheme();
   const { grid, axis } = useAxisProps();
   const muscle = MUSCLE_BY_ID[muscleId];
@@ -86,8 +87,16 @@ export const MuscleDetailPanel = ({ mode = 'stimulus', muscleId, logs, recencyLo
           <p className="text-xs font-bold uppercase tracking-wide text-muted">{CATEGORY_LABELS[muscle.category]}</p>
           {/* Un nombre largo sin espacios se corta en lugar de ensanchar el panel (y el mapa) más que la pantalla. */}
           <h4 className="text-base font-black [overflow-wrap:anywhere] md:text-lg">{muscle.label}</h4>
+          {isRecovery && recovery && (
+            <p className="mt-0.5 text-sm font-bold [overflow-wrap:anywhere]">
+              {classifyRecovery(recovery.percent).label} · {recovery.percent}% de fatiga
+              {recovery.hoursToRecover > 0 && ` · recuperado en ${formatRecoveryTime(recovery.hoursToRecover)}`}
+            </p>
+          )}
           <p className="text-sm text-secondary [overflow-wrap:anywhere]">
-            {round1(weeklyAverage)} series efectivas/semana · último estímulo: {formatRelativeDays(recency.days).toLowerCase()}
+            {isRecovery && recovery
+              ? `${recovery.weeklyLoad} series efectivas en los últimos 7 días`
+              : `${round1(weeklyAverage)} series efectivas/semana`} · último estímulo: {formatRelativeDays(recency.days).toLowerCase()}
             {lastTrained?.exercise && ` (${lastTrained.exercise})`}
           </p>
         </div>

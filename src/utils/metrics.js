@@ -1,4 +1,5 @@
 import { getExerciseCategory, resolveMuscleDistribution } from '../constants/exercises';
+import { muscleCreditsOf, setsOf } from './setCredits';
 import { hasSetDetails, setDetailsTonnage } from './sets';
 import { addDays, diffInCalendarDays, startOfWeek, toDateKey, toWeekKey } from './dates';
 
@@ -207,12 +208,17 @@ export const filterLogs = (logs, { userIds = null, categories = null, muscles = 
   });
 };
 
-// Series efectivas = series × participación del músculo (Face Pull 3 series → 1.2 en deltoides posterior).
+/*
+ * Series efectivas = series × crédito del músculo (ver utils/setCredits.js): 3 series de press banca suman
+ * 3 al pecho medio (músculo directo), 1,5 al deltoides anterior (sinergista) y casi nada al serrato.
+ * `share` (% de la ficha) se pasa aparte para mostrarlo en los detalles.
+ */
 const forEachMuscleShare = (log, muscleSet, callback) => {
-  const sets = Number.isFinite(log.sets) ? log.sets : 0;
+  const sets = setsOf(log);
+  const credits = muscleCreditsOf(log);
   Object.entries(resolveMuscleDistribution(log)).forEach(([muscleId, share]) => {
     if (muscleSet && !muscleSet.has(muscleId)) return;
-    callback(muscleId, sets * share, share);
+    callback(muscleId, sets * (credits[muscleId] ?? 0), share);
   });
 };
 
@@ -227,6 +233,23 @@ export const buildEffectiveSetsByMuscle = (logs, { userIds = null, muscles = nul
     });
   });
   return totals;
+};
+
+/*
+ * Semanas con las que se promedia "por semana". Si el perfil empezó a registrar después del inicio del rango
+ * (por ejemplo, usa la app hace 1 semana y se eligen 30 días), se cuenta desde su primer registro: dividir por
+ * semanas en las que todavía no usaba la app hacía parecer que entrenaba 4 veces menos. Mínimo 1 semana.
+ * `logs` debe incluir todo lo descargado del perfil (sin filtros de músculo/categoría).
+ */
+const WEEK_MS = 7 * 24 * 3_600_000;
+export const activeWeeks = (logs, userId, since, end) => {
+  let first = null;
+  logs.forEach((log) => {
+    if (log.userId === userId && (!first || log.performedAt < first)) first = log.performedAt;
+  });
+  const firstDay = first ? new Date(first.getFullYear(), first.getMonth(), first.getDate()) : since;
+  const start = firstDay > since ? firstDay : since;
+  return Math.max(1, (end.getTime() - start.getTime()) / WEEK_MS);
 };
 
 // Compatibilidad: series efectivas por músculo en los últimos N días para un usuario.
@@ -290,7 +313,7 @@ export const buildMuscleTimeline = (logs, muscleId, userIds = null, limit = 12) 
       exercise: log.exercise,
       date: log.performedAt,
       share,
-      effectiveSets: round1((Number.isFinite(log.sets) ? log.sets : 0) * share),
+      effectiveSets: round1(setsOf(log) * (muscleCreditsOf(log)[muscleId] ?? 0)),
     }));
 };
 
