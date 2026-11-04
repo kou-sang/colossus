@@ -15,10 +15,8 @@ export const CATEGORIES = Object.freeze([
   { id: 'FUNCIONAL', label: 'Funcional' },
   { id: 'CARDIO', label: 'Cardio' },
   { id: 'CROSSFIT', label: 'CrossFit' },
-  { id: 'BAILE', label: 'Baile' },
   { id: 'COMBATE', label: 'Boxeo y combate' },
   { id: 'MOVILIDAD', label: 'Yoga y Pilates' },
-  { id: 'DEPORTES', label: 'Deportes' },
   { id: 'OTROS', label: 'Otros' },
 ]);
 
